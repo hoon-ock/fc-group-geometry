@@ -408,7 +408,7 @@ Scope is the **declarative `functional_group` prompt only**; `snapshot_quiver3d.
 
 This directory holds one producer, `snapshot_quiver3d.py`, which writes
 `analysis/data/analogy_quiver3d.csv` — the 3D coordinates behind
-`visuals/retrieval/analogy3d_*.png`. The retrieval *numbers* live in `../geometry/`; §1 and
+`visuals/retrieval/analogy3d_*.png`. The retrieval *numbers* live in [what fine-tuning did to the representation](#what-fine-tuning-did-to-the-representation); §1 and
 §2 below document the test those numbers come from, because it is
 `src/analogy_retrieval.py`'s method rather than `analyze_geometry.py`'s.
 

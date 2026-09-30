@@ -51,6 +51,19 @@ def _headings(path):
         return {_slug(m.group(1)) for m in HEADING.finditer(fh.read())}
 
 
+def _resolves(candidate):
+    """Exists AND lies inside the repository.
+
+    The containment half is not pedantry. `../geometry/` in analysis/README.md resolved --
+    to a directory of the same name in the PARENT project, which exists on the author's
+    machine and in no clone -- so this test passed locally and failed on a fresh clone of the
+    published repo, the very failure it was written to prevent. A reference that escapes the
+    repository is broken for every reader regardless of what it finds here.
+    """
+    full = os.path.normpath(candidate)
+    return os.path.exists(full) and (full == REPO or full.startswith(REPO + os.sep))
+
+
 def _anchored_paths(text):
     for m in CODE.finditer(text):
         raw = m.group(1)
@@ -102,9 +115,7 @@ def test_every_anchored_path_reference_resolves(rel, txt):
     base = os.path.join(REPO, os.path.dirname(rel))
     broken = []
     for raw, path in _anchored_paths(txt):
-        if os.path.exists(os.path.join(REPO, path)):
-            continue
-        if os.path.exists(os.path.normpath(os.path.join(base, path))):
+        if _resolves(os.path.join(REPO, path)) or _resolves(os.path.join(base, path)):
             continue
         broken.append(raw)
     assert not broken, f'{rel} cites paths that do not exist: {sorted(set(broken))}'
