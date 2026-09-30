@@ -81,11 +81,38 @@ RESULT_TREES = ['probe', 'anisotropy_diagnostic', 'analogy', 'analogy_retrieval'
                 'generation_eval']
 
 
+# What each tree must hold for an analysis to run on it. Keyed to files the analysis scripts
+# actually read, so "complete" means "usable" rather than "a directory exists".
+#
+# The directory check this replaced was not strict enough to catch a killed run. A compute
+# stage interrupted mid-probe leaves the tree in place holding its FIRST output --
+# weidawang-Chem-R-8B's probe sat that way, with surface_baseline_coarse_group.csv and none
+# of the other five files -- and isdir called it complete. Sentinels are late-written or
+# directly consumed for that reason: surface_baseline is written first, so it proves nothing.
+TREE_SENTINELS = {
+    # summary_*.json is analyze_sweep's input; oof_proba_*.npz is analyze_ambiguity's.
+    'probe': ['summary_coarse_group.json', 'oof_proba_coarse_group.npz'],
+    # Written after the per-layer files, so it implies them.
+    'anisotropy_diagnostic': ['summary_all_layers.json'],
+    'analogy': ['summary_layer_trend.json', 'between_class_similarity_layer_31.csv'],
+    'analogy_retrieval': ['retrieval_summary.json'],
+    'analogy_retrieval_carbon': ['retrieval_summary.json'],
+    'analogy_retrieval_halide': ['retrieval_summary.json'],
+    'ambiguity_metric': ['family_probability.csv'],
+    # The GPU stage's three outputs; score_generations needs generations.csv specifically.
+    'generation_eval': ['summary.json', 'scores.csv', 'generations.csv'],
+}
+
+
+def tree_complete(tree, model):
+    """Whether one (tree, model) holds everything an analysis reads out of it."""
+    d = os.path.join(paths.RESULTS, tree, model, 'functional_group', 'data')
+    return all(os.path.exists(os.path.join(d, f)) for f in TREE_SENTINELS[tree])
+
+
 def missing_result_models():
-    """Which (tree, model) pairs are absent, so a skip can say what is needed."""
-    return [f'{t}/{m}' for t in RESULT_TREES for m in MODELS
-            if not os.path.isdir(
-                os.path.join(paths.RESULTS, t, m, 'functional_group', 'data'))]
+    """Which (tree, model) pairs are absent or incomplete, so a skip can say what is needed."""
+    return [f'{t}/{m}' for t in RESULT_TREES for m in MODELS if not tree_complete(t, m)]
 
 
 @pytest.fixture(scope='session')

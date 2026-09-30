@@ -18,8 +18,7 @@ import os
 
 import pytest
 
-from conftest import MODELS, REPO, run
-import paths
+from conftest import MODELS, REPO, run, tree_complete
 
 DATA = os.path.join(REPO, 'analysis/data')
 
@@ -71,9 +70,9 @@ FROM_ACTIVATIONS = [
 
 
 def _tree_complete(tree):
-    return all(
-        os.path.isdir(os.path.join(paths.RESULTS, tree, m, 'functional_group', 'data'))
-        for m in MODELS)
+    """All five models, and each holding what the analysis reads -- see conftest's
+    TREE_SENTINELS for why a directory check is not enough."""
+    return all(tree_complete(tree, m) for m in MODELS)
 
 
 def _assert_reproduces(script, produced, snapshots):
