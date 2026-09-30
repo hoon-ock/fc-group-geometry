@@ -14,7 +14,7 @@
 # scripts/run_local.sh, so there is nothing to fetch for it. What the cluster produces is
 # the generation eval (a GPU job) and, separately, the activations.
 #
-# The activations are ~1.3 GB and are not results, so they are not pulled here. Bring them
+# The activations are ~1.2 GB and are not results, so they are not pulled here. Bring them
 # down once, directly:
 #
 #   rsync -a --partial swan:/work/$USER/fc_group/activations/ activations/

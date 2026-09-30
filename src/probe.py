@@ -639,10 +639,15 @@ def run_surface_baseline(df, entity_type, n_templates, mol_idx, y, folds, seed,
                          label_map=None):
     """The same probe on char n-grams of the raw prompt text.
 
-    Every template embeds `{iupac_name} ({formula})`, so "Propan-1-ol
-    (CH3CH2CH2OH)" hands a probe the substrings `-ol` and `OH` directly. This is
-    the number that separates recalled chemistry from orthography: whatever
-    accuracy appears here is available without running the model at all.
+    Every template embeds `{iupac_name} ({smiles})`, so "Propan-1-ol (CCCO)"
+    hands a probe the substring `-ol` from the name and a trailing `O` from the
+    SMILES directly. This is the number that separates recalled chemistry from
+    orthography: whatever accuracy appears here is available without running the
+    model at all.
+
+    (Before d45a30f the templates embedded `{formula}` -- "Propan-1-ol
+    (CH3CH2CH2OH)" -- which leaked an explicit `OH`. The baseline is therefore
+    not comparable across that commit.)
 
     Takes the same `label_map` as `run_cv` so the baseline is trained and scored
     in exactly the same spaces as the probe it is being compared against --

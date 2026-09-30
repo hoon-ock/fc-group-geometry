@@ -10,7 +10,7 @@ This project tackles two questions:
 e.g. word2vec-style analogies (`king - man + woman ~= queen`)?
  - How does the training procedure impact the embedding geometry and generation performance?
 
-## What is measured, on what
+## Models
 
 92 molecules × 20 functional groups × 10 declarative prompt templates = 920 prompts, run
 through five 8B checkpoints at all 32 layers.
@@ -45,6 +45,53 @@ export HF_TOKEN=hf_...
 everything downstream reads the saved activations, so a reader reproducing the figures needs
 no token at all. See [Where to start](#where-to-start) for which of those applies to you.
 
+## Data
+
+`data/functional_group_dataset.csv` — 92 molecules, identifiers only:
+
+| iupac_name | common_name | formula | smiles | carbon_count | functional_group | functional_group_structure |
+|---|---|---|---|---|---|---|
+| Propane | propane | CH3CH2CH3 | `CCC` | 3 | none (alkane) | C-H / C-C |
+| Propan-1-ol | n-propyl alcohol | CH3CH2CH2OH | `CCCO` | 3 | alcohol | -OH |
+| Propan-2-ol | isopropanol | CC(O)C | `CC(O)C` | 3 | alcohol | -OH |
+| Propanal | propionaldehyde | CH3CH2CHO | `CCC=O` | 3 | aldehyde | -CHO |
+| … 88 more | | | | | | |
+
+20 functional groups at chain lengths C3–C6. Seventeen carry one molecule per length, 4 each;
+`alcohol`, `amine` and `thiol` carry two isomers per length, 8 each — `Propan-1-ol` beside
+`Propan-2-ol` above. 17 × 4 + 3 × 8 = **92**. `none (alkane)` is a group here because the
+alkanes are the backbone every diff-vector subtracts.
+
+**No measured properties.** Nothing interpolates a boiling point or a pKa; a prompt needs the
+name and the SMILES and nothing else. `formula` is vestigial — it duplicates the SMILES in 48
+of the 92 rows (see `Propan-2-ol` above), and nothing in the released pipeline puts it in a
+prompt.
+
+Each molecule is asked 10 ways, so 92 × 10 = **920 prompts** per model:
+
+```
+Propan-1-ol (CCCO) contains the functional group
+The primary functional group in Propan-1-ol (CCCO) is
+For Propan-1-ol (CCCO), the functional-group class is
+...                                                     (10 templates in total)
+```
+
+Declarative and unpunctuated, so the next token is the answer. They live in
+`config_extract_activation.yaml` and interpolate only `{iupac_name}` and `{smiles}`.
+
+Each prompt is one forward pass, and the last token's hidden state is kept at every layer:
+
+```
+activations/<model-slug>/functional_group/functional_group.last.10_templates.layer_<N>.pt
+
+  torch.Size([920, 4096])   float16   7.5 MB per layer
+```
+
+Row order is molecule-major, template-minor — rows 0–9 are `Propane` under all ten templates,
+rows 10–19 are `Butane`, and so on. `template_index` is not a stored column; the probe and the
+t-SNE labelling both reconstruct it from that layout, so it is the one thing here that cannot
+change silently.
+
 ## Layout
 
 **The figures under `visuals/` are the output.** Everything else exists to produce them.
@@ -59,14 +106,14 @@ no token at all. See [Where to start](#where-to-start) for which of those applie
 | `visuals/` | the 9 figure generators *and* their output — **70 PNGs**, gitignored, rebuilt from the snapshots. Read only `analysis/data/*.csv`, never `results/` |
 | `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
-| `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.3 GB |
+| `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.2 GB |
 
 ## Pipeline
 
 Four stages. Only the first two need a GPU; the rest is one local command.
 
 ```
-[1] 01_extract.sbatch          GPU  ->  activations/                 160 .pt, ~1.3 GB
+[1] 01_extract.sbatch          GPU  ->  activations/                 160 .pt, ~1.2 GB
 [2] 02_generation_eval.sbatch  GPU  ->  results/generation_eval/     3 files per model
 [3] run_local.sh --stages compute   ->  results/  (7 trees, named below)
 [4] run_local.sh --stages analysis  ->  analysis/data/*.csv        29 snapshots, committed
@@ -87,7 +134,7 @@ pulled via forward hooks, last-token pooled. 5 models × 32 layers × 920 prompt
 activations/<model-slug>/functional_group/functional_group.last.10_templates.layer_<N>.pt
 ```
 
-160 files, 258 MB per model. `<model-slug>` is the checkpoint id with `/` replaced by `-`
+160 files, 241 MB per model. `<model-slug>` is the checkpoint id with `/` replaced by `-`
 (`meta-llama-Llama-3.1-8B`) — the same spelling `results/` and the figure directories use,
 so one model is one string everywhere a path carries it.
 

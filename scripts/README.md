@@ -118,7 +118,7 @@ catch, since a typo would otherwise narrow the sweep silently instead of stoppin
 
 ## Scratch space
 
-`01_extract` writes ~1.3 GB (5 models × 32 layers × 920 prompts, fp16). On a cluster whose home
+`01_extract` writes ~1.2 GB (5 models × 32 layers × 920 prompts, fp16). On a cluster whose home
 quota cannot hold that, redirect it **before** extracting — `paths.py` reads these, and
 every later stage must see the same values:
 

@@ -263,7 +263,15 @@ def compute_second_order_analogy_by_carbon(diffs, pair_a, pair_b):
 #
 # Selection is constrained by two things beyond chemistry.
 #
-# 1. NOTATION. The functional_group prompt is "{iupac_name} ({formula}) ...", and the
+# 1. NOTATION -- HISTORICAL, and the reason this set is what it is. It applied to the
+#    `{formula}` templates, which d45a30f replaced with "{iupac_name} ({smiles})"; on the
+#    released SMILES prompts every molecule renders in one notation, so the ~0.20 offset
+#    below is not present in the activations shipped here. The selection was made under it
+#    and is kept, so the constraint is recorded rather than deleted -- and the halogen
+#    quadruples it removed stay removed, since re-adding them would be a new claim measured
+#    on different prompts. What follows describes the formula prompts:
+#
+#    The functional_group prompt was "{iupac_name} ({formula}) ...", and the
 #    `formula` column mixes SMILES (ether, imine, nitro, sulfone, sulfoxide, thioether,
 #    the halides) with condensed formulas (aldehyde, amide, carboxylic acid, ester,
 #    ketone, nitrile, alkane); alcohol/amine/thiol are half of each, their 1-isomer

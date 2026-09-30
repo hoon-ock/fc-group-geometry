@@ -25,7 +25,7 @@ python -c "import yaml, torch, transformers" || {
 [ -n "${HF_HOME:-}" ] || echo "note: HF_HOME unset -- weights cache under $HOME/.cache/huggingface"
 
 # Every downstream stage reads these tensors, and 5 models x 32 layers x 920 prompts is
-# ~1.3 GB. On a cluster whose home quota cannot hold that, point FCG_ACTIVATIONS at scratch
+# ~1.2 GB. On a cluster whose home quota cannot hold that, point FCG_ACTIVATIONS at scratch
 # BEFORE this runs -- paths.py reads it, and every analysis stage must see the same value.
 echo "activations -> $(python -c 'import paths; print(paths.ACTIVATIONS)')"
 
