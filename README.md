@@ -53,45 +53,133 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
 | `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
-| `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.1 GB |
+| `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.3 GB |
 
-## Reproducing the figures
+## Pipeline
 
-Two entry points, depending on how far back you want to start.
+Four stages. Only the first two need a GPU; the rest is one local command.
 
-**From the committed snapshots** — no GPU, no cluster, no `results/`, about a minute:
+```
+[1] 01_extract.sbatch          GPU  ->  activations/                 160 .pt, ~1.3 GB
+[2] 02_generation_eval.sbatch  GPU  ->  results/generation_eval/     3 files per model
+[3] run_local.sh --stages compute   ->  results/  (6 more trees)
+[4] run_local.sh --stages analysis  ->  analysis/*/data/*.csv        29 snapshots, committed
+    run_local.sh --stages figures   ->  analysis/visuals/            70 PNGs
+```
+
+### [1] Activations
+
+```bash
+sbatch scripts/01_extract.sbatch
+```
+
+One forward pass per prompt, per-layer hidden states pulled via forward hooks, last-token
+pooled. 5 models × 32 layers × 920 prompts (92 molecules × 10 templates), fp16:
+
+```
+activations/<model-slug>/functional_group/functional_group.last.10_templates.layer_<N>.pt
+```
+
+160 files, 258 MB per model. `<model-slug>` is the checkpoint id with `/` replaced by `-`
+(`meta-llama-Llama-3.1-8B`) — the same spelling `results/` and the figure directories use,
+so one model is one string everywhere a path carries it.
+
+### [2] Generation eval
+
+```bash
+sbatch scripts/02_generation_eval.sbatch
+```
+
+The only stage that asks the model to *answer* rather than probing frozen activations, which
+is why it needs a GPU and stays on the cluster. Three files per model:
+
+```
+results/generation_eval/<model-slug>/functional_group/data/
+  scores.csv        920 rows -- the forced choice
+  generations.csv   920 rows -- the free continuation
+  summary.json      aggregates, plus a free_generation block merged in at [4]
+```
+
+| File | Contents |
+|---|---|
+| `scores.csv` | The **forced choice**: no text is emitted. Each class's surface forms are scored by log-sum-exp and the argmax is the prediction. Per prompt: `pred_raw`, `pred_norm`, `correct_raw`, `correct_norm`, `best_surface_form`, `p_true`, `margin`, plus `logp_<class>` and `logpnorm_<class>` for all 20 classes. |
+| `generations.csv` | The **free continuation**, 10 new tokens, greedy: `iupac_name`, `template_index`, `true_label`, `prompt`, `generation`. Logged verbatim and *not scored by this job* — `analysis/generation/score_generations.py` adjudicates it at [4]. |
+| `summary.json` | `accuracy`, `balanced_accuracy` and `log_loss` under both `raw` and `length_normalized`, plus `chance` and `mean_top1_margin`. |
+
+Generations contain embedded newlines, so `wc -l` reports more lines than records — read
+`generations.csv` as CSV, not by line.
+
+### [3] The CPU compute
+
+```bash
+bash scripts/run_local.sh --stages compute
+```
+
+Five stages per model, single-core, no GPU, ~8 min per model with the probe dominating:
+
+| Stage | Reads | Writes under `results/` |
+|---|---|---|
+| probe, all 32 layers | activations | `functional_group_probe/` |
+| anisotropy, L 0/8/16/24/31 | activations | `anisotropy_diagnostic/` |
+| analogy, carbon-matched, same layers | activations | `functional_group_analogy/` |
+| retrieval, 3 axes | the analogy stage's `.npz` | `functional_group_analogy_retrieval{,_carbon,_halide}/` |
+| ambiguity | the probe's `oof_proba_*.npz` | `ambiguity_metric/` |
+
+The last two never touch the tensors — they read what the stages above wrote, which is why
+they take seconds.
+
+### [4] Snapshots, then figures
+
+```bash
+bash scripts/run_local.sh          # or --stages analysis / --stages figures
+```
+
+**Analysis** turns `results/` into the 29 committed CSVs under `analysis/*/data/`. That is
+the reproducibility boundary: past this point nothing reads `results/`. Two ordering
+constraints — `analyze_taxonomy` writes the matrix the clustermaps need, and
+`score_generations` must precede `analyze_generation`, which reads its adjudicated table:
+
+```
+analyze_sweep -> analyze_taxonomy -> analyze_geometry -> snapshot_quiver3d ->
+analyze_ambiguity -> compute_tsne_coords -> analyze_prompt_structure ->
+score_generations -> analyze_generation
+```
+
+`compute_tsne_coords` and `analyze_prompt_structure` are the two analyses that read
+activations directly, so **their 29 figures need stage [1] only** — not [2] or [3].
+
+**Figures** draw all 70 PNGs from those CSVs in about 15 seconds and need nothing else.
+
+## Where to start
+
+| You have | Run | Time |
+|---|---|---|
+| just this repository | `bash scripts/run_local.sh --stages figures` | ~15 s |
+| the activations | `bash scripts/run_local.sh` | under an hour |
+| nothing | the four stages above | a cluster job plus the hour |
+
+From nothing, end to end:
 
 ```bash
 pip install -r requirements.txt
-cd analysis/figures
-for f in make_visuals*.py; do python "$f"; done
+export HF_TOKEN=...                                   # the Llama checkpoints are gated
+
+sbatch scripts/01_extract.sbatch                      # [1]
+sbatch scripts/02_generation_eval.sbatch              # [2]
+
+rsync -a --partial swan:/work/$USER/fc_group/activations/ activations/
+bash scripts/pull_results.sh                          # results/generation_eval/ only
+
+bash scripts/run_local.sh                             # [3] + [4]
 ```
 
-That rebuilds all 70 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
-works is the reproducibility test the whole layout is arranged around: no generator may read
-`results/`, so if one ever needs it, a snapshot step was missed upstream.
+Without `results/generation_eval/`, `run_local.sh` skips the two generation steps with a
+note and the committed generation snapshot still draws its figure. That every
+`make_visuals*.py` reads only committed CSVs is the property the whole layout is arranged
+around: if one ever needs `results/`, a snapshot step was missed upstream.
 
-**From the activations**, re-deriving every snapshot on the way — no cluster, well under
-an hour:
-
-```bash
-bash scripts/run_local.sh
-```
-
-**From scratch**, where the only cluster work is the two GPU stages:
-
-```bash
-export HF_TOKEN=...                        # the Llama checkpoints are gated
-sbatch scripts/01_extract.sbatch           # -> activations/
-sbatch scripts/02_generation_eval.sbatch   # -> results/generation_eval/
-bash scripts/run_local.sh                  # everything else, locally
-```
-
-`scripts/README.md` has the job order and dependencies; each `analysis/<topic>/README.md`
-has the command that regenerates its own snapshot. The order among the analyses is:
-`analyze_sweep` → `analyze_taxonomy` → `analyze_geometry` → `snapshot_quiver3d` →
-`analyze_ambiguity` → `compute_tsne_coords` →
-`analyze_prompt_structure` → `score_generations` → `analyze_generation`.
+`scripts/README.md` carries the operational detail — resources, array sizing, triage, and a
+figure-by-figure table of which stage each one needs.
 
 ## Paths
 

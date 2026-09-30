@@ -26,7 +26,7 @@ SCRIPTS = os.path.join(ROOT, 'scripts')
 
 # Generated, gitignored, overridable.
 RESULTS = os.environ.get('FCG_RESULTS', os.path.join(ROOT, 'results'))
-# A sibling of results/ and logs/ rather than a subdirectory of data/: it is ~1.1 GB of
+# A sibling of results/ and logs/ rather than a subdirectory of data/: it is ~1.3 GB of
 # generated tensors, so it belongs with the other generated roots, not beside the one
 # committed input.
 ACTIVATIONS = os.environ.get('FCG_ACTIVATIONS', os.path.join(ROOT, 'activations'))
