@@ -1,27 +1,34 @@
-# Pinned to the versions the released results were produced with.
+# Pinned to the versions the released artifacts were verified under: with these, every one
+# of the 29 snapshot CSVs and all 70 figures reproduce byte-for-byte. Python 3.13.4.
 #
-# rdkit and requests are absent on purpose: they were only needed by the dataset builder
-# that fetched the molecular property columns, and this release ships the dataset as a
-# given input with identifiers only.
+# These pins were re-derived from a working environment rather than inherited. The previous
+# set (numpy==1.23.5, scipy==1.10.0, pandas==2.0.3, scikit_learn==1.2.2, matplotlib==3.7.5)
+# came from the upstream project and described no environment this code was ever run in --
+# numpy 1.23.5 does not build on Python 3.13 at all, so `pip install -r requirements.txt`
+# failed outright.
 
-numpy==1.23.5
-scipy==1.10.0
-pandas==2.0.3
-scikit_learn==1.2.2
-
-matplotlib==3.7.5
+# --- Analysis and figures -------------------------------------------------------------
+# CPU-only, and all that `run_local.sh` and `pytest --runslow` need. A reader rebuilding
+# the figures from the committed CSVs needs nothing below this block.
+numpy==2.5.2
+scipy==1.18.1
+pandas==3.0.5
+scikit-learn==1.9.0
+matplotlib==3.11.1
 seaborn==0.13.2
+PyYAML==6.0.1
 
-# Extraction and the behavioural stage only. Everything under analysis/ is CPU-only and
-# needs no more than the four packages above -- torch appears in the probe solely as
-# torch.load(..., map_location="cpu").
-torch
+# --- Extraction and the generation eval -----------------------------------------------
+# Only the three GPU stages need these: 00_smoke_test, 01_extract, 02_generation_eval.
+# torch appears elsewhere solely as torch.load(..., map_location="cpu").
+torch==2.13.0
 transformers==4.45.2
 einops==0.8.1
+# transformers uses it for device_map sharding; never imported directly.
 accelerate>=0.26.0
 
-# 4-bit quantization. Linux + NVIDIA only; on macOS/CPU extraction falls back to fp16/bf16.
-bitsandbytes==0.47.0
-
-PyYAML==6.0.1
-tqdm==4.66.3
+# --- Optional: 4-bit quantization -----------------------------------------------------
+# Linux + NVIDIA only, and only for `--load-in-4bit`. Not installed in the environment
+# these pins were taken from, so no version is asserted; on macOS or CPU the extraction
+# falls back to fp16/bf16 and this is not needed.
+#   pip install bitsandbytes

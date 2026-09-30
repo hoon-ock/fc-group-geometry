@@ -235,8 +235,8 @@ unchanged and would emit more if more prompt types were extracted.
 
 ```bash
 pip install -r requirements-dev.txt
-pytest                    # 228 checks, ~7 s
-pytest --runslow          # + rebuild all 70 figures, + reproduce the snapshots
+pytest                    # 228 checks, ~5 s
+pytest --runslow          # 247 -- + rebuild all 70 figures, + reproduce the snapshots
 ```
 
 **Nothing in the suite needs a GPU**, and `tests/test_no_gpu.py` pins that: it asserts by
@@ -256,13 +256,24 @@ renamed or dropped name survives in code.
 |---|---|---|
 | figures | nothing but this repo | all 9 generators run and produce exactly 70 PNGs at the right per-topic counts |
 | reproduce · activations | `activations/` | `compute_tsne_coords` and `analyze_prompt_structure` reproduce their 3 snapshots byte-for-byte |
-| reproduce · results | a populated `results/` | the 9-script chain reproduces all 29 snapshots byte-for-byte |
+| reproduce · results | whichever `results/` trees exist | each analysis reproduces its own snapshots byte-for-byte |
 
-The reproduce tiers **skip rather than fail** when their inputs are absent, and the skip
-message names which `(tree, model)` pairs are missing and the CPU-only command that fills
-them. Everything writes to a pytest `tmp_path` and is compared against the committed file,
-so running the suite cannot modify `analysis/data/` or `visuals/` — the artifacts under
-test.
+The reproduce tiers **skip rather than fail** when their inputs are absent, and each script
+is checked **on its own inputs** rather than as one chain — so a partially populated
+`results/` still exercises everything it can reach. That division is there for one stage in
+particular: the probe sweep is ~8 min per model, 40 min for all five, and `analyze_sweep` is
+the only analysis that needs it. The other analyses are not held behind it. Each skip message
+names the missing trees and the CPU-only command that fills them.
+
+The one exception is the generation pair, tested as a chain because it is one:
+`analyze_generation` reads `free_generation_by_template.csv` from its own `--out-dir`, so
+`score_generations` must have run there first. A second test asserts that running
+`analyze_generation` alone produces a `template_sensitivity.csv` that *does not* match the
+committed snapshot — otherwise the chain could be passing for the wrong reason, with the
+documented ordering being decorative.
+
+Everything writes to a pytest `tmp_path` and is compared against the committed file, so
+running the suite cannot modify `analysis/data/` or `visuals/` — the artifacts under test.
 
 ## Setup
 
