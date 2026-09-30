@@ -28,7 +28,7 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 
 | Generator | Output | Reads |
 |---|---|---|
-| `make_visuals.py` | `clustermap/`: `heat_<model>_L<layer>.png` (25), `heatrow_<model>.png` (5) | `taxonomy/between_class_matrix.csv` |
+| `make_visuals.py` | `clustermap/<model>/`: `heat_L<layer>.png` (25), `heatrow.png` (5) | `taxonomy/between_class_matrix.csv` |
 | `make_visuals_tsne.py` | `tsne/tsne_depth_{coarse,fine,template}.png`, plus per-model `fine_L<layer>.png` | `tsne/tsne_coords.csv`, `probe/layer_curves.csv` |
 | `make_visuals_probe.py` | `probe/probe_depth.png` | `probe/layer_curves.csv`, `probe/surface_baseline.csv` |
 | `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `ambiguity/ambiguity_family_probability.csv` |
@@ -40,6 +40,14 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 | `make_visuals_retrieval_violin.py` | `retrieval/rankviolin.png` | `geometry/retrieval_rank_hist.csv` |
 | `make_visuals_retrieval_mixed.py` | `retrieval/rankmixed.png` | `geometry/retrieval_rank_hist.csv` |
 | `make_visuals_retrieval_3d.py` | `retrieval/analogy3d_*.png` + a `.txt` readout each (6 pairs) | `analogy/analogy_quiver3d.csv` |
+
+Two generators split their output per checkpoint — `make_visuals.py` and
+`make_visuals_tsne.py` — and both name the subdirectory with the model's own identifier
+(`meta-llama-Llama-3.1-8B`), matching the `results/` and `activations/` trees and the
+`analogy3d_*` filenames. One model is one string everywhere a path carries it, so a figure
+traces back to the run that produced it without a lookup table. The lower-case slugs
+(`base`, `chem-faithful`, …) appear only in console output and figure legends, never in a
+path.
 
 The four `retrieval_*` rank variants draw the same measurement four ways — dots, violins, a
 mix, and a reduction to mean and median. `rankdist.png` is the one the

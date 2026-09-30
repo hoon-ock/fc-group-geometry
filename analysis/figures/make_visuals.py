@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
 """Between-class similarity clustermaps, one file per panel.
 
-    python analysis/figures/make_visuals.py [--only base] [--out-dir DIR]
+    python analysis/figures/make_visuals.py [--only meta-llama-Llama-3.1-8B] [--out-dir DIR]
 
-Emits all FIVE sampled layers and all FIVE 8B checkpoints as **separate** untitled PNGs
-into `analysis/visuals/clustermap/`, so each can be placed individually:
+Emits all FIVE sampled layers and all FIVE 8B checkpoints as **separate** untitled PNGs,
+one directory per checkpoint, so each can be placed individually:
 
-  heat_<model>_L<layer>.png      25 files: 5 models x 5 layers
-  heatrow_<model>.png             5 files: all five depths in one row, set in larger type
-                                  for reading on its own
+  clustermap/<model>/heat_L<layer>.png    25 files: 5 models x 5 layers
+  clustermap/<model>/heatrow.png           5 files: all five depths in one row, set in
+                                           larger type for reading on its own
+
+`<model>` is the checkpoint's own identifier with `/` replaced by `-`
+(`meta-llama-Llama-3.1-8B`), the same string the `results/` and `activations/` trees use and
+the same layout `make_visuals_tsne.py` writes its per-model panels into. One model is one
+string everywhere a path carries it, so a figure can be traced to the run that produced it
+without a lookup table. The model is therefore NOT repeated in the filename.
 
 `heat_figure` and `heatrow_figure` share ONE function for the matrix drawing (`heat_row`)
 and differ only in page geometry and type size, so the two forms cannot disagree about a
@@ -52,9 +58,6 @@ CHEMDFM = 'OpenDFM-ChemDFM-v1.5-8B'
 # reasoning distill. See src/model_registry.py for the tier argument -- ChemDFM sits on
 # Llama-3, not 3.1, so a ChemDFM-vs-base gap is not a controlled contrast.
 MODELS5 = [BASE, CHEM_R, CHEM, CHEMDFM, R1]
-SHORT5 = {BASE: 'base', CHEM_R: 'chem-r', CHEM: 'chem-faithful',
-          CHEMDFM: 'chemdfm', R1: 'reason'}
-
 DEFAULT_VISUALS = os.path.join(ANALYSIS, 'visuals', 'clustermap')
 
 # Each clustermap is now its own figure rather than one of three panels in a 5.5in row, so
@@ -217,8 +220,9 @@ def main():
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--out-dir', default=DEFAULT_VISUALS)
-    p.add_argument('--only', choices=sorted(SHORT5.values()),
-                   help='render a single model instead of all five')
+    p.add_argument('--only', choices=MODELS5, metavar='MODEL',
+                   help='render a single checkpoint instead of all five, named as it is '
+                        'in the CSV and on disk (e.g. meta-llama-Llama-3.1-8B)')
     args = p.parse_args()
     style()
 
@@ -236,18 +240,18 @@ def main():
     order = leaf_order(z_by[(BASE, FIGURE_LAYER)])
     lim = max(np.nanmax(np.abs(z_by[(m, L)])) for m in MODELS5 for L in LAYERS)
 
-    wanted = [m for m in MODELS5 if args.only is None or SHORT5[m] == args.only]
-    os.makedirs(args.out_dir, exist_ok=True)
+    wanted = [m for m in MODELS5 if args.only is None or m == args.only]
     for model in wanted:
-        short = SHORT5[model]
+        sub = os.path.join(args.out_dir, model)
+        os.makedirs(sub, exist_ok=True)
         for layer in LAYERS:
             fig = heat_figure(model, layer, groups, z_by, order, lim)
-            path = os.path.join(args.out_dir, f'heat_{short}_L{layer}.png')
+            path = os.path.join(sub, f'heat_L{layer}.png')
             fig.savefig(path)
             plt.close(fig)
             print(f'wrote {os.path.relpath(path, REPO)}')
         fig = heatrow_figure(model, groups, z_by, order, lim)
-        path = os.path.join(args.out_dir, f'heatrow_{short}.png')
+        path = os.path.join(sub, 'heatrow.png')
         fig.savefig(path)
         plt.close(fig)
         print(f'wrote {os.path.relpath(path, REPO)}')

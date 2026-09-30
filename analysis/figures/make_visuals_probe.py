@@ -58,14 +58,14 @@ COLOR5 = {BASE: '#0072B2', CHEM_R: '#E69F00', CHEM: '#D55E00',
 MARKER5 = {BASE: 'o', CHEM_R: 'D', CHEM: 's', CHEMDFM: 'v', R1: '^'}
 DASH5 = {BASE: (None, None), CHEM_R: (5, 1.5, 1, 1.5), CHEM: (4, 1.5),
          CHEMDFM: (2, 1.2), R1: (1, 1.5)}
-# `_common.SHORT` calls Chem-R-Faithful `chem`, which is unreadable in a legend that also
-# holds `chem-r`. Spelled out here, matching the clustermap filenames.
+# `_common.SHORT` calls Chem-R-Faithful `chem`, which is unreadable beside `chem-r`.
+# Spelled out here.
 SHORT5 = {BASE: 'base', CHEM_R: 'chem-r', CHEM: 'chem-faithful',
           CHEMDFM: 'chemdfm', R1: 'reason'}
 
-# `SHORT5` is an IDENTIFIER: it is what `make_visuals.py` names its files with and what
-# `--only` accepts, so it stays lower-case and must not drift. `DISPLAY5` is what a reader
-# sees on a figure. Chem-R-Faithful shortens to `Chem-F` rather than spelling `Faithful`
+# `SHORT5` is for TEXT OUTPUT -- the console summaries the retrieval and t-SNE generators
+# print, where a full checkpoint name would wrap. No path uses it: files and directories
+# carry the model's own identifier instead. `DISPLAY5` is what a reader sees on a figure. Chem-R-Faithful shortens to `Chem-F` rather than spelling `Faithful`
 # out -- at this type size the full name is the longest label on every figure that draws it.
 DISPLAY5 = {BASE: 'Base', CHEM_R: 'Chem-R', CHEM: 'Chem-F',
             CHEMDFM: 'Chem-DFM', R1: 'Reason'}

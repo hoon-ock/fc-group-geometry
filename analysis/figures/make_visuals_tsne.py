@@ -262,9 +262,9 @@ def main():
             continue
         for m in models:
             # The model's own identifier, not SHORT5's slug: this matches the directory
-            # names under results/ and the analogy3d_* filenames, so one model is one string
-            # everywhere a path carries it. SHORT5 stays what the CLI and the clustermap
-            # filenames use.
+            # names under results/, the analogy3d_* filenames and the clustermap tree, so
+            # one model is one string everywhere a path carries it. SHORT5 is for console
+            # text only.
             sub = os.path.join(args.out_dir, m)
             os.makedirs(sub, exist_ok=True)
             for L in args.layers:
