@@ -165,7 +165,7 @@ export HF_TOKEN=...                                   # the Llama checkpoints ar
 sbatch scripts/01_extract.sbatch                      # [1]
 sbatch scripts/02_generation_eval.sbatch              # [2]
 
-rsync -a --partial swan:/work/$USER/fc_group/activations/ activations/
+rsync -a --partial <cluster>:/work/$USER/fc_group/activations/ activations/
 bash scripts/pull_results.sh                          # results/generation_eval/ only
 
 bash scripts/run_local.sh                             # [3] + [4]

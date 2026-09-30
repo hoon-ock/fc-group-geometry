@@ -150,7 +150,7 @@ that step's output, and stops there rather than carrying a broken input forward.
 The activations, once:
 
 ```bash
-rsync -a --partial swan:/work/$USER/fc_group/activations/ activations/
+rsync -a --partial <cluster>:/work/$USER/fc_group/activations/ activations/
 ```
 
 The generation eval, the only `results/` tree the cluster still writes:

@@ -95,6 +95,11 @@ def test_the_entity_type_still_appears_widely():
 
 
 def test_no_absolute_developer_path_leaked_in():
-    for needle in ('/Users/hoon', '/work/ock'):
-        hits = [rel for rel in _hits(needle) if not rel.startswith('scripts/')]
+    """No exemptions. This check used to skip scripts/, which is where the only real leak
+    was: three sbatch jobs defaulted HF_HOME to /work/ock/hoon/hf_cache -- one cluster's
+    group and one username, naming a directory that exists nowhere else. The exemption had
+    been added to make the check pass rather than to record a legitimate exception, so it
+    was blind on exactly the files that needed it."""
+    for needle in ('/Users/hoon', '/work/ock', '/home/ock'):
+        hits = _hits(needle)
         assert not hits, f'{needle} in {hits}'

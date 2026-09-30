@@ -17,7 +17,12 @@ check_array_size 5 || exit 1
 python -c "import yaml, torch, transformers" || {
   echo "ERROR: conda env not active or deps missing (python=$(command -v python))"; exit 1; }
 
-export HF_HOME="${HF_HOME:-/work/ock/hoon/hf_cache}"
+# Not defaulted to a path: the five 8B checkpoints are ~16 GB each at fp16, ~80 GB for the
+# sweep, which exceeds a typical cluster home quota. Left unset, transformers caches under
+# $HOME/.cache/huggingface; redirect it before submitting rather than after the first
+# download fills the quota.
+#   export HF_HOME=/work/$USER/hf_cache
+[ -n "${HF_HOME:-}" ] || echo "note: HF_HOME unset -- weights cache under $HOME/.cache/huggingface"
 
 # Every downstream stage reads these tensors, and 5 models x 32 layers x 920 prompts is
 # ~1.3 GB. On a cluster whose home quota cannot hold that, point FCG_ACTIVATIONS at scratch
