@@ -28,6 +28,7 @@ Run from the repo root:
 
 import argparse
 import os
+import platform
 import sys
 import warnings
 
@@ -38,6 +39,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import scipy
+import sklearn
 
 from sklearn.decomposition import PCA
 from sklearn.exceptions import ConvergenceWarning
@@ -1010,6 +1013,19 @@ def main():
             'null_std': float(np.std(null_scores)) if null_scores else None,
             'p_value_best_layer': p_value,
             'surface_baseline_balanced_acc': res['surface'],
+            # Provenance. The probe is bitwise deterministic within one environment --
+            # verified by running it twice into separate directories, 6/6 files identical --
+            # so a disagreement between two summaries is a disagreement about the stack, and
+            # nothing here used to record which stack. That cost a long diagnosis: the
+            # committed snapshots turned out to come from an environment (scikit-learn 1.2.2,
+            # numpy 1.23.5) with no Python 3.13 wheels, which made them unreproducible here
+            # for reasons no file on disk disclosed. Ruling out code and input changes took
+            # diffing the source repo; these four keys would have answered it in one line.
+            'seed': int(args.seed),
+            'env': {'python': platform.python_version(),
+                    'numpy': np.__version__,
+                    'scipy': scipy.__version__,
+                    'scikit_learn': sklearn.__version__},
         }, os.path.join(output_dir, 'data', f'summary_{tag}.json'))
 
         plot_layer_trend(layer_scores, null_scores, res['surface'], n_classes, num_layers,
