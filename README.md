@@ -51,7 +51,7 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | `analysis/figures/` | the 9 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
 | `analysis/visuals/` | **the output.** 70 PNGs, gitignored and rebuilt from the snapshots |
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
-| `scripts/` | eight SLURM array jobs that fill `results/` and `data/activation/` |
+| `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
 | `data/activation/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.1 GB |
 
@@ -71,12 +71,20 @@ That rebuilds all 70 PNGs from the `analysis/*/data/*.csv` files in this reposit
 works is the reproducibility test the whole layout is arranged around: no generator may read
 `results/`, so if one ever needs it, a snapshot step was missed upstream.
 
-**From scratch**, which needs a GPU and re-derives the snapshots too:
+**From the activations**, re-deriving every snapshot on the way — no cluster, well under
+an hour:
+
+```bash
+bash scripts/run_local.sh
+```
+
+**From scratch**, where the only cluster work is the two GPU stages:
 
 ```bash
 export HF_TOKEN=...                        # the Llama checkpoints are gated
-sbatch scripts/01_extract.sbatch           # then 02..07 -- see scripts/README.md
-python analysis/probe/analyze_sweep.py     # and the other analyze_*.py
+sbatch scripts/01_extract.sbatch           # -> data/activation/
+sbatch scripts/02_generation_eval.sbatch   # -> results/generation_eval/
+bash scripts/run_local.sh                  # everything else, locally
 ```
 
 `scripts/README.md` has the job order and dependencies; each `analysis/<topic>/README.md`

@@ -9,10 +9,18 @@
 #   FCG_REMOTE_ROOT  the results tree on that host    (default: /work/$USER/fc_group/results)
 #   FCG_RESULTS      local destination                (default: <repo>/results, via paths.py)
 #
-# The remote tree is results/<method>/<model>/<leaf>, and only a slice of it is ever under
-# analysis. Copying the whole thing means gigabytes dominated by plot leaves nobody is
-# looking at, so the selection lives here as explicit lists rather than as a half-remembered
-# rsync filter typed by hand.
+# ONLY ONE STAGE STILL RUNS ON THE CLUSTER AND WRITES results/. Everything else -- probe,
+# anisotropy, analogy, retrieval, ambiguity -- is CPU-only and runs locally via
+# scripts/run_local.sh, so there is nothing to fetch for it. What the cluster produces is
+# the generation eval (a GPU job) and, separately, the activations.
+#
+# The activations are 1.1 GB and are not results, so they are not pulled here. Bring them
+# down once, directly:
+#
+#   rsync -a --partial swan:/work/$USER/fc_group/activation/ data/activation/
+#
+# The remote tree is results/<method>/<model>/<leaf>. The selection stays an explicit list
+# rather than a half-remembered rsync filter typed by hand.
 #
 # One rsync per source directory, with an explicit destination, instead of a single
 # --files-from run: macOS ships openrsync (/usr/bin/rsync, "rsync 2.6.9 compatible"), which
@@ -47,13 +55,6 @@ LOCAL_ROOT="$(cd "$ROOT" && python -c 'import paths; print(paths.RESULTS)')"
 # Every method whose output an analysis stage reads. Sibling prompt types can include names
 # with spaces ("functional_group question"), so the leaf is named exactly and never globbed.
 METHODS=(
-  ambiguity_metric
-  anisotropy_diagnostic
-  functional_group_analogy
-  functional_group_analogy_retrieval
-  functional_group_analogy_retrieval_carbon
-  functional_group_analogy_retrieval_halide
-  functional_group_probe
   generation_eval
 )
 LEAF=functional_group
@@ -116,6 +117,9 @@ if [ -z "$DRY" ]; then
   echo "local sizes:"
   du -sh "$LOCAL_ROOT"/* 2>/dev/null
   echo
-  echo "next: re-merge the free-generation block, then rebuild the snapshots and figures"
-  echo "  python analysis/generation/score_generations.py"
+  echo "next: rebuild the snapshots and figures locally --"
+  echo "  bash scripts/run_local.sh          # or --stages analysis to skip the compute"
+  echo
+  echo "that re-merges the free-generation block score_generations.py owns, which the"
+  echo "pull above overwrote."
 fi

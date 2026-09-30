@@ -145,7 +145,7 @@ python analysis/probe/analyze_sweep.py                        # -> data/*.csv
 ```
 
 `--tag` selects which probe target to summarise and defaults to `coarse_group`, which is
-what `02_probe.sbatch` runs and what the committed `data/` carries. Another tag needs the
+what `scripts/run_local.sh` runs and what the committed `data/` carries. Another tag needs the
 job re-run with `PROBE_TARGET` set, and would overwrite these same filenames — the
 snapshot holds one target at a time.
 

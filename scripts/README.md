@@ -1,68 +1,39 @@
-# Cluster jobs
+# Running the pipeline
 
-Eight SLURM array jobs that fill `results/` and `data/activation/`. Everything downstream — the
-snapshot CSVs under `analysis/*/data/` and the figures under `analysis/visuals/` — runs on a
-laptop from what these produce.
+**Only the GPU work needs a cluster.** Three SLURM jobs here do that. Everything else —
+probe, anisotropy, analogy, retrieval, ambiguity, every `analyze_*.py`, and all 70 figures —
+runs locally from the activations in one command:
 
-Submit from the repository root:
+```bash
+bash scripts/run_local.sh
+```
+
+That was not always true. The five CPU stages used to be SLURM array jobs
+(`02_probe` … `06_ambiguity`) because they were written beside the extraction that does need
+a GPU. Each asks for one core and 4–8 GB and never touches a GPU, so on a machine that
+already has the activations, a cluster round-trip plus `pull_results.sh` bought nothing.
+They now live inside `run_local.sh`.
+
+## What still needs a GPU
+
+| Job | Stage | Resources | Writes |
+|---|---|---|---|
+| `00_smoke_test` | one template, three layers, then verify shapes against the registry | 1 GPU | — |
+| `01_extract` | forward pass, per-layer hidden states via forward hooks | 1 GPU, 8 cores | `data/activation/` |
+| `02_generation_eval` | the behavioural stage: forced choice + free generation | 1 GPU, 8 cores | `results/generation_eval/` |
+
+Submit from the repository root. Each job resolves the root from `$SLURM_SUBMIT_DIR` and
+fails immediately if `paths.py` is not there; for a manual run elsewhere, set `FCG_ROOT`.
 
 ```bash
 sbatch scripts/01_extract.sbatch
 ```
 
-Each job resolves the root from `$SLURM_SUBMIT_DIR` and fails immediately if `paths.py` is
-not there. For a manual run from elsewhere, set `FCG_ROOT=/path/to/repo`.
-
-## Which stages a figure actually needs
-
-`01` must finish before anything else. After that, `02`/`03`/`04`/`07` are independent;
-`05` needs `04`, and `06` needs `02`.
-
-**29 of the 70 figures need nothing beyond `01_extract`.** Two analysis scripts read the
-`.pt` tensors directly and no `results/` tree at all, so with the activations in place they
-run on a laptop in minutes:
-
-| Figures | Count | Producer | Needs |
-|---|---|---|---|
-| `tsne/` | 28 | `analysis/tsne/compute_tsne_coords.py` | **activations only** |
-| `prompt_structure/` | 1 | `analysis/prompt_structure/analyze_prompt_structure.py` | **activations only** |
-| `clustermap/` | 30 | `analysis/taxonomy/analyze_taxonomy.py` | `04` |
-| `retrieval/rankdist`, `rankviolin` | 2 | `analysis/geometry/analyze_geometry.py` | `03` `04` `05` |
-| `retrieval/analogy3d_*` | 6 | `analysis/analogy/snapshot_quiver3d.py` | `04` `05` |
-| `probe/` | 1 | `analysis/probe/analyze_sweep.py` | `02` |
-| `ambiguity/` | 1 | `analysis/ambiguity/analyze_ambiguity.py` | `02` `04` `06` |
-| `generation/` | 1 | `score_generations.py` → `analyze_generation.py` | `07` |
-
-The remaining 41 need `results/`, and between them they touch **every** stage from 02 to
-07 — none is skippable if you want the full set. `00_smoke_test` is a preflight and is never
-required for an output.
-
-Each `analysis/<topic>/README.md` carries the command that regenerates its own snapshot.
-
-| Job | Stage | Resources | Reads | Writes under `results/` |
-|---|---|---|---|---|
-| `00_smoke_test` | one template, three layers, then verify shapes against the registry | 1 GPU | — | — |
-| `01_extract` | forward pass, per-layer hidden states via hooks | 1 GPU, 8 cores | `data/` | → `data/activation/` |
-| `02_probe` | layer-wise linear probe, all 32 layers | 1 core, 4 GB | `data/activation/` | `functional_group_probe/` |
-| `03_anisotropy` | generic-anisotropy baseline for the diff-vector geometry | 1 core | `data/activation/` | `anisotropy_diagnostic/` |
-| `04_analogy` | diff-vector geometry, carbon-matched | 1 core | `data/activation/` | `functional_group_analogy/` |
-| `05_retrieval` | does `b2 + (a1 - a2)` retrieve `b1`? three axes | 1 core | `04`'s npz files | `functional_group_analogy_retrieval{,_carbon,_halide}/` |
-| `06_ambiguity` | how much mass lands on the defensible rival family | 1 core | `02`'s `oof_proba_*.npz` | `ambiguity_metric/` |
-| `07_generation_eval` | the behavioural stage: forced choice + free generation | 1 GPU, 8 cores | `data/` | `generation_eval/` |
-
-Only `00`, `01` and `07` need a GPU. `02` deliberately asks for one core and 4 GB with no
-GPU: it is entirely scikit-learn (`torch` appears only as `torch.load(map_location="cpu")`),
-extra cores do not help because the matrices are too small for BLAS parallelism and lbfgs is
-serial, and an earlier 32 GB request pinned the array to a few concurrent tasks with the rest
-in `PD (Resources)`. Throughput comes from array width, not from per-task size.
-
-## Every array is `0-4`
-
-Five models × one entity type. Both lists are derived at runtime — the models from
-`models.sh`, the entity types from `config_extract_activation.yaml` — so they cannot
-drift from each other or from what was actually extracted. The one thing that cannot
-self-update is the static `#SBATCH --array` span, so every job calls
-`check_array_size 5` and refuses to start if the product disagrees:
+Both arrays are `0-4` — five models × one entity type. Both lists are derived at runtime
+(models from `models.sh`, entity types from `config_extract_activation.yaml`), so they cannot
+drift from each other or from what was extracted. The static `#SBATCH --array` span is the
+one thing that cannot self-update, so each job calls `check_array_size 5` and refuses to
+start on a mismatch:
 
 ```
 ERROR: 5 models x 1 entity types = 5 runs,
@@ -70,74 +41,125 @@ ERROR: 5 models x 1 entity types = 5 runs,
        Update the --array line and ARRAY_SIZE together.
 ```
 
-Add a prompt type to the YAML and that message tells you exactly which lines to widen.
+## `run_local.sh`
+
+Three stages, and any one can run alone:
+
+```bash
+bash scripts/run_local.sh                     # compute -> analysis -> figures
+bash scripts/run_local.sh --stages compute    # the five CPU stages, per model
+bash scripts/run_local.sh --stages analysis   # results/ -> analysis/*/data/
+bash scripts/run_local.sh --stages figures    # analysis/*/data/ -> analysis/visuals/
+bash scripts/run_local.sh --models meta-llama/Llama-3.1-8B
+```
+
+Measured per model: anisotropy ~6 s, analogy ~1–3 min (the permutation null dominates),
+probe ~8 min for all 32 layers, retrieval and ambiguity seconds each — those two read the
+npz the earlier stages wrote rather than the tensors. The probe is the long pole; the whole
+five-model compute stage is well under an hour.
+
+**`--stages figures` needs nothing but the repository.** Every `make_visuals*.py` reads only
+the committed `analysis/*/data/*.csv`, so a fresh clone with no activations draws all 70
+PNGs in about 15 seconds. The compute and analysis stages exist to *re-derive* those
+snapshots; the figures consume whatever is on disk.
+
+**`--stages analysis` skips the GPU-only half gracefully.** `score_generations.py` and
+`analyze_generation.py` need `results/generation_eval/`, which only `02_generation_eval`
+produces. Without it those two are skipped with a note, the committed generation snapshot
+stays as it is, and the figure still draws from it.
+
+## Which stages a figure needs
+
+Two analysis scripts read the `.pt` tensors directly and no `results/` tree at all, so
+**29 of the 70 figures need only the activations** — not even the local compute stage:
+
+| Figures | Count | Producer | Needs |
+|---|---|---|---|
+| `tsne/` | 28 | `analysis/tsne/compute_tsne_coords.py` | activations |
+| `prompt_structure/` | 1 | `analysis/prompt_structure/analyze_prompt_structure.py` | activations |
+| `clustermap/` | 30 | `analysis/taxonomy/analyze_taxonomy.py` | local: analogy |
+| `retrieval/rankdist`, `rankviolin` | 2 | `analysis/geometry/analyze_geometry.py` | local: anisotropy + analogy + retrieval |
+| `retrieval/analogy3d_*` | 6 | `analysis/analogy/snapshot_quiver3d.py` | local: analogy + retrieval |
+| `probe/` | 1 | `analysis/probe/analyze_sweep.py` | local: probe |
+| `ambiguity/` | 1 | `analysis/ambiguity/analyze_ambiguity.py` | local: probe + analogy + ambiguity |
+| `generation/` | 1 | `score_generations.py` → `analyze_generation.py` | **`02_generation_eval` (GPU)** |
+
+Worth being explicit about the division, because the directory names invite the opposite
+reading: **`src/` computes and `analysis/` summarises.** `analysis/probe/analyze_sweep.py`
+does not fit a probe — it contains no sklearn calls at all and reads the `summary_*.json`
+that `src/functional_group_probe.py` wrote. The same holds for ambiguity, taxonomy, geometry
+and generation. The two activations-only scripts above are the exceptions.
+
+Each `analysis/<topic>/README.md` carries the command that regenerates its own snapshot.
 
 ## `models.sh`
 
 The sweep is declared there; `src/model_registry.py` is the catalogue it draws from. The
 check is a **subset** check, not equality: a model must be registered for
 `get_model_config` to resolve its depth, but it may be registered without being swept. The
-70B pair is in that position — registered, unswept, and used by nothing released here — so
-sourcing `models.sh` prints:
+70B pair is in that position, so sourcing `models.sh` prints:
 
 ```
 note: registered, not in this sweep: deepseek-ai/DeepSeek-R1-Distill-Llama-70B meta-llama/Llama-3.1-70B
 ```
 
-A swept name that is *not* registered is a hard error, which is the failure the file exists
-to catch: a typo would otherwise narrow the sweep silently rather than stopping it.
+A swept name that is *not* registered is a hard error — the failure this file exists to
+catch, since a typo would otherwise narrow the sweep silently instead of stopping it.
 
 ## Scratch space
 
-`01_extract` writes ~1.1 GB (5 models × 32 layers × 920 prompts) and `results/` adds a few
-hundred MB more. On a cluster whose home quota cannot hold that, redirect both **before**
-extracting — `paths.py` reads these, and every later stage must see the same values:
+`01_extract` writes ~1.1 GB (5 models × 32 layers × 920 prompts). On a cluster whose home
+quota cannot hold that, redirect it **before** extracting — `paths.py` reads these, and
+every later stage must see the same values:
 
 ```bash
 export FCG_ACTIVATIONS=/work/$USER/fc_group/activation
 export FCG_RESULTS=/work/$USER/fc_group/results
 ```
 
-`01_extract` echoes the resolved activation path on startup so a misconfigured run is
-visible in the first lines of its log rather than after the first model loads.
+`FCG_LOGS` works the same way. `01_extract` echoes the resolved activation path on startup,
+so a misconfigured run is visible in the first lines of its log rather than after the first
+model loads.
 
 Gated checkpoints need Hugging Face auth: `export HF_TOKEN=...` before submitting. The jobs
 also set `HF_HOME` to a shared cache, overridable in the environment.
 
 ## Triage
 
-Every job ends with one `SUMMARY:` line per task, so a whole sweep reduces to one grep:
+Every sbatch job ends with one `SUMMARY:` line per task, so a sweep reduces to one grep:
 
 ```bash
-grep -h SUMMARY logs/slurm-probe-*.out | sort | uniq -c
+grep -h SUMMARY logs/slurm-extract-*.out | sort | uniq -c
 ```
 
-The outcomes are distinguished on purpose rather than collapsed into pass/fail:
-`no activation data` and `no retrieval input` mean a stage ran before its input existed — an
-ordering problem. `bad-output` means `analogy_retrieval.py`'s own self-check failed, so the
-analysis ran but its outputs do not agree with each other, which is a bug in the code rather
-than the environment. `crashed` is an ordinary traceback.
+`run_local.sh` reports `ok` with a duration per step, or `FAILED` with the last 12 lines of
+that step's output, and stops there rather than carrying a broken input forward.
 
-## Bringing results back
+## Bringing work back from the cluster
+
+The activations, once:
+
+```bash
+rsync -a --partial swan:/work/$USER/fc_group/activation/ data/activation/
+```
+
+The generation eval, the only `results/` tree the cluster still writes:
 
 ```bash
 bash scripts/pull_results.sh --dry-run    # then without the flag
 ```
 
 Override `FCG_REMOTE`, `FCG_REMOTE_ROOT` and `FCG_RESULTS` rather than editing the script.
-It copies only the `functional_group` leaf of each method, and it does **not** use
-`--delete`, which matters for one file: `generation_eval/<model>/functional_group/data/
-summary.json` carries a `free_generation` block merged in locally, and the remote copy
-overwrites it. Re-derive it after every pull — it is CPU-only and takes seconds:
-
-```bash
-python analysis/generation/score_generations.py
-```
+It does **not** use `--delete`, which matters for one file:
+`generation_eval/<model>/functional_group/data/summary.json` carries a `free_generation`
+block merged in locally, and the remote copy overwrites it. `run_local.sh --stages analysis`
+re-derives it.
 
 ## Files
 
 | | |
 |---|---|
-| `_preamble.inc` | sourced first by every job: resolves `ROOT`, activates the env, pins BLAS thread counts (the compute nodes cap `RLIMIT_NPROC` and OpenBLAS blows past it) |
+| `run_local.sh` | the whole CPU pipeline: five compute stages, nine analysis scripts, nine figure generators |
+| `_preamble.inc` | sourced first by every sbatch: resolves `ROOT`, activates the env, pins BLAS thread counts (the compute nodes cap `RLIMIT_NPROC` and OpenBLAS blows past it) |
 | `models.sh` | the five swept models, the registry subset check, `read_entity_types`, `check_array_size` |
-| `pull_results.sh` | selective rsync of `results/` back from the cluster |
+| `pull_results.sh` | selective rsync of `results/generation_eval/` back from the cluster |

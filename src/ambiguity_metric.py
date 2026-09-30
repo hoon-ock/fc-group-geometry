@@ -145,7 +145,7 @@ def load_proba(output_dir, tag):
             f"This file is written by functional_group_probe.py, which saves it by "
             f"default; results produced before that existed do not carry it. Rerun the "
             f"probe for this model/entity_type (on the cluster: "
-            f"`sbatch scripts/02_probe.sbatch`, unchanged) and try again.")
+            f"`bash scripts/run_local.sh --stages compute`, unchanged) and try again.")
     with np.load(path, allow_pickle=True) as z:
         return {
             'proba': z['proba'].astype(np.float64),
