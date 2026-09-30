@@ -29,7 +29,9 @@ ACTIVATIONS = os.environ.get('FCG_ACTIVATIONS', os.path.join(ROOT, 'activations'
 LOGS = os.environ.get('FCG_LOGS', os.path.join(ROOT, 'logs'))
 
 DATASET_CSV = os.path.join(DATA, 'functional_group_dataset.csv')
-EXTRACTION_CONFIG = os.path.join(DATA, 'config_extract_activation.yaml')
+# At the root, not under data/: it configures the run rather than being an input to it, and
+# it is the one file a reader edits to change what the pipeline does.
+EXTRACTION_CONFIG = os.path.join(ROOT, 'config_extract_activation.yaml')
 
 # Ordered for the report below: committed roots, generated roots, then the two files.
 _REPORT = ['ROOT', 'SRC', 'DATA', 'ANALYSIS', 'SCRIPTS',

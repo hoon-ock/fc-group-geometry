@@ -44,7 +44,8 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | Path | Contents |
 |---|---|
 | `paths.py` | every path in the project, resolved from its own location. Import this; never hardcode |
-| `data/` | the 92-molecule dataset and the extraction/prompt config |
+| `config_extract_activation.yaml` | the model, pooling and prompt templates for a run — the one file to edit to change what the pipeline does |
+| `data/` | the 92-molecule dataset |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
 | `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
 | `analysis/figures/` | the 12 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |

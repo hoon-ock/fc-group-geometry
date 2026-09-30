@@ -30,7 +30,7 @@ echo "=== task=$TASK_ID model=$MODEL (all layers) ==="
 # All 32 layers, not the registry's default three: the probe reports a curve over depth and
 # the released layer_curves.csv has every layer in it.
 if python src/extract_activations_subset.py \
-     --config data/config_extract_activation.yaml \
+     --config "$ROOT/config_extract_activation.yaml" \
      --model-name "$MODEL"; then
   echo "SUMMARY: ok  $MODEL"
 else

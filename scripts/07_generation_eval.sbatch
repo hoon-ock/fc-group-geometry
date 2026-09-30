@@ -30,7 +30,7 @@ echo "=== task=$TASK_ID model=$MODEL ==="
 #
 # Needs a GPU -- it is the only stage that runs a forward pass with generation.
 if python src/generation_eval.py \
-     --config data/config_extract_activation.yaml \
+     --config "$ROOT/config_extract_activation.yaml" \
      --model-name "$MODEL" \
      --entity-types functional_group \
      --max-new-tokens 10; then

@@ -835,7 +835,7 @@ def parse_args():
     )
     parser.add_argument('--entity-type', default=ENTITY_TYPE,
                          help="Which entity_type's activations to analyze (must match an entity_type "
-                              "in data/config_extract_activation.yaml). Default: %(default)s")
+                              "in config_extract_activation.yaml). Default: %(default)s")
     parser.add_argument('--model-name', default=MODEL_NAME,
                          help="HF model_name whose saved activations to analyze (must be a key in "
                               "src/model_registry.py and match the directory name under "

@@ -26,7 +26,7 @@ echo "=== task=$TASK_ID model=$MODEL (smoke: one template, three layers) ==="
 # is what checks the last part -- a silently wrong hidden_dim would otherwise surface only
 # when the probe fails to load a fold.
 if python src/extract_activations_subset.py \
-     --config data/config_extract_activation.yaml \
+     --config "$ROOT/config_extract_activation.yaml" \
      --model-name "$MODEL" \
      --layers bottom middle top \
      --max-templates 1; then

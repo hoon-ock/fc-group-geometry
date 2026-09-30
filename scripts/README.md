@@ -38,7 +38,7 @@ in `PD (Resources)`. Throughput comes from array width, not from per-task size.
 ## Every array is `0-4`
 
 Five models × one entity type. Both lists are derived at runtime — the models from
-`models.sh`, the entity types from `data/config_extract_activation.yaml` — so they cannot
+`models.sh`, the entity types from `config_extract_activation.yaml` — so they cannot
 drift from each other or from what was actually extracted. The one thing that cannot
 self-update is the static `#SBATCH --array` span, so every job calls
 `check_array_size 5` and refuses to start if the product disagrees:

@@ -62,7 +62,7 @@ unset _registry_sorted _sweep_sorted _unregistered _unswept _REGISTRY_MODELS
 read_entity_types() {
   python -c "
 import yaml
-with open('$ROOT/data/config_extract_activation.yaml') as f:
+with open('$ROOT/config_extract_activation.yaml') as f:
     cfg = yaml.safe_load(f)
 for e in cfg['extraction']['entities']:
     print(e['entity_type'])
