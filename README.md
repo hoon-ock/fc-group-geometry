@@ -4,46 +4,50 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
 
-Do LLM hidden states encode organic functional groups as a consistent geometric structure,
-analogous to word2vec-style analogies (`king - man + woman ~= queen`)?
+This project tackles two questions:
 
-For each non-alkane molecule the pipeline defines
-
-```
-diff_vec(group, C) = act(molecule with `group` at chain length C) - act(alkane backbone at the same chain length C)
-```
-
-e.g. `diff_vec(alcohol, 3) = act(propan-1-ol) - act(propane)`, then measures the geometry of
-those difference vectors: within-class consistency across chain lengths, between-class
-distinctness, analogy retrieval, an anisotropy baseline, a layer-wise linear probe, and a
-behavioural free-generation counterpart to check whether any of it shows up in what the
-model actually says.
-
-Extraction never generates text — one forward pass per prompt, per-layer hidden states
-pulled via forward hooks, last-token pooled.
-
-**The figures under `visuals/` are the output.** Everything else exists to produce
-them.
+ - Do LLM hidden states encode organic functional groups as a consistent geometric structure,
+e.g. word2vec-style analogies (`king - man + woman ~= queen`)?
+ - How does the training procedure impact the embedding geometry and generation performance?
 
 ## What is measured, on what
 
 92 molecules × 20 functional groups × 10 declarative prompt templates = 920 prompts, run
 through five 8B checkpoints at all 32 layers.
 
-| | |
-|---|---|
-| `meta-llama/Llama-3.1-8B` | base |
-| `weidawang/Chem-R-8B` | chemistry-tuned, same base |
-| `phenixace/Chem-R-Faithful` | chemistry-tuned, GRPO-trained *from* Chem-R-8B |
-| `OpenDFM/ChemDFM-v1.5-8B` | chemistry-tuned, but on Llama-3 rather than 3.1 |
-| `deepseek-ai/DeepSeek-R1-Distill-Llama-8B` | reasoning-distilled |
+| Checkpoint | Role | Access | License |
+|---|---|---|---|
+| [`meta-llama/Llama-3.1-8B`](https://huggingface.co/meta-llama/Llama-3.1-8B) | base | **request, reviewed by hand** — not instant | `llama3.1` |
+| [`weidawang/Chem-R-8B`](https://huggingface.co/weidawang/Chem-R-8B) | chemistry-tuned, same base | accept terms, automatic | `apache-2.0` |
+| [`phenixace/Chem-R-Faithful`](https://huggingface.co/phenixace/Chem-R-Faithful) | chemistry-tuned, GRPO-trained *from* Chem-R-8B | open | `cc-by-4.0` |
+| [`OpenDFM/ChemDFM-v1.5-8B`](https://huggingface.co/OpenDFM/ChemDFM-v1.5-8B) | chemistry-tuned, but on Llama-3 rather than 3.1 | open | `agpl-3.0` |
+| [`deepseek-ai/DeepSeek-R1-Distill-Llama-8B`](https://huggingface.co/deepseek-ai/DeepSeek-R1-Distill-Llama-8B) | reasoning-distilled | open | `mit` |
 
 The set is deliberately all-Llama at one size, so every contrast varies one thing against a
 shared architecture and tokenizer. ChemDFM is the exception and is marked as such everywhere
 it appears: it sits on Llama-3, so a ChemDFM-vs-base gap confounds chemistry training with
 the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what carries that.
 
+### Getting access to the checkpoints
+
+Two of the five are gated, and they gate differently — the base model's request is reviewed
+by a human, so start it before you plan anything else. Request access while logged in, from
+each model's page linked above. Then create a **read** token at
+[huggingface.co/settings/tokens](https://huggingface.co/settings/tokens) and put it in the
+environment — never in the tracked config:
+
+```bash
+export HF_TOKEN=hf_...
+```
+
+`HF_TOKEN` is checked first and is the one to use on a cluster; a one-time
+`huggingface-cli login` works locally instead. Only the three GPU stages download weights —
+everything downstream reads the saved activations, so a reader reproducing the figures needs
+no token at all. See [Where to start](#where-to-start) for which of those applies to you.
+
 ## Layout
+
+**The figures under `visuals/` are the output.** Everything else exists to produce them.
 
 | Path | Contents |
 |---|---|
@@ -75,8 +79,9 @@ Four stages. Only the first two need a GPU; the rest is one local command.
 sbatch scripts/01_extract.sbatch
 ```
 
-One forward pass per prompt, per-layer hidden states pulled via forward hooks, last-token
-pooled. 5 models × 32 layers × 920 prompts (92 molecules × 10 templates), fp16:
+**Extraction never generates text.** One forward pass per prompt, per-layer hidden states
+pulled via forward hooks, last-token pooled. 5 models × 32 layers × 920 prompts
+(92 molecules × 10 templates), fp16:
 
 ```
 activations/<model-slug>/functional_group/functional_group.last.10_templates.layer_<N>.pt
@@ -117,7 +122,28 @@ Generations contain embedded newlines, so `wc -l` reports more lines than record
 bash scripts/run_local.sh --stages compute
 ```
 
-Five stages per model, single-core, no GPU, ~8 min per model with the probe dominating:
+Five independent measurements over the same frozen activations, each asking a different
+question. None loads a model; all are single-core and CPU-only:
+
+- **probe** — the supervised question: *is a molecule's functional group linearly decodable
+  from the last-token residual stream, and at what depth does decodability peak?* All 32
+  layers, leave-one-fine-group-out, so withholding `alkyl iodide` entirely tests whether its
+  molecules still land with the halides. The long pole by a wide margin.
+- **anisotropy** — the control the rest depends on. Transformer hidden states share a dominant
+  direction present almost regardless of content, so this measures how much of the geometry
+  below is that concentration rather than chemistry.
+- **analogy** — the unsupervised counterpart, carbon-matched. Builds
+  `diff_vec(group, C) = act(molecule with group at chain length C) − act(alkane backbone at
+  the same C)` — e.g. `diff_vec(alcohol, 3) = act(propan-1-ol) − act(propane)` — then scores
+  within-class consistency across chain lengths against between-class distinctness.
+- **retrieval** — the same analogy question asked the way word2vec actually asked it. The
+  cosine test above tops out near +0.66, which reads as *"the analogy isn't here"*; retrieval
+  instead asks whether `thioether − thiol + alcohol` lands **nearest** to `ether`. Three axes.
+- **ambiguity** — where the probe's mass goes for the four groups whose family label is a
+  naming convention rather than a chemical fact: `amide` and `nitro` both contain oxygen but
+  are labelled nitrogen, `sulfone` and `sulfoxide` sulfur.
+
+Mechanically, ~8 min per model with the probe dominating:
 
 | Stage | Reads | Writes under `results/` |
 |---|---|---|
@@ -164,7 +190,7 @@ From nothing, end to end:
 
 ```bash
 pip install -r requirements.txt
-export HF_TOKEN=...                                   # the Llama checkpoints are gated
+export HF_TOKEN=...                                   # two of the five are gated
 
 sbatch scripts/01_extract.sbatch                      # [1]
 sbatch scripts/02_generation_eval.sbatch              # [2]
@@ -297,9 +323,9 @@ pip install -r requirements.txt
 ```
 
 Everything under `analysis/` is CPU-only. `bitsandbytes` 4-bit quantization is Linux +
-NVIDIA only; on macOS/CPU extraction falls back to fp16/bf16. Gated checkpoints need
-`export HF_TOKEN=...` (checked first, and the one to use on a cluster) or a one-time
-`huggingface-cli login`. Do not put a token in the tracked config.
+NVIDIA only; on macOS/CPU extraction falls back to fp16/bf16. For the checkpoints and the
+token the GPU stages need, see
+[Getting access to the checkpoints](#getting-access-to-the-checkpoints).
 
 ## License
 
