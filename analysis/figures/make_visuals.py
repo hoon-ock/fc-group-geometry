@@ -43,7 +43,7 @@ from _common import (ANALYSIS, BASE, CHEM, FIGURE_LAYER, LAYERS,  # noqa: E402
                      R1, REPO, load, num)
 
 # The two chemistry checkpoints added after the paper CSVs were first snapshotted. Slugs are
-# the Results/ directory names (`/` -> `-`), which is what the CSVs carry in `model`.
+# the results/ directory names (`/` -> `-`), which is what the CSVs carry in `model`.
 CHEM_R = 'weidawang-Chem-R-8B'
 CHEMDFM = 'OpenDFM-ChemDFM-v1.5-8B'
 

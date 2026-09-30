@@ -25,7 +25,7 @@ Identity does not rest on hue alone even though bars carry no marker: the five b
 the same left-to-right order in every group of every figure, and the legend is in that order.
 
 Every value is read from the committed `geometry/data/retrieval_by_axis.csv` -- never
-`Results/`, which is gitignored -- so this figure and `f4_retrieval` cannot disagree about a
+`results/`, which is gitignored -- so this figure and `f4_retrieval` cannot disagree about a
 number. What that CSV carries, `analyze_geometry.retrieval()` pooled by trial count across
 each axis's groups, k-by-k with its own baseline.
 """

@@ -1,74 +1,73 @@
-# `visuals/generation/` — per-functional-group generation against per-group representation
+# `visuals/generation/` — what per-group generation failure is made of
 
-Exploratory PNGs, not paper figures. Written by
-[`analysis/figures/make_visuals_generation_vs_representation.py`](../../figures/make_visuals_generation_vs_representation.py),
-which reads only `generation/data/group_*.csv` and never `Results/` — the same rule the
-`make_visuals_retrieval*.py` family follows. Those CSVs are snapshotted by
-[`Analysis/generation/analyze_generation_vs_representation.py`](../../generation/analyze_generation_vs_representation.py).
-
-The reading of all three together is
-[`narrative/group_level_representation_behaviour.md`](../../narrative/group_level_representation_behaviour.md).
+One figure. Written by
+[`analysis/figures/make_visuals_generation_composition.py`](../../figures/make_visuals_generation_composition.py),
+which reads only `generation/data/group_response_composition.csv` and never `results/` — the
+same rule every generator in that directory follows. That CSV is snapshotted by
+[`analysis/generation/analyze_generation.py`](../../generation/analyze_generation.py).
 
 Regenerate:
 
+```bash
+python analysis/generation/score_generations.py          # -> free_generation_adjudicated.csv
+python analysis/generation/analyze_generation.py         # -> group_response_composition.csv
+python analysis/figures/make_visuals_generation_composition.py
 ```
-python analysis/generation/analyze_generation_vs_representation.py
-python analysis/figures/make_visuals_generation_vs_representation.py
-```
+
+The order matters: the composition is rebuilt from the adjudicated per-prompt table, so
+`score_generations.py` has to run first.
 
 ---
 
-## `gen_vs_retrieval.png`
-
-The question as posed: does a group the model retrieves badly get generated badly? Analogy
-retrieval hit@1 (top row) and mean rank (bottom) at layer 31, against per-group free-generation
-accuracy with superclass credit. One facet per checkpoint, ten facets.
-
-Read the **left-hand tail**, not the pile. Most groups sit at hit@1 = 1.000, so the panel's whole
-information content is the handful of points off that value — and they run the wrong way. Base:
-`sulfone` at hit@1 0.000 generates at 0.875, `imine` at 0.667 generates at 0.275.
-
-Three conventions worth knowing:
-
-* **Not every point is labelled.** `label_subset()` annotates points off the modal predictor value
-  plus the two y-extremes. Labelling all twenty turns the pile into overstrike and hides the tail,
-  which is the only part that carries information.
-* **The displayed rho is flipped on the bottom row.** `analyze_generation_vs_representation.py`
-  scores rank predictors negated so "higher is better" holds uniformly in
-  `group_correlations.csv`; these panels plot the raw rank, so the sign is flipped back to match
-  the axis the reader sees. A rho quoted from the CSV will differ in sign from the one in the
-  panel title, by design.
-* **A cream panel background means the outcome is unreliable** for that checkpoint — split-half
-  over templates below 0.5. chem-r and chem are cream. Their flat clouds mean the measurement
-  could not resolve a relationship, not that there is none.
-
-## `rho_by_layer.png`
-
-Correlation against depth, six predictors, five checkpoints plus a pooled fit. This is the figure
-that decides the question, because the one association that exists is layer-specific and any
-single-layer view either misses it or overstates it.
-
-* Shaded bands are cluster-bootstrap 95% CIs **over functional groups** — drawn for the two
-  cohesion predictors only. Shading all six is unreadable, and those two are the ones carrying a
-  claim. The width is the result: with n = 17–20 groups the bands run roughly ±0.45, so only
-  rho beyond ~0.55 clears zero in a single model.
-* The pooled panel ranks within model before pooling and still bootstraps over groups, so it
-  does not manufacture power by counting the same twenty groups five times.
-* Cream panels are underpowered checkpoints, as above, and the label carries the reliability.
-* Everything here except the preregistered primary is exploratory; `group_correlations.csv`
-  carries the BH-adjusted p-values and the `is_primary` flag.
-
 ## `group_response_composition.png`
 
-What the per-group spread is actually made of. Each functional group is one stacked bar of the
-five adjudicated response types from `free_generation_scoring.py`, one row per checkpoint, with
-teacher-forced raw recall overlaid as a dark tick.
+Each functional group is one stacked bar of the five adjudicated response types from
+`src/free_generation_scoring.py`, one row per checkpoint, with teacher-forced raw recall
+overlaid as a dark tick. The five types partition every prompt, so each bar sums to 1.
 
-This is the panel that answers the question the correlation could not. Read base's four halides:
-tall light-blue `superclass only` blocks under a tick near the top — `alkyl chloride` is 0.150
-strict against 0.950 teacher-forced, because the model answers "alkyl halide". Then read `imine`
-and `thioether`: no light blue at all, a tall orange `named no group` block, tick at 0.800. Then
-`alkyl fluoride` and `alkyl iodide`, the only two groups where the tick itself is low.
+**The four halides are the case to read.** Base at layer 31:
 
-Three different failure modes, pooled into one number by strict scoring, and only the third is the
-kind of thing an embedding metric is about.
+| group | strict | + superclass credit | underspecified | non-answer | teacher-forced |
+|---|---|---|---|---|---|
+| alkyl bromide | 0.325 | 0.775 | **0.450** | 0.050 | 0.875 |
+| alkyl chloride | 0.150 | 0.625 | **0.475** | 0.100 | 0.950 |
+| alkyl fluoride | 0.250 | 0.350 | 0.100 | **0.300** | 0.425 |
+| alkyl iodide | 0.050 | 0.375 | 0.325 | 0.175 | 0.475 |
+
+`alkyl chloride` scores **0.150** by strict free generation and **0.950** by teacher-forced
+recall. The model is not failing to identify chlorine — it answers "alkyl halide", and
+`free_generation_scoring.py` files that as `underspecified`. Credit the superclass and the
+group moves to 0.625. Bromide behaves the same way. In the figure this reads as a tall light
+blue `Superclass only` block sitting under a tick near the top.
+
+**Three failure modes, pooled into one number.** Strict per-group recall cannot tell them
+apart, and only the third is the kind of thing a representation metric is even about:
+
+| mode | signature in the figure | example |
+|---|---|---|
+| Answers the family, not the member | tall `Superclass only`, tick near the top | chloride 0.150 → 0.950 |
+| Names no group at all | tall `Named no group`, tick still high | `imine` non-answer 0.400, tf 0.800; `thioether` 0.450, tf 0.800 |
+| Genuinely weak on the class | the tick itself is low | `alkyl fluoride` tf 0.425, `alkyl iodide` tf 0.475 |
+
+Fluoride and iodide are the only two groups where the forced-choice head is also weak, so
+those two are the only real candidates for a representation deficit. `imine` and `thioether`
+fail by declining to commit while the forced-choice head has the answer at 0.800.
+
+That is the per-group form of the commitment story in
+[`narrative/representation_behaviour_gap.md`](../../narrative/representation_behaviour_gap.md):
+conditional on committing, the chemistry is there.
+
+## No layer axis
+
+Every other figure in this repository is drawn against depth. This one is not, and cannot be:
+generation outcomes come from what the model emitted, not from a hidden state at some layer.
+The CSV therefore carries no `layer` column.
+
+## What this figure replaced
+
+Two correlation figures — per-group generation accuracy scattered against retrieval hit@1
+and mean rank, and rank correlation by layer for six representation predictors — were dropped
+along with the analysis behind them. Their result was a null: the point cloud had no
+orientation to fit, `sulfone` sitting at hit@1 0.000 with strict recall 0.875 while `imine`
+sat at hit@1 0.667 with 0.275. The composition above is what answers the question those
+figures could not, and it needs no embedding metric to do it.

@@ -66,7 +66,7 @@ The `ester : carboxylic acid :: ketone : aldehyde` file is the quadruple set's d
 negative control, and its sidecar says so. It passes the selection rule cleanly at C4, which
 is a result rather than a reason to hide it, but it must not read as a plain success.
 
-Reads only `analogy/data/analogy_quiver3d.csv`, never `Results/`, in line with every other
+Reads only `analogy/data/analogy_quiver3d.csv`, never `results/`, in line with every other
 generator here. Written to `analysis/visuals/retrieval/`, so
 nothing here can reach the manuscript by accident.
 """
@@ -167,7 +167,7 @@ def slug(cell, layer):
     """`<model>_L31_thioether-thiol_ether-alcohol_C5` -- the stem both outputs share.
 
     The model comes first because these figures are per-checkpoint and a directory of them
-    should sort by checkpoint; it is the full directory slug the `Results/` tree uses rather
+    should sort by checkpoint; it is the full directory slug the `results/` tree uses rather
     than `_common.SHORT`'s `base`, which means nothing outside this repo.
 
     All four group names rather than just a1 and b1: two of the five quadruples share `amine`

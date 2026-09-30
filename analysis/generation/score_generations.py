@@ -35,7 +35,7 @@ max word 8, with 96-99% inside the first five words, for all three models. When 
 models answer they answer immediately, so the non-answers are evasion -- description,
 superclass, prompt restatement -- and not truncation. No rerun buys anything.
 
-Reads only `Results/generation_eval/*/functional_group/data/generations.csv`. CPU-only.
+Reads only `results/generation_eval/*/functional_group/data/generations.csv`. CPU-only.
 """
 import argparse
 import json
@@ -74,7 +74,7 @@ def write_results_summary(results_dir, model, entity_type, block):
     replaces the block instead of nesting it. Everything `generation_eval.py` wrote is left
     untouched -- this block sits beside the forced-choice record, it does not edit it.
 
-    Note that `Results*` is gitignored and `scripts/pull_results.sh` rsyncs summary.json down
+    Note that `results*` is gitignored and `scripts/pull_results.sh` rsyncs summary.json down
     from Swan without --delete, so the next pull silently reverts this. That is why the block
     carries its own provenance: a missing or stale one is visible on sight, and re-running
     this script restores it.
@@ -115,7 +115,7 @@ def main():
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--no-results-summary', action='store_true',
                    help='do not merge the free_generation block into each model\'s '
-                        'summary.json under --results-dir, leaving Results/ a pure mirror '
+                        'summary.json under --results-dir, leaving results/ a pure mirror '
                         'of what the HPC run produced.')
     p.add_argument('--strict-names-only', action='store_true',
                    help='drop the element and formula forms ("the bromine atom", "-SH", '
@@ -184,12 +184,12 @@ def main():
 
     # ---- merge into each model's own summary.json ----------------------------------
     # Last, so the committed CSVs in Analysis/ are already on disk before anything under
-    # the gitignored Results/ tree is touched.
+    # the gitignored results/ tree is touched.
     if args.strict_names_only:
         # This flag reproduces the conservative tier and is normally paired with a scratch
-        # --out-dir. Letting it overwrite the published lenient block in Results/ would
+        # --out-dir. Letting it overwrite the published lenient block in results/ would
         # swap one tier for another with nothing in the output saying so.
-        print("--strict-names-only: leaving Results/ summary.json alone")
+        print("--strict-names-only: leaving results/ summary.json alone")
     elif not args.no_results_summary:
         for model in args.models:
             block = build_block(model, adjudicated[model], args.entity_type)

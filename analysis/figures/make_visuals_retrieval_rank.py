@@ -46,7 +46,7 @@ Identity works exactly as in the hit figures: no markers, but the five bars appe
 same left-to-right order in every panel, and the legend is in that order.
 
 Every value is read from the committed `geometry/data/retrieval_by_axis.csv` -- never
-`Results/`. `mean_rank` and `random_mean_rank` are pooled there by
+`results/`. `mean_rank` and `random_mean_rank` are pooled there by
 `analyze_geometry.retrieval()`, trial-weighted across each axis's groups, out of columns
 `analogy_retrieval.summarize()` has emitted all along. `median_rank` is taken over the
 per-trial ranks instead -- a trial-weighted mean of per-group medians is not a median.

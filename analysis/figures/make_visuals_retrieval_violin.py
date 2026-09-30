@@ -36,7 +36,7 @@ Bandwidth is Scott's rule via `gaussian_kde`, stated rather than tuned: a bandwi
 make these panels look right would be a choice about the conclusion.
 
 Reads the same committed CSVs as `rankdist.png` -- `geometry/data/retrieval_rank_hist.csv`
-and `geometry/data/retrieval_by_axis.csv`, never `Results/`.
+and `geometry/data/retrieval_by_axis.csv`, never `results/`.
 """
 import argparse
 import os

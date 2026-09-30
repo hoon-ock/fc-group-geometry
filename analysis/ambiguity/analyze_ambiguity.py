@@ -26,7 +26,7 @@ the posterior ordering -- which is the finding: within a model the effect is sol
 and present in all three, but ranking models on it needs `ambiguity_metric.py --full
 --mode projection`, which has not been run.
 
-Reads only `Results/`. No activations, no model, CPU-only.
+Reads only `results/`. No activations, no model, CPU-only.
 """
 import argparse
 import csv
@@ -131,8 +131,8 @@ def snapshot_family_probability(results_dir, model, entity_type, structures):
     the ambiguity, when the same model may be committing just as hard everywhere -- which is
     what the base model in fact does (controls r = 0.012 against chem-r's 0.226).
 
-    Snapshotted here rather than read from `Results/` by the figure script, so the
-    reproducible-without-Results property holds for the visuals too.
+    Snapshotted here rather than read from `results/` by the figure script, so the
+    reproducible-without-results property holds for the visuals too.
     """
     path = os.path.join(results_dir, 'ambiguity_metric', model, entity_type, 'data',
                         'family_probability.csv')

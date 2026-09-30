@@ -30,7 +30,7 @@ THREE THINGS THIS FIGURE DOES NOT SAY, all of them in that directory's README.md
     the most anisotropic (pairwise cosine 0.944, Table 3). t-SNE will happily separate points
     that no linear probe could.
 
-Reads only `analysis/tsne/data/tsne_coords.csv`, never `Results/`, which is
+Reads only `analysis/tsne/data/tsne_coords.csv`, never `results/`, which is
 gitignored. `Analysis/tsne/compute_tsne_coords.py` writes that snapshot for this purpose.
 """
 import argparse
@@ -262,7 +262,7 @@ def main():
             continue
         for m in models:
             # The model's own identifier, not SHORT5's slug: this matches the directory
-            # names under Results/ and the analogy3d_* filenames, so one model is one string
+            # names under results/ and the analogy3d_* filenames, so one model is one string
             # everywhere a path carries it. SHORT5 stays what the CLI and the clustermap
             # filenames use.
             sub = os.path.join(args.out_dir, m)

@@ -7,7 +7,7 @@
 *geometric* one: `data/analogy_quiver3d.csv`, the 3D coordinates
 `analysis/figures/make_visuals_retrieval_3d.py` draws as `visuals/retrieval/analogy3d_*.png`,
 one PNG per row of the selection below. It is a separate file rather than another writer
-inside `analyze_analogy.py` because it needs two Results trees and numpy, and because the
+inside `analyze_analogy.py` because it needs two results trees and numpy, and because the
 three CSVs that script emits feed the paper's tables -- they should not move when this one
 is regenerated.
 
@@ -42,8 +42,8 @@ Two guards against the figure flattering itself:
     say so. `dist3d_true` and `dist3d_rival` carry the same comparison as a margin, so the
     panel can show that the answer won rather than merely that the residual was short.
 
-CPU-only. Reads `Results/functional_group_analogy/` (the diff-vector npz),
-`Results/functional_group_analogy_retrieval/` (the scored trials) and the committed
+CPU-only. Reads `results/functional_group_analogy/` (the diff-vector npz),
+`results/functional_group_analogy_retrieval/` (the scored trials) and the committed
 `data/functional_group_dataset.csv` (the compound names).
 """
 import argparse

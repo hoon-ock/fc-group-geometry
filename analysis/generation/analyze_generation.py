@@ -7,7 +7,7 @@ the same declarative prompts the probe reads its activations from, and takes the
 and it is the measurement the paper's central paradox rests on, because it ranks the three
 models in the opposite order to the probe.
 
-Its results live in `Results/generation_eval/`, which is gitignored, and no other Analysis
+Its results live in `results/generation_eval/`, which is gitignored, and no other Analysis
 script reads them. This snapshots them so the paper builds from committed files.
 
 It also adds what `summary.json` lacks: a **molecule-level bootstrap CI** on the accuracy
@@ -25,13 +25,14 @@ normalization trades a bias toward short class names for a bias toward long ones
 the headline (it is what the model would actually emit); `length_normalized` is reported
 beside it so the choice is visible rather than silent.
 
-Reads only `Results/generation_eval/`. No activations, no model, CPU-only.
+Reads only `results/generation_eval/`. No activations, no model, CPU-only.
 """
 import argparse
 import csv
 import json
 import math
 import os
+from collections import Counter
 import sys
 
 from statistics import stdev
@@ -124,7 +125,7 @@ def write_results_log_loss(results_dir, model, entity_type, per_scoring):
     `length_normalized.log_loss` beside the accuracies they belong to, so the file says which
     rule each number came from instead of leaving it implicit.
 
-    Assigning into the existing blocks keeps the merge idempotent. `Results*` is gitignored
+    Assigning into the existing blocks keeps the merge idempotent. `results*` is gitignored
     and `scripts/pull_results.sh` rsyncs summary.json down without --delete, so a later pull
     reverts this; re-running the script restores it.
     """
@@ -184,7 +185,7 @@ def main():
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--no-results-summary', action='store_true',
                    help='do not merge per-scoring log_loss into each model\'s '
-                        'summary.json under --results-dir, leaving Results/ a pure '
+                        'summary.json under --results-dir, leaving results/ a pure '
                         'mirror of what the HPC run produced.')
     args = p.parse_args()
 
@@ -246,6 +247,48 @@ def main():
                     'functional_group': cls, 'recall': round(recall, 6)})
     write_csv(os.path.join(args.out_dir, 'generation_by_class.csv'), class_rows,
               ['model', 'entity_type', 'scoring', 'functional_group', 'recall'])
+
+    # ---- 2b. per-class response composition ---------------------------------------
+    #
+    # What the per-group spread actually tracks, and the one readout that survives the
+    # halide confound. The five adjudicated response types PARTITION every prompt, so the
+    # shares sum to 1 -- which is why this is rebuilt from `free_generation_adjudicated.csv`
+    # rather than read out of `free_generation_by_class.csv`, which carries strict recall
+    # alone. Strict scoring files "alkyl halide" as a failure; here it lands in
+    # `underspecified`, beside a teacher-forced recall of 0.875-0.950 on the exact class.
+    # That gap is a resolution effect in the scoring, not a representation deficit.
+    #
+    # `tf_raw_recall` comes from the in-memory summaries rather than by re-reading
+    # generation_by_class.csv, so the two files cannot disagree.
+    comp_rows = []
+    adj_path = os.path.join(args.out_dir, 'free_generation_adjudicated.csv')
+    if not os.path.exists(adj_path):
+        print(f"skipping response composition: no {os.path.relpath(adj_path, REPO)}"
+              " -- run score_generations.py first")
+    else:
+        counts = {}
+        for r in read_csv(adj_path):
+            counts.setdefault((r['model'], r['true_label']), Counter())[r['response_type']] += 1
+        for model in args.models:
+            tf = summaries[model]['raw']['per_class_recall']
+            for (m, group), c in sorted(counts.items()):
+                if m != model:
+                    continue
+                n = sum(c.values())
+                comp_rows.append({
+                    'model': model, 'entity_type': args.entity_type,
+                    'functional_group': group, 'n_prompts': n,
+                    'strict': round(c['answer_correct'] / n, 6),
+                    'underspecified': round(c['underspecified'] / n, 6),
+                    'answer_wrong': round(c['answer_wrong'] / n, 6),
+                    'non_answer': round(c['non_answer'] / n, 6),
+                    'malformed': round(c['malformed'] / n, 6),
+                    'tf_raw_recall': round(tf[group], 6) if group in tf else '',
+                })
+        write_csv(os.path.join(args.out_dir, 'group_response_composition.csv'), comp_rows,
+                  ['model', 'entity_type', 'functional_group', 'n_prompts', 'strict',
+                   'underspecified', 'answer_wrong', 'non_answer', 'malformed',
+                   'tf_raw_recall'])
 
     # ---- 3b. prompt sensitivity: spread of accuracy over the 10 templates ----------
     #

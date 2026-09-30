@@ -14,9 +14,9 @@ This script emits the same question answered from two independent places, both c
 against the group's own **oxygen-free** family controls so a merely-diffuse model scores zero:
 
 - **posterior** — the probe's out-of-fold `p(family)`, as `r = p(O) / [p(O) + p(home)]`,
-  from `Results/ambiguity_metric/`.
+  from `results/ambiguity_metric/`.
 - **geometric** — mean z-cosine from the group to the six oxygen-named groups, from
-  `Results/functional_group_analogy/`. No probe, no softmax, no regularization constant.
+  `results/functional_group_analogy/`. No probe, no softmax, no regularization constant.
 
 ## What holds: the within-model result, in all three models
 
@@ -76,5 +76,5 @@ ranking does not explain the behavioural ranking.
 **What would settle it:** `ambiguity_metric.py --full --mode projection`, which reads the
 same question off the probe's own geometry with no softmax, plus `--c-grid 1e-3` to pin the
 temperature identically across models. Neither has been run —
-`Results/ambiguity_metric/*/functional_group/data/ambiguity_contrast.csv` does not exist for
+`results/ambiguity_metric/*/functional_group/data/ambiguity_contrast.csv` does not exist for
 any model. Until it does, report this section as within-model and say so.

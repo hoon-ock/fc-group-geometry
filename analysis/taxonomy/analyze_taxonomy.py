@@ -25,12 +25,12 @@ Three outputs, in increasing order of what they defend against:
   taxonomy_permutation.csv delta against random partitions matched in family count
                            and family sizes, so a named partition has to beat an
                            arbitrary one of the same shape
-  between_class_matrix.csv the input matrices themselves, in long form. `Results/` is
+  between_class_matrix.csv the input matrices themselves, in long form. `results/` is
                            gitignored, so without this snapshot neither these numbers nor
                            the paper's dendrogram figure could be rebuilt from a clean
                            checkout. ~200 KB for 5 models x 5 layers x 171 pairs.
 
-Reads only `Results/functional_group_analogy/`. No activations, no model, CPU-only.
+Reads only `results/functional_group_analogy/`. No activations, no model, CPU-only.
 """
 import argparse
 import csv

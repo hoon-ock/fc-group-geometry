@@ -59,7 +59,7 @@ and the two metrics agree to three decimals.
 `sulfur`.
 
 **Do not read the per-fold columns as a comparison of the two metrics.** In
-`Results/.../probe_scores_coarse_group.csv`, `balanced_acc` and `accuracy` are identical in
+`results/.../probe_scores_coarse_group.csv`, `balanced_acc` and `accuracy` are identical in
 every row — all 608 of them for Base. That is not redundancy in the data but a consequence of
 the design: leave-one-fine-group-out gives each fold a test set of a single coarse family, and
 on a one-class test set macro-recall *is* plain accuracy. The two metrics separate only in the
@@ -148,7 +148,7 @@ strictly paired comparison.
 
 ## Sources
 
-Read from committed CSVs only, never `Results/`:
+Read from committed CSVs only, never `results/`:
 
 - curves — `analysis/probe/data/layer_curves.csv`
 - baseline — `analysis/probe/data/surface_baseline.csv`
@@ -158,7 +158,7 @@ Read from committed CSVs only, never `Results/`:
 **One exception, flagged because it breaks the rule above.** The plain-accuracy column of the
 table in the metric section is *not* in any committed CSV — `layer_curves.csv` carries
 `balanced_acc` only. It was pooled from the per-fold `accuracy` and `n_test` columns of
-`Results/functional_group_probe/<model>/functional_group/data/probe_scores_coarse_group.csv`,
+`results/functional_group_probe/<model>/functional_group/data/probe_scores_coarse_group.csv`,
 which is gitignored, so those numbers cannot be re-derived from the repo alone. The balanced
 column beside it was pooled the same way and reproduces `layer_curves.csv` exactly at all 20
 model × layer points checked, which is what establishes the reconstruction is right.

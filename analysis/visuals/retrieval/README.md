@@ -2,7 +2,7 @@
 
 `hit1/2/3.png` report how **often** `b2 + (a1 - a2)` retrieves `b1`; `meanrank.png` reports how far
 off it lands when it misses; `rankdist.png` draws every trial behind those two summaries. The
-`analogy3d_*` set shows what one success looks like. None of them reads `Results/`.
+`analogy3d_*` set shows what one success looks like. None of them reads `results/`.
 
 ## hit@1 / hit@2 / hit@3
 
@@ -21,7 +21,7 @@ python analysis/figures/make_visuals_retrieval.py [--layer 31] [--out-dir DIR]
 Each draws the three retrieval axes on x, the five registered 8B checkpoints as bars, at
 layer 31 by default. They share one y-limit so the three can be read against each other.
 Source: `analysis/geometry/data/retrieval_by_axis.csv`, which
-`geometry/analyze_geometry.py` snapshots out of `Results/`. Nothing here reads `Results/`.
+`geometry/analyze_geometry.py` snapshots out of `results/`. Nothing here reads `results/`.
 
 All three cutoffs are drawn, for all five models, and are meant to be read against each
 other -- see the shared y-limit note in the generator's docstring.
@@ -265,10 +265,10 @@ python analysis/figures/make_visuals_retrieval_3d.py [--layer 31] [--out-dir DIR
 One **PNG plus one `.txt` of the same stem** per (quadruple, chain length) cell that is 4/4
 corners at hit@1 with zero degenerate corners — six of twenty at base/L31. Source:
 `analysis/analogy/data/analogy_quiver3d.csv`, which `analogy/snapshot_quiver3d.py`
-snapshots out of `Results/`. Nothing here reads `Results/`.
+snapshots out of `results/`. Nothing here reads `results/`.
 
 Stems are `analogy3d_{model}_L{layer}_{a1}-{a2}_{b1}-{b2}_C{N}`. The model comes first so a
-directory of these sorts by checkpoint, and it is the full `Results/` directory slug rather
+directory of these sorts by checkpoint, and it is the full `results/` directory slug rather
 than `_common.SHORT`'s `base`, which means nothing outside this repo.
 
 | stem (prefix `analogy3d_meta-llama-Llama-3.1-8B_L31_`) | C | rank in 4096-D | cos | margin |
@@ -359,7 +359,7 @@ These are 3 of 4096 dimensions. The sidecar prints `of the constructed point in 
 fraction the three drawn dimensions actually hold, 0.42 to 0.64 across the six. `rank` and
 `cos` are the **full 4096-D** numbers copied from the scored trials; nothing is rescored for
 the picture. And a projection can invert a result: at layer 16 one cell does exactly that,
-and in the **uncentered** basis the older `Results/` quiver uses, the imine panel's
+and in the **uncentered** basis the older `results/` quiver uses, the imine panel's
 constructed point is nearest `alkyl fluoride` and the true `amine` falls to rank 3.
 
 ## Drawing choices worth knowing
@@ -367,7 +367,7 @@ constructed point is nearest `alkyl fluoride` and the true `amine` falls to rank
 **The projection is mean-centered**, unlike
 `functional_group_analogy_carbon_matched.fit_uncentered_3d_basis`. Uncentered, the anisotropic
 mean direction owns PC-1 and every group's arrow points the same way — the hairball in
-`Results/.../diff_vector_quiver_3d_layer_*.png`. Offsets are translation-invariant so the
+`results/.../diff_vector_quiver_3d_layer_*.png`. Offsets are translation-invariant so the
 parallelogram loses nothing; what is given up is the origin reading as the alkane baseline.
 `analogy/README.md` §8 has the numbers.
 

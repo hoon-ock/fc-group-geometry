@@ -24,7 +24,7 @@ TWO THINGS THIS FIGURE DOES NOT SAY, both of which live in that directory's READ
     `ambiguity/data/ambiguity_two_readings.csv` is the control-corrected reading, and on
     `amide` it puts base ahead of chem-r rather than far behind.
 
-Reads only `analysis/ambiguity/data/*.csv`, never `Results/`, which is gitignored.
+Reads only `analysis/ambiguity/data/*.csv`, never `results/`, which is gitignored.
 `analyze_ambiguity.py` snapshots the family-probability table there for this purpose.
 """
 import argparse

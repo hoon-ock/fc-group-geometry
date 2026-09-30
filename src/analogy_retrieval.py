@@ -46,7 +46,7 @@ import paths  # noqa: E402
 # What 05_analogy writes, on the cluster and locally alike.
 DEFAULT_ANALOGY = os.path.join(paths.RESULTS, 'functional_group_analogy')
 # Outputs follow the same shape as every other experiment here --
-# Results/{experiment}/{model-slug}/{entity_type}/ with figures at the leaf and CSVs
+# results/{experiment}/{model-slug}/{entity_type}/ with figures at the leaf and CSVs
 # under data/ (cf. functional_group_analogy_carbon_matched.py:47, functional_group_probe.py:65).
 DEFAULT_OUTPUT_ROOT = os.path.join(paths.RESULTS,
                                    'functional_group_analogy_retrieval')
@@ -1115,7 +1115,7 @@ def plot_rank_heatmap(trial_rows, model, entity_type, path):
 
 
 def write_model_outputs(out_dir, entity_type, model, rows, make_plots):
-    """Everything for one model x entity_type, laid out the way Results/ expects."""
+    """Everything for one model x entity_type, laid out the way results/ expects."""
     trial_rows, trend_rows, quad_rows, group_rows = rows
     os.makedirs(os.path.join(out_dir, 'data'), exist_ok=True)
     for name, table in [('retrieval_trials', trial_rows),
@@ -1212,7 +1212,7 @@ def main():
                   f"{len(RETRIEVAL_QUADRUPLES)} quadruples, {n_cm} trials "
                   f"per layer over {n_groups} candidates")
         # entity_type is used raw as a directory name, spaces and all, matching the
-        # Results tree this reads from ('functional_group question' et al).
+        # results tree this reads from ('functional_group question' et al).
         out_dir = os.path.join(output_dir, model, args.entity_type)
         write_model_outputs(out_dir, args.entity_type, model, rows, not args.no_plots)
 

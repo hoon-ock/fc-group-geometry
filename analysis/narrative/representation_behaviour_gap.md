@@ -86,7 +86,7 @@ chemical knowledge (conditional 0.918 → 0.981), against a probe already at cei
 0.20); free generation is 20-way group naming (chance 0.05). Only `coarse_group` and
 `fine_to_coarse_group` exist on disk, and `fine_to_coarse_group` trains on the 20 but still
 *scores* the 5, so **no probe number exists at the generation task's granularity** — verified
-across all five models under `Results/functional_group_probe/*/functional_group/data/`.
+across all five models under `results/functional_group_probe/*/functional_group/data/`.
 Comparing 1.000 to 0.585 therefore crosses a task-difficulty change as well as a
 representation-behaviour one. State the comparison as coarse-probe versus fine-generation and
 say so in the text.
@@ -98,10 +98,11 @@ say so in the text.
 > Every extraction template embeds `{iupac_name}`, so `1-bromobutane` spells its own answer and
 > the molecule split leaves that shortcut intact; the group split, which defeats it, is ill-posed
 > for a 20-way target. A matched-granularity representation number therefore still does not exist
-> and cannot be made from the cached activations. See
-> [`group_level_representation_behaviour.md`](group_level_representation_behaviour.md), which
-> also tests the per-group form of this note's claim and finds no relation between per-group
-> generation accuracy and per-group retrieval quality.
+> and cannot be made from the cached activations. The per-group form of this note's claim was
+> tested against six representation predictors and found no relation; that analysis is not part
+> of this release, and what replaced it is
+> [`visuals/generation/README.md`](../visuals/generation/README.md) -- the response-type
+> composition, which separates the three failure modes strict recall pools together.
 
 **ChemDFM sits on Llama-3, not 3.1.** Already daggered in the Table 1 caption. A ChemDFM−base
 gap confounds chemistry training with the base-model change; chem-r carries the controlled

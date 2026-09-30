@@ -98,7 +98,7 @@ not preserve density or between-cluster distance.
 
 ## Sources
 
-Committed CSVs only, never `Results/`:
+Committed CSVs only, never `results/`:
 
 - coordinates — `analysis/tsne/data/tsne_coords.csv`
   (23000 rows = 5 models × 5 layers × 920 prompts; `x`, `y`, and the `functional_group`,

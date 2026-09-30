@@ -1,0 +1,101 @@
+model,entity_type,functional_group,n_prompts,strict,underspecified,answer_wrong,non_answer,malformed,tf_raw_recall
+meta-llama-Llama-3.1-8B,functional_group,alcohol,80,0.8,0.05,0.0,0.0375,0.1125,0.9375
+meta-llama-Llama-3.1-8B,functional_group,aldehyde,40,0.625,0.15,0.075,0.05,0.1,0.8
+meta-llama-Llama-3.1-8B,functional_group,alkyl bromide,40,0.325,0.45,0.05,0.05,0.125,0.875
+meta-llama-Llama-3.1-8B,functional_group,alkyl chloride,40,0.15,0.475,0.125,0.1,0.15,0.95
+meta-llama-Llama-3.1-8B,functional_group,alkyl fluoride,40,0.25,0.1,0.25,0.3,0.1,0.425
+meta-llama-Llama-3.1-8B,functional_group,alkyl iodide,40,0.05,0.325,0.2,0.175,0.25,0.475
+meta-llama-Llama-3.1-8B,functional_group,amide,40,0.525,0.05,0.0,0.3,0.125,0.8
+meta-llama-Llama-3.1-8B,functional_group,amine,80,0.8,0.0,0.0,0.1,0.1,0.9
+meta-llama-Llama-3.1-8B,functional_group,carboxylic acid,40,0.9,0.0,0.0,0.025,0.075,1.0
+meta-llama-Llama-3.1-8B,functional_group,ester,40,0.7,0.05,0.1,0.05,0.1,0.7
+meta-llama-Llama-3.1-8B,functional_group,ether,40,0.425,0.0,0.1,0.25,0.225,0.25
+meta-llama-Llama-3.1-8B,functional_group,imine,40,0.275,0.0,0.15,0.4,0.175,0.8
+meta-llama-Llama-3.1-8B,functional_group,ketone,40,0.675,0.2,0.0,0.0,0.125,0.85
+meta-llama-Llama-3.1-8B,functional_group,nitrile,40,0.625,0.0,0.025,0.2,0.15,1.0
+meta-llama-Llama-3.1-8B,functional_group,nitro,40,0.65,0.0,0.0,0.275,0.075,0.975
+meta-llama-Llama-3.1-8B,functional_group,none (alkane),40,0.45,0.0,0.0,0.25,0.3,0.9
+meta-llama-Llama-3.1-8B,functional_group,sulfone,40,0.875,0.0,0.0,0.0,0.125,1.0
+meta-llama-Llama-3.1-8B,functional_group,sulfoxide,40,0.7,0.0,0.0,0.075,0.225,0.975
+meta-llama-Llama-3.1-8B,functional_group,thioether,40,0.425,0.0,0.125,0.45,0.0,0.8
+meta-llama-Llama-3.1-8B,functional_group,thiol,80,0.8125,0.0,0.0,0.1,0.0875,1.0
+phenixace-Chem-R-Faithful,functional_group,alcohol,80,1.0,0.0,0.0,0.0,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,aldehyde,40,0.5,0.425,0.075,0.0,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,alkyl bromide,40,0.875,0.0,0.0,0.1,0.025,1.0
+phenixace-Chem-R-Faithful,functional_group,alkyl chloride,40,0.8,0.075,0.025,0.05,0.05,1.0
+phenixace-Chem-R-Faithful,functional_group,alkyl fluoride,40,0.775,0.0,0.2,0.0,0.025,1.0
+phenixace-Chem-R-Faithful,functional_group,alkyl iodide,40,0.925,0.025,0.0,0.025,0.025,1.0
+phenixace-Chem-R-Faithful,functional_group,amide,40,1.0,0.0,0.0,0.0,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,amine,80,0.9875,0.0,0.0,0.0125,0.0,0.9125
+phenixace-Chem-R-Faithful,functional_group,carboxylic acid,40,0.2,0.7,0.0,0.1,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,ester,40,0.45,0.55,0.0,0.0,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,ether,40,0.9,0.0,0.0,0.1,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,imine,40,0.7,0.0,0.0,0.3,0.0,0.975
+phenixace-Chem-R-Faithful,functional_group,ketone,40,0.65,0.325,0.0,0.025,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,nitrile,40,1.0,0.0,0.0,0.0,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,nitro,40,0.975,0.0,0.0,0.025,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,none (alkane),40,0.875,0.05,0.0,0.075,0.0,0.9
+phenixace-Chem-R-Faithful,functional_group,sulfone,40,0.95,0.0,0.0,0.05,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,sulfoxide,40,0.95,0.0,0.0,0.05,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,thioether,40,0.95,0.0,0.0,0.05,0.0,1.0
+phenixace-Chem-R-Faithful,functional_group,thiol,80,0.975,0.0,0.0125,0.0,0.0125,0.9
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,alcohol,80,0.9625,0.0,0.0,0.0375,0.0,0.9625
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,aldehyde,40,0.725,0.175,0.05,0.05,0.0,0.725
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,alkyl bromide,40,0.9,0.0,0.0,0.1,0.0,0.95
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,alkyl chloride,40,0.6,0.225,0.025,0.15,0.0,0.95
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,alkyl fluoride,40,0.125,0.6,0.125,0.15,0.0,0.3
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,alkyl iodide,40,0.45,0.25,0.025,0.225,0.05,0.675
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,amide,40,0.675,0.025,0.175,0.125,0.0,0.75
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,amine,80,0.9625,0.0,0.0,0.025,0.0125,0.875
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,carboxylic acid,40,1.0,0.0,0.0,0.0,0.0,0.9
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,ester,40,1.0,0.0,0.0,0.0,0.0,0.7
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,ether,40,0.85,0.0,0.025,0.1,0.025,0.625
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,imine,40,0.8,0.0,0.075,0.1,0.025,0.5
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,ketone,40,0.95,0.0,0.0,0.05,0.0,0.875
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,nitrile,40,1.0,0.0,0.0,0.0,0.0,1.0
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,nitro,40,0.875,0.0,0.025,0.1,0.0,0.9
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,none (alkane),40,0.7,0.05,0.0,0.15,0.1,0.7
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,sulfone,40,0.5,0.0,0.075,0.425,0.0,0.9
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,sulfoxide,40,0.95,0.0,0.025,0.0,0.025,1.0
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,thioether,40,0.325,0.0,0.275,0.35,0.05,0.625
+deepseek-ai-DeepSeek-R1-Distill-Llama-8B,functional_group,thiol,80,0.9375,0.0,0.0,0.0375,0.025,0.875
+weidawang-Chem-R-8B,functional_group,alcohol,80,1.0,0.0,0.0,0.0,0.0,0.975
+weidawang-Chem-R-8B,functional_group,aldehyde,40,0.9,0.05,0.025,0.025,0.0,0.875
+weidawang-Chem-R-8B,functional_group,alkyl bromide,40,0.875,0.0,0.0,0.1,0.025,0.925
+weidawang-Chem-R-8B,functional_group,alkyl chloride,40,0.8,0.1,0.025,0.05,0.025,1.0
+weidawang-Chem-R-8B,functional_group,alkyl fluoride,40,0.75,0.0,0.2,0.0,0.05,1.0
+weidawang-Chem-R-8B,functional_group,alkyl iodide,40,0.925,0.025,0.0,0.025,0.025,0.75
+weidawang-Chem-R-8B,functional_group,amide,40,0.875,0.0,0.1,0.025,0.0,0.9
+weidawang-Chem-R-8B,functional_group,amine,80,0.975,0.0,0.0,0.025,0.0,0.775
+weidawang-Chem-R-8B,functional_group,carboxylic acid,40,0.9,0.0,0.0,0.1,0.0,1.0
+weidawang-Chem-R-8B,functional_group,ester,40,0.875,0.1,0.0,0.025,0.0,0.925
+weidawang-Chem-R-8B,functional_group,ether,40,0.85,0.0,0.0,0.15,0.0,0.975
+weidawang-Chem-R-8B,functional_group,imine,40,0.7,0.0,0.0,0.3,0.0,0.8
+weidawang-Chem-R-8B,functional_group,ketone,40,0.975,0.0,0.0,0.025,0.0,1.0
+weidawang-Chem-R-8B,functional_group,nitrile,40,1.0,0.0,0.0,0.0,0.0,1.0
+weidawang-Chem-R-8B,functional_group,nitro,40,0.875,0.0,0.0,0.125,0.0,1.0
+weidawang-Chem-R-8B,functional_group,none (alkane),40,0.9,0.025,0.0,0.075,0.0,0.875
+weidawang-Chem-R-8B,functional_group,sulfone,40,0.925,0.0,0.0,0.075,0.0,1.0
+weidawang-Chem-R-8B,functional_group,sulfoxide,40,0.95,0.0,0.0,0.05,0.0,0.925
+weidawang-Chem-R-8B,functional_group,thioether,40,0.925,0.0,0.0,0.075,0.0,0.95
+weidawang-Chem-R-8B,functional_group,thiol,80,0.9,0.0,0.025,0.0625,0.0125,0.925
+OpenDFM-ChemDFM-v1.5-8B,functional_group,alcohol,80,0.8875,0.0,0.0,0.1125,0.0,1.0
+OpenDFM-ChemDFM-v1.5-8B,functional_group,aldehyde,40,0.75,0.05,0.0,0.2,0.0,0.85
+OpenDFM-ChemDFM-v1.5-8B,functional_group,alkyl bromide,40,0.125,0.1,0.2,0.575,0.0,1.0
+OpenDFM-ChemDFM-v1.5-8B,functional_group,alkyl chloride,40,0.525,0.0,0.0,0.475,0.0,0.95
+OpenDFM-ChemDFM-v1.5-8B,functional_group,alkyl fluoride,40,0.25,0.05,0.025,0.675,0.0,0.9
+OpenDFM-ChemDFM-v1.5-8B,functional_group,alkyl iodide,40,0.725,0.05,0.0,0.225,0.0,1.0
+OpenDFM-ChemDFM-v1.5-8B,functional_group,amide,40,0.5,0.05,0.0,0.45,0.0,0.9
+OpenDFM-ChemDFM-v1.5-8B,functional_group,amine,80,0.8875,0.0,0.0,0.1125,0.0,0.975
+OpenDFM-ChemDFM-v1.5-8B,functional_group,carboxylic acid,40,0.575,0.0,0.075,0.35,0.0,0.7
+OpenDFM-ChemDFM-v1.5-8B,functional_group,ester,40,0.55,0.25,0.05,0.125,0.025,0.8
+OpenDFM-ChemDFM-v1.5-8B,functional_group,ether,40,0.65,0.0,0.0,0.35,0.0,0.7
+OpenDFM-ChemDFM-v1.5-8B,functional_group,imine,40,0.7,0.0,0.025,0.275,0.0,0.85
+OpenDFM-ChemDFM-v1.5-8B,functional_group,ketone,40,0.475,0.4,0.075,0.05,0.0,0.925
+OpenDFM-ChemDFM-v1.5-8B,functional_group,nitrile,40,0.65,0.0,0.0,0.35,0.0,0.95
+OpenDFM-ChemDFM-v1.5-8B,functional_group,nitro,40,0.65,0.0,0.0,0.35,0.0,1.0
+OpenDFM-ChemDFM-v1.5-8B,functional_group,none (alkane),40,0.65,0.125,0.0,0.225,0.0,0.875
+OpenDFM-ChemDFM-v1.5-8B,functional_group,sulfone,40,0.725,0.0,0.15,0.1,0.025,0.65
+OpenDFM-ChemDFM-v1.5-8B,functional_group,sulfoxide,40,0.85,0.0,0.0,0.15,0.0,0.975
+OpenDFM-ChemDFM-v1.5-8B,functional_group,thioether,40,0.275,0.0,0.075,0.65,0.0,0.725
+OpenDFM-ChemDFM-v1.5-8B,functional_group,thiol,80,0.7125,0.0,0.0125,0.275,0.0,0.9125

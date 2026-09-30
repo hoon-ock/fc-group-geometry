@@ -24,7 +24,7 @@ trial is degenerate when b2 + (a1 - a2) is nearest to b2 itself once the exclusi
 lifted. It is scored on the same trials as hit@1, so a model can retrieve well and
 still have a weak offset -- which is what the fine-tuned models do.
 
-Reads only `Results/`. No activations, no model, CPU-only.
+Reads only `results/`. No activations, no model, CPU-only.
 """
 import argparse
 import csv
@@ -291,7 +291,7 @@ def main():
     # A mean and a median are two numbers off a sample that is far from normal: ranks are
     # small integers piled on 1, with a thin tail that on some axes IS the whole result.
     # Snapshotting the histogram lets a figure show the sample itself without reaching into
-    # `Results/`, which nothing under Analysis/visuals is allowed to read. Lossless, because
+    # `results/`, which nothing under Analysis/visuals is allowed to read. Lossless, because
     # ranks are integers -- repeating each rank n times reconstructs the sample exactly.
     hist_rows = []
     for model in args.models:

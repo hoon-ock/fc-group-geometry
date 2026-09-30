@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Derive the functional-group analogy findings from the two HCC result trees.
 
-Reads `Results/functional_group_analogy/` (within/between cosine, second-order
-analogies) and joins it against `Results/anisotropy_diagnostic/`, which carries
+Reads `results/functional_group_analogy/` (within/between cosine, second-order
+analogies) and joins it against `results/anisotropy_diagnostic/`, which carries
 the **mean-centered** version of the same within/between numbers.
 
 That join is the point of this script. Raw cosine among these activations runs
@@ -84,7 +84,7 @@ def collect(analogy_dir, aniso_dir, entity_type, models):
                               'summary_all_layers.json')
         for path in (a_path, n_path):
             if not os.path.exists(path):
-                raise SystemExit(f"missing {path} -- is Results populated for {entity_type}?")
+                raise SystemExit(f"missing {path} -- is results/ populated for {entity_type}?")
 
         analogy = read_json(a_path)
         aniso = read_json(n_path)

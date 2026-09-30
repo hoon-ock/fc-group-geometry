@@ -54,7 +54,6 @@ METHODS=(
   functional_group_analogy_retrieval_carbon
   functional_group_analogy_retrieval_halide
   functional_group_probe
-  functional_group_separability
   generation_eval
 )
 LEAF=functional_group

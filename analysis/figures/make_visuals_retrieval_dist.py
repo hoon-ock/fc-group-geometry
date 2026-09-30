@@ -38,7 +38,7 @@ against its pool, and the pool is ~16 candidates on the first two axes and ~74 o
 ladder. Rank 8 is chance on one and good on another.
 
 Read from the committed `geometry/data/retrieval_rank_hist.csv` and
-`geometry/data/retrieval_by_axis.csv` -- never `Results/`. The histogram is lossless for
+`geometry/data/retrieval_by_axis.csv` -- never `results/`. The histogram is lossless for
 integer ranks, so repeating each rank `n` times reconstructs the exact sample that produced
 `mean_rank` and `median_rank`.
 """

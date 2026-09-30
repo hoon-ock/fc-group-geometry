@@ -33,7 +33,7 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 | `make_visuals_probe.py` | `probe/probe_depth.png` | `probe/layer_curves.csv`, `probe/surface_baseline.csv` |
 | `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `ambiguity/ambiguity_family_probability.csv` |
 | `make_visuals_prompt_structure.py` | `prompt_structure/label_agreement_depth.png` (`--column raw` for the second) | `prompt_structure/label_agreement_by_layer.csv` |
-| `make_visuals_generation_vs_representation.py` | `generation/gen_vs_retrieval.png`, `rho_by_layer.png`, `group_response_composition.png` | `generation/group_{correlations,reliability,representation_join}.csv` |
+| `make_visuals_generation_composition.py` | `generation/group_response_composition.png` | `generation/group_response_composition.csv` |
 | `make_visuals_retrieval.py` | `retrieval/hit1.png`, `hit2.png`, `hit3.png` | `geometry/retrieval_by_axis.csv` |
 | `make_visuals_retrieval_rank.py` | `retrieval/meanrank.png` | `geometry/retrieval_by_axis.csv` |
 | `make_visuals_retrieval_dist.py` | `retrieval/rankdist.png` | `geometry/retrieval_rank_hist.csv` |

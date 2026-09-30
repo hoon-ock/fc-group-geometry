@@ -29,7 +29,7 @@ the two single-mark scripts and called unchanged, so a panel here is pixel-ident
 same panel there, and a fix to either propagates without anyone remembering to copy it.
 
 Reads the same committed CSVs -- `geometry/data/retrieval_rank_hist.csv` and
-`geometry/data/retrieval_by_axis.csv`, never `Results/`.
+`geometry/data/retrieval_by_axis.csv`, never `results/`.
 """
 import argparse
 import os

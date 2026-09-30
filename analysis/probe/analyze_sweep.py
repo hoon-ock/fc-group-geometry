@@ -34,7 +34,7 @@ MODEL_CHEM = 'phenixace-Chem-R-Faithful'
 MODEL_R1 = 'deepseek-ai-DeepSeek-R1-Distill-Llama-8B'
 MODEL_70B = 'meta-llama-Llama-3.1-70B'
 # Registered after this snapshot was first taken. Their probe results were already on disk
-# under Results/functional_group_probe/ -- only the CSVs had not been regenerated.
+# under results/functional_group_probe/ -- only the CSVs had not been regenerated.
 MODEL_CHEM_R = 'weidawang-Chem-R-8B'
 MODEL_CHEMDFM = 'OpenDFM-ChemDFM-v1.5-8B'
 
@@ -94,7 +94,7 @@ def load_curves(results_dir, tag, models=MODELS):
         if not out[model]:
             raise SystemExit(
                 f"no summary_{tag}.json under {os.path.join(results_dir, model)} -- "
-                "is Results populated for this tag?")
+                "is results/ populated for this tag?")
     return out
 
 
@@ -321,7 +321,7 @@ def main():
 
     # ---- 3b. where the errors go -------------------------------------------------
     # The probe writes a full confusion matrix per layer, but only inside the gitignored
-    # Results tree. The paper quotes the nitrogen->oxygen counts -- the direction the
+    # results tree. The paper quotes the nitrogen->oxygen counts -- the direction the
     # convention-labelled groups fail in -- so they have to survive into a committed CSV.
     conf_rows = []
     for model in args.models:

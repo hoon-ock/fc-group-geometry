@@ -33,7 +33,7 @@ Scope is the **declarative `functional_group` prompt only**; the script takes
 
 ## 1. The anisotropy control
 
-`Results/anisotropy_diagnostic/.../summary_all_layers.json` reports the same within/between
+`results/anisotropy_diagnostic/.../summary_all_layers.json` reports the same within/between
 statistics twice — as computed, and after subtracting the global mean vector.
 
 | model | L | depth | raw pairwise cos | orig within | orig between | **cent within** | **cent between** |
@@ -207,7 +207,7 @@ python analysis/analogy/analyze_analogy.py                    # functional_group
 python analysis/analogy/analyze_analogy.py --entity-type pka  # any other prompt
 ```
 
-Needs both `Results/functional_group_analogy/` and `Results/anisotropy_diagnostic/`;
+Needs both `results/functional_group_analogy/` and `results/anisotropy_diagnostic/`;
 the script asserts their layer sets match rather than silently emitting empty centered columns.
 
 | file in `data/` | contents |
@@ -283,7 +283,7 @@ python src/analogy_retrieval.py --entity-type pka  # any other prompt
 python src/analogy_retrieval.py --no-plots         # CSVs only
 ```
 
-Outputs land under `Results/`, in the same shape every other experiment here uses —
+Outputs land under `results/`, in the same shape every other experiment here uses —
 `results/functional_group_analogy_retrieval/{model}/{entity_type}/`, figures at the
 leaf and CSVs under `data/`. Model and entity are in the path, so they are not repeated in
 the filenames, and each CSV holds exactly one model.
@@ -354,7 +354,7 @@ concept that is wrong in both.
 
 It also holds a fixed regression on 8B/`functional_group` — hit@1 34/57/59 of 80 at layers
 0/16/31, mean rank 3.79/2.17/1.35, and O↔S at 16/16. Those track the contents of
-`Results/` **and** `ANALOGY_QUADRUPLES`, so after a legitimate re-extraction or a change
+`results/` **and** `ANALOGY_QUADRUPLES`, so after a legitimate re-extraction or a change
 to the quadruple set the constants at the top of the file are what should change.
 
 ## 8. The 3D projection snapshot
@@ -363,7 +363,7 @@ to the quadruple set the constants at the top of the file are what should change
 `analysis/figures/make_visuals_retrieval_3d.py` draws under `visuals/retrieval/` as one PNG
 plus one `.txt` per selected cell, stems `analogy3d_{model}_L{layer}_{quadruple}_C{N}`. The
 numbers live in the `.txt`; the image carries only what identifies it. It is a separate script rather than another writer inside
-`analyze_analogy.py` because it needs two Results trees and numpy, and because the three CSVs
+`analyze_analogy.py` because it needs two results trees and numpy, and because the three CSVs
 that script emits feed the paper's tables — they should not move when this one is regenerated.
 
 ```bash

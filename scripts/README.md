@@ -1,6 +1,6 @@
 # Cluster jobs
 
-Nine SLURM array jobs that fill `results/` and `activations/`. Everything downstream — the
+Eight SLURM array jobs that fill `results/` and `activations/`. Everything downstream — the
 snapshot CSVs under `analysis/*/data/` and the figures under `analysis/visuals/` — runs on a
 laptop from what these produce.
 
@@ -15,7 +15,7 @@ not there. For a manual run from elsewhere, set `FCG_ROOT=/path/to/repo`.
 
 ## Order
 
-`01` must finish before anything else. After that, `02`/`03`/`04`/`07`/`08` are independent;
+`01` must finish before anything else. After that, `02`/`03`/`04`/`07` are independent;
 `05` needs `04`, and `06` needs `02`.
 
 | Job | Stage | Resources | Reads | Writes under `results/` |
@@ -27,10 +27,9 @@ not there. For a manual run from elsewhere, set `FCG_ROOT=/path/to/repo`.
 | `04_analogy` | diff-vector geometry, carbon-matched | 1 core | `activations/` | `functional_group_analogy/` |
 | `05_retrieval` | does `b2 + (a1 - a2)` retrieve `b1`? three axes | 1 core | `04`'s npz files | `functional_group_analogy_retrieval{,_carbon,_halide}/` |
 | `06_ambiguity` | how much mass lands on the defensible rival family | 1 core | `02`'s `oof_proba_*.npz` | `ambiguity_metric/` |
-| `07_separability` | per-group rival margin, all 32 layers | 1 core | `activations/` | `functional_group_separability/` |
-| `08_generation_eval` | the behavioural stage: forced choice + free generation | 1 GPU, 8 cores | `data/` | `generation_eval/` |
+| `07_generation_eval` | the behavioural stage: forced choice + free generation | 1 GPU, 8 cores | `data/` | `generation_eval/` |
 
-Only `01`, `00` and `08` need a GPU. `02` deliberately asks for one core and 4 GB with no
+Only `00`, `01` and `07` need a GPU. `02` deliberately asks for one core and 4 GB with no
 GPU: it is entirely scikit-learn (`torch` appears only as `torch.load(map_location="cpu")`),
 extra cores do not help because the matrices are too small for BLAS parallelism and lbfgs is
 serial, and an earlier 32 GB request pinned the array to a few concurrent tasks with the rest

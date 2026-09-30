@@ -45,12 +45,12 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 |---|---|
 | `paths.py` | every path in the project, resolved from its own location. Import this; never hardcode |
 | `data/` | the 92-molecule dataset and the extraction/prompt config |
-| `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, separability, generation eval |
+| `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
 | `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
 | `analysis/figures/` | the 12 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
-| `analysis/visuals/` | **the output.** 78 PNGs, gitignored and rebuilt from the snapshots |
+| `analysis/visuals/` | **the output.** 76 PNGs, gitignored and rebuilt from the snapshots |
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
-| `scripts/` | nine SLURM array jobs that fill `results/` and `activations/` |
+| `scripts/` | eight SLURM array jobs that fill `results/` and `activations/` |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
 | `activations/` | generated, gitignored. Saved hidden states, ~1.1 GB |
 
@@ -67,7 +67,7 @@ for f in make_visuals*.py; do python "$f"; done
 python make_visuals_prompt_structure.py --column raw   # the second variant
 ```
 
-That rebuilds all 78 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
+That rebuilds all 76 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
 works is the reproducibility test the whole layout is arranged around: no generator may read
 `results/`, so if one ever needs it, a snapshot step was missed upstream.
 
@@ -75,16 +75,15 @@ works is the reproducibility test the whole layout is arranged around: no genera
 
 ```bash
 export HF_TOKEN=...                        # the Llama checkpoints are gated
-sbatch scripts/01_extract.sbatch           # then 02..08 -- see scripts/README.md
+sbatch scripts/01_extract.sbatch           # then 02..07 -- see scripts/README.md
 python analysis/probe/analyze_sweep.py     # and the other analyze_*.py
 ```
 
 `scripts/README.md` has the job order and dependencies; each `analysis/<topic>/README.md`
 has the command that regenerates its own snapshot. The order among the analyses is:
-`analyze_sweep` → `analyze_taxonomy` → `analyze_geometry` →
-`analyze_analogy` → `snapshot_quiver3d` → `analyze_ambiguity` → `compute_tsne_coords` →
-`analyze_prompt_structure` → `score_generations` → `analyze_generation` →
-`analyze_generation_vs_representation`.
+`analyze_sweep` → `analyze_taxonomy` → `analyze_geometry` → `analyze_analogy` →
+`snapshot_quiver3d` → `analyze_ambiguity` → `compute_tsne_coords` →
+`analyze_prompt_structure` → `score_generations` → `analyze_generation`.
 
 ## Paths
 

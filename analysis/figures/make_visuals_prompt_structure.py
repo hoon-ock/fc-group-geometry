@@ -22,7 +22,7 @@ structure is organised by. They do not answer at the same depth, and the gap is 
 see `Analysis/prompt_structure/README.md`.
 
 Reads only `analysis/prompt_structure/data/label_agreement_by_layer.csv`, never
-`Results/`, which is gitignored.
+`results/`, which is gitignored.
 """
 import argparse
 import os
