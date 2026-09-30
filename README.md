@@ -48,8 +48,8 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | `data/` | the 92-molecule dataset |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
 | `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
-| `analysis/figures/` | the 12 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
-| `analysis/visuals/` | **the output.** 75 PNGs, gitignored and rebuilt from the snapshots |
+| `analysis/figures/` | the 9 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
+| `analysis/visuals/` | **the output.** 70 PNGs, gitignored and rebuilt from the snapshots |
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
 | `scripts/` | eight SLURM array jobs that fill `results/` and `activations/` |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
@@ -67,7 +67,7 @@ cd analysis/figures
 for f in make_visuals*.py; do python "$f"; done
 ```
 
-That rebuilds all 75 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
+That rebuilds all 70 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
 works is the reproducibility test the whole layout is arranged around: no generator may read
 `results/`, so if one ever needs it, a snapshot step was missed upstream.
 

@@ -49,10 +49,12 @@ from scipy.stats import gaussian_kde  # noqa: E402
 
 from _common import BEHAVIOURAL, FIGURE_LAYER, REPO, num  # noqa: E402
 from make_visuals_probe import COLOR5, DISPLAY5, recessive, style  # noqa: E402
-from make_visuals_retrieval import (AXES, DEFAULT_VISUALS, RETR_LABEL,  # noqa: E402
-                                    RETR_SIZE, RETR_TICK, read_axis_rows)
-from make_visuals_retrieval_dist import (DIST_LEGEND, MEAN, TICK,  # noqa: E402
-                                         TICK_HALF, YTICKS, annotate_hit1, rank_hist)
+# One import, not two: `_dist` is the base of the retrieval family now that the hit@k
+# module it used to share with is gone.
+from make_visuals_retrieval_dist import (AXES, DEFAULT_VISUALS, DIST_LEGEND,  # noqa: E402
+                                         MEAN, RETR_LABEL, RETR_SIZE, RETR_TICK, TICK,
+                                         TICK_HALF, YTICKS, annotate_hit1, rank_hist,
+                                         read_axis_rows)
 
 # Half-width of the widest point of a violin, in column units. The columns sit one unit
 # apart, so 0.42 leaves a visible gap between neighbours at full width.

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Every retrieval trial as one dot: the rank distribution behind `meanrank.png`.
+"""Every retrieval trial as one dot: the full rank distribution, per model per axis.
 
     python analysis/figures/make_visuals_retrieval_dist.py [--layer 31] [--out-dir DIR]
 
-`meanrank.png` reduces each model on each axis to a mean and a median. Those two numbers
-disagree sharply on some panels, and the disagreement is the result -- so this figure draws
-the sample itself. Writes `rankdist.png`.
+A mean and a median are the obvious way to report where `b2 + (a1 - a2)` lands, and on
+some panels here they disagree sharply -- that disagreement IS the result, and no pair of
+summary statistics can show it. So this draws the sample itself. Writes `rankdist.png`.
 
 **Why dots and not a violin.** A violin was the obvious thing to reach for and it is the
 wrong tool here. These are small integers piled on rank 1, not a continuous variable:
@@ -25,17 +25,17 @@ count -- two tied trials are visibly two dots, a hundred are a saturated bar -- 
 column as a whole is a discrete density built without smoothing anything. No random jitter:
 the placement is deterministic, so re-running cannot reshuffle the picture.
 
-Each column also carries the two summaries `meanrank.png` draws, in the same encoding it
-uses: a dark tick at the median, and an open circle at the mean. Seeing them against the
-dots is the point -- a mean floating far above a median that sits on 1, with a couple of
-lonely dots up near the chance line, is a tail, not an ordering.
+Each column also carries both summaries: a dark tick at the median, an open circle at the
+mean. Seeing them against the dots is the point -- a mean floating far above a median that
+sits on 1, with a couple of lonely dots up near the chance line, is a tail, not an
+ordering.
 
 y is logarithmic. Ranks span 1 to 63 here and the interesting structure is all at the
 bottom; a linear axis would crush the 1-2-3 band, where most trials sit, into nothing.
 
-Panels keep their own y-limits for the reason `meanrank.png` does: a rank is only meaningful
-against its pool, and the pool is ~16 candidates on the first two axes and ~74 on the
-ladder. Rank 8 is chance on one and good on another.
+Panels keep their own y-limits, and must: a rank is only meaningful against its pool, and
+the pool is ~16 candidates on the first two axes and ~74 on the ladder. Rank 8 is chance on
+one and good on another, so a shared axis would invite exactly the wrong comparison.
 
 Read from the committed `geometry/data/retrieval_rank_hist.csv` and
 `geometry/data/retrieval_by_axis.csv` -- never `results/`. The histogram is lossless for
@@ -50,17 +50,70 @@ matplotlib.use('Agg')
 import matplotlib.patheffects as pe  # noqa: E402
 import matplotlib.pyplot as plt  # noqa: E402
 
-from _common import BEHAVIOURAL, FIGURE_LAYER, REPO, load, num  # noqa: E402
+from _common import ANALYSIS, BEHAVIOURAL, FIGURE_LAYER, REPO, load, num  # noqa: E402
 from make_visuals_probe import COLOR5, DISPLAY5, SHORT5, recessive, style  # noqa: E402
-from make_visuals_retrieval import (AXES, DEFAULT_VISUALS, RETR_LABEL,  # noqa: E402
-                                    RETR_SIZE, RETR_TICK, read_axis_rows)
+# ---- Shared across the retrieval family -----------------------------------------------
+# This module is the family's base: `make_visuals_retrieval_violin.py` imports these from
+# here, and `read_axis_rows` is what keeps `retrieval_by_axis.csv` in play for the hit@1
+# annotation. They lived in a `make_visuals_retrieval.py` that also drew hit@k bar charts;
+# those were dropped as a restatement of a number these figures already print.
+
+DEFAULT_VISUALS = os.path.join(ANALYSIS, 'visuals', 'retrieval')
+
+# The three trees, widest candidate pool first, the one-column halide probe second, the
+# chain-length ladder last.
+AXES = ['inter_group', 'halide', 'carbon_ladder']
+# Display names, shared through `read_axis_rows` so they are spelled once. The AXES keys
+# ('halide', ...) are the CSV values and must not drift.
+PRETTY = {'inter_group': 'Inter-group', 'halide': 'Halide ladder',
+          'carbon_ladder': 'Chain-length ladder'}
+
+RETR_SIZE = (10.0, 4.8)
+RETR_LABEL = 14
+RETR_TICK = 12.5
+
+
+def read_axis_rows(layer):
+    """`(model, axis) -> row` at one layer, plus the tick label each axis earns.
+
+    The group and trial counts in the labels are read off the rows rather than typed, so a
+    re-run that changes the trial set cannot leave a stale n on the figure.
+    """
+    rows = [r for r in load('geometry/data/retrieval_by_axis.csv')
+            if int(r['layer']) == layer]
+    if not rows:
+        raise SystemExit(
+            f'no rows at layer {layer} in geometry/data/retrieval_by_axis.csv -- '
+            'the snapshot carries layers 0, 8, 16, 24, 31')
+    by = {(r['model'], r['axis']): r for r in rows}
+    missing = [(SHORT5.get(m, m), a) for m in BEHAVIOURAL for a in AXES
+               if (m, a) not in by]
+    if missing:
+        raise SystemExit(
+            'missing ' + ', '.join(f'{m}/{a}' for m, a in missing) + ' -- re-run '
+            'analysis/geometry/analyze_geometry.py')
+
+    labels = {}
+    for a in AXES:
+        # Identical across models by construction -- same trials, different embeddings --
+        # so asserting it is cheap and catches a half-finished results tree.
+        ns = {(r['n_groups'], r['n_trials']) for (m, ax), r in by.items() if ax == a}
+        if len(ns) != 1:
+            raise SystemExit(f'{a}: models disagree on the trial set at layer {layer}: {ns}')
+        g, n = ns.pop()
+        labels[a] = f'{PRETTY[a]}\n({g} groups, {n} trials)'
+    return by, labels
+
+
+# ---- This figure ----------------------------------------------------------------------
 
 # Column width, and the spacing between two tied dots before the row has to clamp to fit.
 # W/12 keeps a handful of ties legible as separate dots, which is the whole point at n=12.
 COL_W = 0.60
 DOT_GAP = COL_W / 12
 DOT = dict(s=7, alpha=0.72, linewidths=0, zorder=3)
-# Same encoding as meanrank.png, deliberately. Two departures, both forced by the dots:
+# The median tick and mean circle, drawn over the dots. Two departures from the obvious
+# encoding, both forced by the dots:
 # the tick is drawn BENEATH them and reaches wider than the column, so on the rows where it
 # matters most -- a median of 1 under a full row of tied trials -- it reads as two ends
 # poking out rather than as a black bar laid over the data it is supposed to summarise; and
@@ -83,9 +136,9 @@ def annotate_hit1(ax, by, axis, show_key=False):
     """Write each column's hit@1 just above the panel, in data-x / axes-y.
 
     Read from the RELEASED `hit1` column rather than recounted as the rank-1 share of the
-    histogram. Both are available and they agree to 3.5e-07 (CSV rounding), but `hit1` is
-    what `hit1.png` draws, and computing it a second way here would only create a second
-    chance for the two figures to disagree.
+    histogram. Both are available and they agree to 3.5e-07 (CSV rounding), but the released
+    column is the one `analyze_geometry.py` computed, and deriving it a second way here
+    would only create a second chance for this figure and the snapshot to disagree.
     """
     tr = ax.get_xaxis_transform()
     for i, m in enumerate(BEHAVIOURAL):
@@ -99,7 +152,7 @@ def annotate_hit1(ax, by, axis, show_key=False):
                 fontsize=HIT_FS, color='0.45', style='italic')
 
 
-# Larger than the shared RETR_LEGEND (12) that the other retrieval figures use. This legend
+# Larger than this figure's other type. This legend
 # carries eight entries against their six and is the only place the median tick, the mean
 # marker and the reference line are explained, so it is doing more work and gets more type.
 DIST_LEGEND = 14

@@ -3,8 +3,8 @@
 
     python analysis/figures/make_visuals_retrieval_3d.py [--layer 31] [--out-dir DIR]
 
-`make_visuals_retrieval.py` reports how OFTEN `b2 + (a1 - a2)` retrieves `b1`. These show what
-one success looks like. One file per (quadruple, chain length) cell that is 4/4 corners at
+`rankdist.png` reports WHERE `b2 + (a1 - a2)` lands across every trial. These show what one
+success looks like. One file per (quadruple, chain length) cell that is 4/4 corners at
 hit@1 with zero degenerate corners -- six of twenty at base/L31:
 
   analogy3d_<model>_L31_thioether-thiol_ether-alcohol_C5.png        and C6

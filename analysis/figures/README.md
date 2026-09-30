@@ -34,11 +34,8 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 | `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `ambiguity/ambiguity_family_probability.csv` |
 | `make_visuals_prompt_structure.py` | `prompt_structure/label_agreement_depth.png` | `prompt_structure/label_agreement_by_layer.csv` |
 | `make_visuals_generation_composition.py` | `generation/group_response_composition.png` | `generation/group_response_composition.csv` |
-| `make_visuals_retrieval.py` | `retrieval/hit1.png`, `hit2.png`, `hit3.png` | `geometry/retrieval_by_axis.csv` |
-| `make_visuals_retrieval_rank.py` | `retrieval/meanrank.png` | `geometry/retrieval_by_axis.csv` |
-| `make_visuals_retrieval_dist.py` | `retrieval/rankdist.png` | `geometry/retrieval_rank_hist.csv` |
-| `make_visuals_retrieval_violin.py` | `retrieval/rankviolin.png` | `geometry/retrieval_rank_hist.csv` |
-| `make_visuals_retrieval_mixed.py` | `retrieval/rankmixed.png` | `geometry/retrieval_rank_hist.csv` |
+| `make_visuals_retrieval_dist.py` | `retrieval/rankdist.png` | `geometry/retrieval_{rank_hist,by_axis}.csv` |
+| `make_visuals_retrieval_violin.py` | `retrieval/rankviolin.png` | `geometry/retrieval_{rank_hist,by_axis}.csv` |
 | `make_visuals_retrieval_3d.py` | `retrieval/analogy3d_*.png` + a `.txt` readout each (6 pairs) | `analogy/analogy_quiver3d.csv` |
 
 Two generators split their output per checkpoint — `make_visuals.py` and
@@ -49,10 +46,14 @@ traces back to the run that produced it without a lookup table. The lower-case s
 (`base`, `chem-faithful`, …) appear only in console output and figure legends, never in a
 path.
 
-The four `retrieval_*` rank variants draw the same measurement four ways — dots, violins, a
-mix, and a reduction to mean and median. `rankdist.png` is the one the
-`visuals/retrieval/README.md` argues from; the others exist because a rank distribution over
-19 candidates is easy to misread from summary statistics alone.
+`rankdist.png` and `rankviolin.png` draw the same measurement two ways — every trial as a
+dot, and the same sample as a density. `rankdist.png` is the one
+`visuals/retrieval/README.md` argues from; the violin exists beside it because it is what a
+reader expects to see, and both docstrings explain why it is the weaker choice at n=12.
+Each prints hit@1 above its columns, which is why both read `retrieval_by_axis.csv` as well.
+
+`make_visuals_retrieval_dist.py` is the base of that pair: it owns `AXES`, `PRETTY`, the
+`RETR_*` type sizes and `read_axis_rows()`, which `_violin` imports.
 
 `_common.py` holds what they share: the model order, the figure layer, and `load`/`num`.
 
