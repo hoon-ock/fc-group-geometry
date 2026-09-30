@@ -40,7 +40,7 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 
 Two generators split their output per checkpoint — `make_visuals.py` and
 `make_visuals_tsne.py` — and both name the subdirectory with the model's own identifier
-(`meta-llama-Llama-3.1-8B`), matching the `results/` and `data/activation/` trees and the
+(`meta-llama-Llama-3.1-8B`), matching the `results/` and `activations/` trees and the
 `analogy3d_*` filenames. One model is one string everywhere a path carries it, so a figure
 traces back to the run that produced it without a lookup table. The lower-case slugs
 (`base`, `chem-faithful`, …) appear only in console output and figure legends, never in a

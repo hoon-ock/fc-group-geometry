@@ -11,7 +11,7 @@ one directory per checkpoint, so each can be placed individually:
                                            larger type for reading on its own
 
 `<model>` is the checkpoint's own identifier with `/` replaced by `-`
-(`meta-llama-Llama-3.1-8B`), the same string the `results/` and `data/activation/` trees use and
+(`meta-llama-Llama-3.1-8B`), the same string the `results/` and `activations/` trees use and
 the same layout `make_visuals_tsne.py` writes its per-model panels into. One model is one
 string everywhere a path carries it, so a figure can be traced to the run that produced it
 without a lookup table. The model is therefore NOT repeated in the filename.

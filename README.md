@@ -45,7 +45,7 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 |---|---|
 | `paths.py` | every path in the project, resolved from its own location. Import this; never hardcode |
 | `config_extract_activation.yaml` | the model, pooling and prompt templates for a run — the one file to edit to change what the pipeline does |
-| `data/` | the 92-molecule dataset, and the extracted activations under `activation/` |
+| `data/` | the 92-molecule dataset |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
 | `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
 | `analysis/figures/` | the 9 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
@@ -53,7 +53,7 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
 | `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
-| `data/activation/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.1 GB |
+| `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.1 GB |
 
 ## Reproducing the figures
 
@@ -82,7 +82,7 @@ bash scripts/run_local.sh
 
 ```bash
 export HF_TOKEN=...                        # the Llama checkpoints are gated
-sbatch scripts/01_extract.sbatch           # -> data/activation/
+sbatch scripts/01_extract.sbatch           # -> activations/
 sbatch scripts/02_generation_eval.sbatch   # -> results/generation_eval/
 bash scripts/run_local.sh                  # everything else, locally
 ```
@@ -106,7 +106,7 @@ The three generated roots take an environment override, which is what a cluster 
 when the home quota cannot hold the activation tensors:
 
 ```bash
-export FCG_ACTIVATIONS=/work/$USER/fc_group/activation
+export FCG_ACTIVATIONS=/work/$USER/fc_group/activations
 export FCG_RESULTS=/work/$USER/fc_group/results
 ```
 

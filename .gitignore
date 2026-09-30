@@ -3,7 +3,7 @@
 # analysis/*/data/*.csv -- the snapshots the paper's tables and figures are built from.
 # If a figure generator ever needs results/, a snapshot step was missed upstream.
 results/
-data/activation/
+activations/
 logs/*
 !logs/.gitkeep
 

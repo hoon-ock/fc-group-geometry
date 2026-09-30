@@ -17,7 +17,7 @@
 # The activations are 1.1 GB and are not results, so they are not pulled here. Bring them
 # down once, directly:
 #
-#   rsync -a --partial swan:/work/$USER/fc_group/activation/ data/activation/
+#   rsync -a --partial swan:/work/$USER/fc_group/activations/ activations/
 #
 # The remote tree is results/<method>/<model>/<leaf>. The selection stays an explicit list
 # rather than a half-remembered rsync filter typed by hand.

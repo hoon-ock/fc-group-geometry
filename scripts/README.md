@@ -19,7 +19,7 @@ They now live inside `run_local.sh`.
 | Job | Stage | Resources | Writes |
 |---|---|---|---|
 | `00_smoke_test` | one template, three layers, then verify shapes against the registry | 1 GPU | — |
-| `01_extract` | forward pass, per-layer hidden states via forward hooks | 1 GPU, 8 cores | `data/activation/` |
+| `01_extract` | forward pass, per-layer hidden states via forward hooks | 1 GPU, 8 cores | `activations/` |
 | `02_generation_eval` | the behavioural stage: forced choice + free generation | 1 GPU, 8 cores | `results/generation_eval/` |
 
 Submit from the repository root. Each job resolves the root from `$SLURM_SUBMIT_DIR` and
@@ -113,7 +113,7 @@ quota cannot hold that, redirect it **before** extracting — `paths.py` reads t
 every later stage must see the same values:
 
 ```bash
-export FCG_ACTIVATIONS=/work/$USER/fc_group/activation
+export FCG_ACTIVATIONS=/work/$USER/fc_group/activations
 export FCG_RESULTS=/work/$USER/fc_group/results
 ```
 
@@ -140,7 +140,7 @@ that step's output, and stops there rather than carrying a broken input forward.
 The activations, once:
 
 ```bash
-rsync -a --partial swan:/work/$USER/fc_group/activation/ data/activation/
+rsync -a --partial swan:/work/$USER/fc_group/activations/ activations/
 ```
 
 The generation eval, the only `results/` tree the cluster still writes:
