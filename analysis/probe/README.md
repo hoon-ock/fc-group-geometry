@@ -142,8 +142,12 @@ python src/functional_group_probe.py --model-name meta-llama/Llama-3.1-8B \
 
 ```bash
 python analysis/probe/analyze_sweep.py                        # -> data/*.csv
-python analysis/probe/analyze_sweep.py --tag fine_to_coarse_group
 ```
+
+`--tag` selects which probe target to summarise and defaults to `coarse_group`, which is
+what `02_probe.sbatch` runs and what the committed `data/` carries. Another tag needs the
+job re-run with `PROBE_TARGET` set, and would overwrite these same filenames — the
+snapshot holds one target at a time.
 
 Needs a populated `results/functional_group_probe/`. CPU-only, no model loading, a few
 seconds. `--n-boot` and `--seed` control the bootstrap; CI bounds move by < 0.002 between

@@ -1,236 +1,49 @@
-# Functional-group analogy — declarative `functional_group` prompt
+# Analogy retrieval and the 3D projection
 
-Scope is the **declarative `functional_group` prompt only**; the script takes
+Scope is the **declarative `functional_group` prompt only**; `snapshot_quiver3d.py` takes
 `--entity-type` if others are extracted.
 
-> **Read the prose below as historical, not as a report on this release.** It was written
-> against the 8B/70B scale pair, and **no 70B data ships here** — the tables and sections
-> quoting 70B numbers (§2's "The 8B is better than the 70B", the 70B rows throughout) cannot
-> be checked against anything in this repository. Nothing in it has been rewritten.
->
-> What *is* current is `data/*.csv`, regenerated for three 8B models — `Llama-3.1-8B`,
-> `phenixace/Chem-R-Faithful` and `deepseek-ai/DeepSeek-R1-Distill-Llama-8B`. That makes this
-> the one analysis directory carrying **three** models rather than five: `../probe/`,
-> `../taxonomy/`, `../geometry/` and `../ambiguity/` were all re-run after Chem-R-8B and
-> ChemDFM were added, and this one was not. `analogy_quiver3d.csv` is narrower still — base
-> only, which is all the 3D projection figure draws.
->
-> The three-model findings that ARE written up against current data live in `../taxonomy/`,
-> `../geometry/` and `../ambiguity/`. Use those for anything load-bearing; use this for the
-> method, the caveats, and the reasoning about what the reference lines mean.
+This directory holds one producer, `snapshot_quiver3d.py`, which writes
+`data/analogy_quiver3d.csv` — the 3D coordinates behind
+`visuals/retrieval/analogy3d_*.png`. The retrieval *numbers* live in `../geometry/`; §1 and
+§2 below document the test those numbers come from, because it is
+`src/analogy_retrieval.py`'s method rather than `analyze_geometry.py`'s.
 
-> **Every figure here predates the notation switch.** These runs used the old `{formula}`
-> column, which mixed SMILES and condensed notation across groups — a confound worth ~0.20
-> cosine at every depth. All templates now interpolate the uniform `{smiles}` column, and
-> `molecule_formula_bare` is now `molecule_smiles_bare`. Nothing below has been re-measured
-> against the new prompts.
+> **`analogy_quiver3d.csv` is base-only**, which is all the 3D figure draws. Per-model
+> retrieval across all five checkpoints is in `../geometry/data/retrieval_by_axis.csv` and
+> `retrieval_rank_hist.csv`.
 
-> **Two things decide most of what follows.** (1) The activation space is strongly anisotropic
-> — raw pairwise cosine runs 0.78–1.00 — so `full_within_mean` cannot be quoted on its own; the
-> mean-centered numbers from `results/anisotropy_diagnostic/` are the real ones. (2) The
-> second-order analogy rests on **four hand-chosen quadruples**, and they disagree in sign, so
-> their mean is not a summary of anything.
+> **The activation space is strongly anisotropic** — raw pairwise cosine runs 0.78–1.00 — so
+> any cosine quoted here without mean-centring is largely reporting that. The centred numbers
+> from `results/anisotropy_diagnostic/` are the real ones, and §3 is why this projection
+> centres too.
 
-## 1. The anisotropy control
+> **The second-order analogy rests on four hand-chosen quadruples**, and they disagree in
+> sign, so their mean is not a summary of anything. §1 is scored per quadruple for that
+> reason.
 
-`results/anisotropy_diagnostic/.../summary_all_layers.json` reports the same within/between
-statistics twice — as computed, and after subtracting the global mean vector.
+An earlier revision of this directory also carried `analyze_analogy.py` and three CSVs
+(`layer_trend`, `analogy_quadruples`, `within_by_group`) scoring the analogies by **offset
+cosine** rather than by retrieval. That analysis fed no figure and was dropped; its prose,
+written against an 8B/70B pair whose data does not ship here, went with it.
 
-| model | L | depth | raw pairwise cos | orig within | orig between | **cent within** | **cent between** |
-|---|---|---|---|---|---|---|---|
-| 8B | 0 | 0.00 | 0.990 | 0.843 | 0.450 | 0.739 | −0.008 |
-| 8B | 16 | 0.52 | 0.943 | 0.857 | 0.538 | 0.695 | −0.042 |
-| 8B | 24 | 0.77 | 0.856 | 0.910 | 0.475 | 0.827 | −0.048 |
-| 8B | 31 | 1.00 | 0.943 | 0.891 | 0.407 | 0.817 | −0.046 |
-| 70B | 0 | 0.00 | 0.996 | 0.825 | 0.342 | 0.760 | −0.033 |
-| 70B | 40 | 0.51 | 0.837 | 0.878 | 0.477 | 0.774 | −0.043 |
-| 70B | 60 | 0.76 | 0.780 | 0.898 | 0.410 | 0.838 | −0.046 |
-| 70B | 79 | 1.00 | 0.933 | 0.874 | 0.400 | 0.787 | −0.043 |
+## 1. The retrieval test
 
-Uncentered, *unrelated* functional groups look 0.34–0.54 similar. Centered, they sit at ≈ −0.04
-— zero, as they should. **The structure is real** (centered within-class stays at 0.59–0.84,
-far above the ±0.05 / ±0.04 closed-form threshold), but roughly half of every raw cosine here
-is the global mean direction, not chemistry. All verdicts below use the centered gap.
-
-A related point about the reference lines: `empirical_null_cross_group`
-(`src/functional_group_analogy_carbon_matched.py:349`) samples pairs of diff vectors **from different
-groups** — the same population as `full_between_mean`. That is why the two agree to three
-decimals in every layer of every run. It is a re-estimate of the between-class mean, not an
-independent null. The usable reference is `closed_form_null_ci`, which is correctly per-model
-(±0.0514 at 4096 dims, ±0.0364 at 8192).
-
-## 2. The four claims
-
-### "As layer depth increases, embeddings show increasingly valid clustering by functional group"
-
-**Not monotone, in either model.** The centered gap:
-
-| model | | | | | | shape | peak |
-|---|---|---|---|---|---|---|---|
-| 8B (L0/8/16/24/31) | 0.747 | 0.708 | 0.737 | **0.875** | 0.863 | dip then rise then fall | L24, d=0.77 |
-| 70B (L0/20/40/60/79) | 0.794 | 0.621 | 0.817 | **0.884** | 0.830 | same | L60, d=0.76 |
-
-Three things break the claim as stated:
-
-- **Layer 0 is already high** (0.747 / 0.794) — higher than everything up to half depth. Depth
-  initially makes the geometry *worse*.
-- The **dip at quarter depth** is large and present in both models (70B falls to 0.621).
-- The **final layer falls back** from the peak in both.
-
-The L0 value should not be read as semantic structure. The molecule name contains the group
-name, so diff vectors at layer 0 are largely orthographic — the same confound the probe's
-surface baseline measures, where character n-grams alone reach 0.475 on the coarse task and
-0.975 once the molecule split is used.
-
-The honest version: *the geometry sharpens from quarter depth to about three-quarters depth,
-then degrades slightly.* That peak at d ≈ 0.76 is the same depth the t-SNE clustering peaks at
-(`Analysis/tsne/README.md` §4), and later than the probe's saturation at d ≈ 0.47–0.52.
-
-### "The 8B is better than the 70B at capturing this"
-
-**Not supported.** Centered gap at matched depth:
-
-| depth | 8B | 70B | better |
-|---|---|---|---|
-| 0.00 | 0.747 | 0.794 | 70B |
-| ~0.26 | 0.708 | 0.621 | 8B |
-| ~0.52 | 0.737 | 0.817 | 70B |
-| ~0.77 | 0.875 | 0.884 | 70B |
-| 1.00 | 0.863 | 0.830 | 8B |
-
-The 8B leads at **2 of 5** depths, and at the peak the two are effectively tied (0.875 vs
-0.884). There is one place the 8B is genuinely ahead — the O→N analogy, §3 — but that is a
-single quadruple.
-
-### "Within-class similarity increases with depth"
-
-**Same non-monotone shape** — this is the centered-within column, which drives the gap above:
-8B 0.739 → 0.671 → 0.695 → **0.827** → 0.817; 70B 0.760 → 0.585 → 0.774 → **0.838** → 0.787.
-Both dip at quarter depth before recovering. The L0-to-final direction is upward, but that is
-not the same as increasing with depth.
-
-### "Consistency across molecules within a group increases with depth"
-
-**This is the same quantity as the previous claim, unless a different reading is intended.**
-`within_class_similarity` *is* cosine between same-group diff vectors at different chain
-lengths — i.e. consistency across molecules within a group. Measured that way it inherits the
-non-monotone shape above.
-
-Under the other available reading — `within_std`, the spread of within-scores *across* the 19
-groups, i.e. how uniform the groups are in their internal coherence — **the claim holds, and it
-is the only one of the four that does**:
-
-| model | | | | | | shape |
-|---|---|---|---|---|---|---|
-| 8B | 0.108 | 0.068 | 0.049 | 0.038 | 0.052 | decreasing, final-layer uptick |
-| 70B | 0.110 | 0.077 | 0.053 | 0.044 | 0.040 | **monotone decreasing** |
-
-Worth separating these two in future write-ups: one is "are a group's members alike" and the
-other is "are the groups alike in how alike their members are", and only the second is monotone.
-
-## 3. The analogy result is 2-of-4, not a mean
-
-> **Superseded in part.** This section analyses the original **four** quadruples. The set is
-> now **seven** — both halogen quadruples were dropped as notation-confounded, and three
-> controls were added (see `functional_group_analogy_carbon_matched.py:259` for the
-> selection criteria). The HCC sweep behind the tables below has not been rerun, so these
-> numbers still describe the old set. What the local 8B layers already show:
->
-> | quadruple | L0 | L16 | L31 | |
-> |---|---|---|---|---|
-> | thioether−thiol ~ ether−alcohol | +0.382 | +0.740 | +0.599 | O↔S, notation-crossed |
-> | thiol−alcohol ~ thioether−ether | −0.176 | +0.447 | **+0.588** | **its notation-clean control** |
-> | imine−aldehyde ~ amine−alcohol | +0.056 | +0.107 | +0.556 | O→N, notation-crossed |
-> | amide−carboxylic acid ~ amine−alcohol | +0.141 | +0.228 | **+0.616** | **its notation-clean control** |
-> | carboxylic acid−alcohol ~ amide−amine | +0.713 | +0.861 | +0.629 | matched legs |
-> | ester−carboxylic acid ~ ketone−aldehyde | +0.269 | +0.043 | **+0.129** | **mismatched legs, negative control** |
->
-> Two things follow. **The O↔S and O→N results survive their notation controls** — the clean
-> and crossed versions converge by the final layer (+0.588 vs +0.599, +0.616 vs +0.556),
-> though they disagree sharply at layer 0 where the geometry is orthographic anyway. And
-> **leg symmetry predicts success**: the two quadruples built from the same carbonyl groups
-> differ only in whether their legs conserve hbd/hba, and score +0.629 against +0.129.
-
-
-The per-layer mean (8B: 0.118 → 0.273 → 0.150) averages four quadruples that **disagree in
-sign**, two consistently positive and two consistently negative. Individually:
-
-**8B**
-
-| quadruple | L0 | L8 | L16 | L24 | L31 | |
-|---|---|---|---|---|---|---|
-| thioether−thiol ~ ether−alcohol (O↔S) | +0.488 | +0.643 | +0.704 | +0.659 | +0.643 | **works, stable** |
-| imine−aldehyde ~ amine−alcohol (O→N) | +0.044 | +0.216 | +0.444 | **+0.683** | +0.609 | **works, grows with depth** |
-| alkyl bromide−chloride ~ iodide−bromide | +0.078 | +0.107 | +0.094 | −0.250 | −0.349 | fails, worsens |
-| sulfoxide−thioether ~ sulfone−sulfoxide | −0.140 | −0.023 | −0.151 | −0.141 | −0.301 | fails throughout |
-
-**70B**
-
-| quadruple | L0 | L20 | L40 | L60 | L79 | |
-|---|---|---|---|---|---|---|
-| O↔S | +0.749 | +0.541 | +0.719 | +0.732 | +0.700 | works, flat |
-| O→N | −0.163 | +0.385 | +0.472 | +0.438 | +0.465 | works after L0 |
-| halogens | −0.167 | −0.156 | −0.214 | −0.258 | −0.216 | fails at every layer |
-| sulfur ladder | +0.267 | −0.037 | +0.009 | +0.081 | −0.085 | noise |
-
-Only the **O→N substitution in the 8B** actually matches the "improves with depth" story
-(+0.044 → +0.683). The O↔S analogy is the strongest but is already near its ceiling at layer 0
-in the 70B (+0.749), so depth adds nothing to it.
-
-**The halogen failure is probably a data defect, not chemistry.** At the time these results
-were computed, F, Br and I were written as SMILES in the dataset while Cl was written as
-a condensed formula. So `alkyl bromide − alkyl chloride` is partly a *notation* difference while
-`alkyl iodide − alkyl bromide` is not — the two vectors encode different things, and
-anti-alignment is what that predicts. This is the same confound that made `alkyl chloride` the
-sole failing group in the probe's leave-one-group-out. The dataset has since been fixed —
-`smiles` is populated uniformly for every molecule — but the fix cannot reach these results,
-because the notation is part of the prompt
-text baked into the activations. Treat "the halogen analogy fails" as untested until the
-prompts are re-extracted from the clean columns; the prediction is that it stops being
-anti-aligned.
-
-## 4. Limits
-
-- **5 layers per model** (8B 0/8/16/24/31; 70B 0/20/40/60/79). Every "as depth increases"
-  statement, mine included, is read off 5 points. The dip at quarter depth and the peak at
-  d ≈ 0.76 are located only to within one sampled layer.
-- **n = 4 analogy quadruples**, hand-chosen at `functional_group_analogy.py:196`. With two
-  positive and two negative, no aggregate over them supports a model-vs-model claim.
-- **Layer 0 is orthographic, not semantic** — see §2.
-- **The diff-vector space is nearly 1-D**: PC1 explains 0.48–0.62 of variance at every layer in
-  both models, so "clustering" here lives largely along a single direction.
-
-## 5. Regenerating
-
-```bash
-python analysis/analogy/analyze_analogy.py                    # functional_group
-python analysis/analogy/analyze_analogy.py --entity-type pka  # any other prompt
-```
-
-Needs both `results/functional_group_analogy/` and `results/anisotropy_diagnostic/`;
-the script asserts their layer sets match rather than silently emitting empty centered columns.
-
-| file in `data/` | contents |
-|---|---|
-| `layer_trend.csv` | per model × layer: raw pairwise cosine, original and centered within/between/gap, within_std, PC1 ratio, analogy mean, signed significance counts |
-| `analogy_quadruples.csv` | all 4 quadruples × layer × model, individual cosines, direction-aware significance flag |
-| `within_by_group.csv` | per-group within-class score by layer — which groups drive the mean |
-
-## 6. The retrieval test
-
-§3 scores each quadruple by the **cosine between two offset vectors**. That is not what the
-word2vec analogy result measures. That result is *retrieval* — `king − man + woman` lands
+The dropped cosine analysis scored each quadruple by the **cosine between two offset
+vectors**. That is not what the word2vec analogy result measures. That result is *retrieval* — `king − man + woman` lands
 nearest to `queen` — and offset cosines in those spaces are well short of 1. Scoring by
 cosine alone measures the strictly harder quantity, and it changes the verdict on half the
 quadruples.
 
-`src/analogy_retrieval.py` runs the retrieval version over the diff vectors the
-analogy script already saved to `data/diff_vectors_layer_{L}.npz`, so it needs no rerun and no GPU. For
+`src/analogy_retrieval.py` runs the retrieval version over the diff vectors
+`src/functional_group_analogy_carbon_matched.py` saved to
+`results/functional_group_analogy/*/data/diff_vectors_layer_{L}.npz`, so it needs no rerun
+and no GPU. For
 each quadruple it tests all four corner predictions (`b1 = b2 + (a1 − a2)`, and the three
 rotations) at each chain length: 4 quadruples × 4 corners × 4 chain lengths = 64 trials per
 layer, against 19 candidate groups.
 
-**Retrieval sees 5 analogies where §3's cosine sees 7.** Retrieval is blind to how four
+**Retrieval sees 5 analogies where the offset cosine sees 7.** Retrieval is blind to how four
 groups are paired — every corner target is two of them minus the third, and the exclusion
 set is always the other three, so re-pairing `{w,x,y,z}` poses the same four questions with
 the sources relabelled. `cos(a1−a2, b1−b2)` *does* depend on the pairing, which is why
@@ -258,11 +71,11 @@ those group sets' weight in every pooled figure.
 **The peak-then-fall shape reported for the four-quadruple set was the halogen quadruple.**
 With the halogens gone, both models rise and then plateau across the whole second half
 rather than falling back at the end. The earlier "falls back at
-the final layer" reading, which appeared to corroborate §2's centered gap, was one
-notation-confounded quadruple collapsing and dragging the pooled mean with it.
+the final layer" reading was one notation-confounded quadruple collapsing and dragging the
+pooled mean with it.
 
-O↔S retrieves 16/16 from the midpoint on. **The sulfur ladder, which is negative by cosine
-in §3, retrieves at rank 1–2 on every trial at 8B layer 31** — the clearest case of cosine
+O↔S retrieves 16/16 from the midpoint on. **The sulfur ladder, which is negative by offset
+cosine, retrieves at rank 1–2 on every trial at 8B layer 31** — the clearest case of cosine
 and retrieval disagreeing.
 
 Two caveats that have to travel with these numbers:
@@ -274,7 +87,8 @@ Two caveats that have to travel with these numbers:
   `rank_incl` and `degenerate_top1_rate` are emitted in every output for that reason.
 - **The halogen failure is asymmetric by corner.** The two corners predicting `alkyl bromide`
   sit at rank 11–17 while predicting chloride and iodide is rank 1 at every chain length —
-  which is what the SMILES-vs-condensed-formula confound in §3 predicts, and is invisible in
+  which is what the SMILES-vs-condensed-formula confound in the dataset predicts (the
+  halides were mixed notation when these activations were extracted), and is invisible in
   the cosine view.
 
 ```bash
@@ -318,12 +132,12 @@ side by side.
 Every series in these plots is a solid line distinguished by colour and marker. Dash
 patterns are deliberately not used to encode identity — at these font sizes `--` and `-.`
 are indistinguishable from `-` in a legend swatch, so a dash-encoded series ends up
-mislabelled in practice even when the code is right. The self-checks in §7 have no opinion
+mislabelled in practice even when the code is right. The self-checks in §2 have no opinion
 on this — it is a figure property, not a data one — so it is asserted separately by
 building each figure and comparing every legend handle's linestyle, marker and colour
 against the line it labels, with solid the only non-baseline style permitted.
 
-## 7. Checking it
+## 2. Checking it
 
 `analogy_retrieval.py` used to exit 0 whenever it did not crash, and both bugs found while
 writing it were silent-wrong-answer bugs: a heatmap row key that collided for the two
@@ -357,14 +171,14 @@ It also holds a fixed regression on 8B/`functional_group` — hit@1 34/57/59 of 
 `results/` **and** `ANALOGY_QUADRUPLES`, so after a legitimate re-extraction or a change
 to the quadruple set the constants at the top of the file are what should change.
 
-## 8. The 3D projection snapshot
+## 3. The 3D projection snapshot
 
 `snapshot_quiver3d.py` writes `data/analogy_quiver3d.csv`, the coordinates
 `analysis/figures/make_visuals_retrieval_3d.py` draws under `visuals/retrieval/` as one PNG
 plus one `.txt` per selected cell, stems `analogy3d_{model}_L{layer}_{quadruple}_C{N}`. The
-numbers live in the `.txt`; the image carries only what identifies it. It is a separate script rather than another writer inside
-`analyze_analogy.py` because it needs two results trees and numpy, and because the three CSVs
-that script emits feed the paper's tables — they should not move when this one is regenerated.
+numbers live in the `.txt`; the image carries only what identifies it. It reads two results
+trees — `functional_group_analogy/` for the diff vectors and
+`functional_group_analogy_retrieval/` for the scored trials — plus the dataset.
 
 ```bash
 python analysis/analogy/snapshot_quiver3d.py \

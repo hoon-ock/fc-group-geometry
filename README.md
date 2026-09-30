@@ -45,15 +45,15 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 |---|---|
 | `paths.py` | every path in the project, resolved from its own location. Import this; never hardcode |
 | `config_extract_activation.yaml` | the model, pooling and prompt templates for a run — the one file to edit to change what the pipeline does |
-| `data/` | the 92-molecule dataset |
+| `data/` | the 92-molecule dataset, and the extracted activations under `activation/` |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
 | `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
 | `analysis/figures/` | the 9 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
 | `analysis/visuals/` | **the output.** 70 PNGs, gitignored and rebuilt from the snapshots |
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
-| `scripts/` | eight SLURM array jobs that fill `results/` and `activations/` |
+| `scripts/` | eight SLURM array jobs that fill `results/` and `data/activation/` |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
-| `activations/` | generated, gitignored. Saved hidden states, ~1.1 GB |
+| `data/activation/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.1 GB |
 
 ## Reproducing the figures
 
@@ -81,8 +81,8 @@ python analysis/probe/analyze_sweep.py     # and the other analyze_*.py
 
 `scripts/README.md` has the job order and dependencies; each `analysis/<topic>/README.md`
 has the command that regenerates its own snapshot. The order among the analyses is:
-`analyze_sweep` → `analyze_taxonomy` → `analyze_geometry` → `analyze_analogy` →
-`snapshot_quiver3d` → `analyze_ambiguity` → `compute_tsne_coords` →
+`analyze_sweep` → `analyze_taxonomy` → `analyze_geometry` → `snapshot_quiver3d` →
+`analyze_ambiguity` → `compute_tsne_coords` →
 `analyze_prompt_structure` → `score_generations` → `analyze_generation`.
 
 ## Paths
@@ -98,7 +98,7 @@ The three generated roots take an environment override, which is what a cluster 
 when the home quota cannot hold the activation tensors:
 
 ```bash
-export FCG_ACTIVATIONS=/work/$USER/fc_group/activations
+export FCG_ACTIVATIONS=/work/$USER/fc_group/activation
 export FCG_RESULTS=/work/$USER/fc_group/results
 ```
 

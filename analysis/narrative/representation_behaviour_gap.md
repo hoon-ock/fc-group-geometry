@@ -83,10 +83,10 @@ chemical knowledge (conditional 0.918 → 0.981), against a probe already at cei
 ## Caveats, in the order a reviewer hits them
 
 **Granularity mismatch — the load-bearing one.** The probe is 5-way heteroatom family (chance
-0.20); free generation is 20-way group naming (chance 0.05). Only `coarse_group` and
-`fine_to_coarse_group` exist on disk, and `fine_to_coarse_group` trains on the 20 but still
-*scores* the 5, so **no probe number exists at the generation task's granularity** — verified
-across all five models under `results/functional_group_probe/*/functional_group/data/`.
+0.20); free generation is 20-way group naming (chance 0.05). The released probe target is
+`coarse_group`, and the only alternative the pipeline offers — `fine_to_coarse` — trains on
+the 20 but still *scores* the 5, so **no probe number exists at the generation task's
+granularity** whichever is run.
 Comparing 1.000 to 0.585 therefore crosses a task-difficulty change as well as a
 representation-behaviour one. State the comparison as coarse-probe versus fine-generation and
 say so in the text.

@@ -3,7 +3,7 @@
 `compute_tsne_coords.py` embeds the last-token activations and releases the **coordinates**,
 so `analysis/figures/make_visuals_tsne.py` can draw the figures without touching
 activations. It is the only analysis here besides `prompt_structure/` that reads
-`activations/` directly.
+`data/activation/` directly.
 
 ```bash
 python analysis/tsne/compute_tsne_coords.py     # -> data/tsne_coords.csv, data/tsne_neighbourhood.csv
@@ -77,7 +77,7 @@ between models and between depths, not against chance.
 |---|---|
 | `data/tsne_coords.csv` | model × layer × 920 prompts: `x`, `y`, plus `molecule`, `functional_group`, `coarse_family`, `carbon_count`, `template_index` |
 | `data/tsne_neighbourhood.csv` | model × layer × k: k-NN label agreement for template, coarse family and fine group |
-| `compute_tsne_coords.py` | the embedding; reads `activations/`, writes both CSVs |
+| `compute_tsne_coords.py` | the embedding; reads `data/activation/`, writes both CSVs |
 
 The figures are drawn by `analysis/figures/make_visuals_tsne.py` into
 `analysis/visuals/tsne/` — three overview PNGs (`tsne_depth_{coarse,fine,template}.png`) plus

@@ -1,6 +1,6 @@
 # Cluster jobs
 
-Eight SLURM array jobs that fill `results/` and `activations/`. Everything downstream — the
+Eight SLURM array jobs that fill `results/` and `data/activation/`. Everything downstream — the
 snapshot CSVs under `analysis/*/data/` and the figures under `analysis/visuals/` — runs on a
 laptop from what these produce.
 
@@ -13,18 +13,39 @@ sbatch scripts/01_extract.sbatch
 Each job resolves the root from `$SLURM_SUBMIT_DIR` and fails immediately if `paths.py` is
 not there. For a manual run from elsewhere, set `FCG_ROOT=/path/to/repo`.
 
-## Order
+## Which stages a figure actually needs
 
 `01` must finish before anything else. After that, `02`/`03`/`04`/`07` are independent;
 `05` needs `04`, and `06` needs `02`.
 
+**29 of the 70 figures need nothing beyond `01_extract`.** Two analysis scripts read the
+`.pt` tensors directly and no `results/` tree at all, so with the activations in place they
+run on a laptop in minutes:
+
+| Figures | Count | Producer | Needs |
+|---|---|---|---|
+| `tsne/` | 28 | `analysis/tsne/compute_tsne_coords.py` | **activations only** |
+| `prompt_structure/` | 1 | `analysis/prompt_structure/analyze_prompt_structure.py` | **activations only** |
+| `clustermap/` | 30 | `analysis/taxonomy/analyze_taxonomy.py` | `04` |
+| `retrieval/rankdist`, `rankviolin` | 2 | `analysis/geometry/analyze_geometry.py` | `03` `04` `05` |
+| `retrieval/analogy3d_*` | 6 | `analysis/analogy/snapshot_quiver3d.py` | `04` `05` |
+| `probe/` | 1 | `analysis/probe/analyze_sweep.py` | `02` |
+| `ambiguity/` | 1 | `analysis/ambiguity/analyze_ambiguity.py` | `02` `04` `06` |
+| `generation/` | 1 | `score_generations.py` → `analyze_generation.py` | `07` |
+
+The remaining 41 need `results/`, and between them they touch **every** stage from 02 to
+07 — none is skippable if you want the full set. `00_smoke_test` is a preflight and is never
+required for an output.
+
+Each `analysis/<topic>/README.md` carries the command that regenerates its own snapshot.
+
 | Job | Stage | Resources | Reads | Writes under `results/` |
 |---|---|---|---|---|
 | `00_smoke_test` | one template, three layers, then verify shapes against the registry | 1 GPU | — | — |
-| `01_extract` | forward pass, per-layer hidden states via hooks | 1 GPU, 8 cores | `data/` | → `activations/` |
-| `02_probe` | layer-wise linear probe, all 32 layers | 1 core, 4 GB | `activations/` | `functional_group_probe/` |
-| `03_anisotropy` | generic-anisotropy baseline for the diff-vector geometry | 1 core | `activations/` | `anisotropy_diagnostic/` |
-| `04_analogy` | diff-vector geometry, carbon-matched | 1 core | `activations/` | `functional_group_analogy/` |
+| `01_extract` | forward pass, per-layer hidden states via hooks | 1 GPU, 8 cores | `data/` | → `data/activation/` |
+| `02_probe` | layer-wise linear probe, all 32 layers | 1 core, 4 GB | `data/activation/` | `functional_group_probe/` |
+| `03_anisotropy` | generic-anisotropy baseline for the diff-vector geometry | 1 core | `data/activation/` | `anisotropy_diagnostic/` |
+| `04_analogy` | diff-vector geometry, carbon-matched | 1 core | `data/activation/` | `functional_group_analogy/` |
 | `05_retrieval` | does `b2 + (a1 - a2)` retrieve `b1`? three axes | 1 core | `04`'s npz files | `functional_group_analogy_retrieval{,_carbon,_halide}/` |
 | `06_ambiguity` | how much mass lands on the defensible rival family | 1 core | `02`'s `oof_proba_*.npz` | `ambiguity_metric/` |
 | `07_generation_eval` | the behavioural stage: forced choice + free generation | 1 GPU, 8 cores | `data/` | `generation_eval/` |
@@ -73,7 +94,7 @@ hundred MB more. On a cluster whose home quota cannot hold that, redirect both *
 extracting — `paths.py` reads these, and every later stage must see the same values:
 
 ```bash
-export FCG_ACTIVATIONS=/work/$USER/fc_group/activations
+export FCG_ACTIVATIONS=/work/$USER/fc_group/activation
 export FCG_RESULTS=/work/$USER/fc_group/results
 ```
 

@@ -34,7 +34,7 @@ echo "=== task=$TASK_ID model=$MODEL entity=$ENTITY ==="
 # oxygen-free family controls so a merely-diffuse probe scores zero.
 #
 # --mode proba keeps this off the activations entirely. The projection mode additionally
-# needs activations/ present; --full adds the calibrated contrast with bootstrap CIs.
+# needs data/activation/ present; --full adds the calibrated contrast with bootstrap CIs.
 if python src/ambiguity_metric.py \
      --model-name "$MODEL" \
      --entity-type "$ENTITY" \

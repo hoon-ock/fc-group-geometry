@@ -21,12 +21,17 @@ check_array_size 5 || exit 1
 python -c "import yaml, torch, scipy, seaborn, sklearn, matplotlib, pandas" || {
   echo "ERROR: conda env not active or deps missing (python=$(command -v python))"; exit 1; }
 
-# Overridable at submit time:
-#   sbatch --export=ALL,PROBE_TARGET=fine,PROBE_SPLIT=molecule scripts/02_probe.sbatch
+# `coarse` and not `all`, because nothing downstream reads the other targets. `--target all`
+# also fits `fine_to_coarse`, and analyze_sweep, analyze_ambiguity and ambiguity_metric all
+# default to --tag coarse_group; the committed probe/data/ snapshot carries coarse_group
+# alone. Dropping the extra target roughly halves this job.
+#
 # An empty PROBE_SPLIT leaves the probe on its own default (leave-one-group-out), which is
 # the only split with dynamic range -- molecule and carbon are saturated by the molecule's
-# own spelling, where character n-grams alone score 0.975-1.00.
-PROBE_TARGET="${PROBE_TARGET:-all}"
+# own spelling, where character n-grams alone score 0.975-1.00. Both stay overridable at
+# submit time for a one-off, e.g.
+#   sbatch --export=ALL,PROBE_TARGET=fine_to_coarse scripts/02_probe.sbatch
+PROBE_TARGET="${PROBE_TARGET:-coarse}"
 PROBE_SPLIT="${PROBE_SPLIT:-}"
 
 MODEL="${MODELS[$TASK_ID]}"

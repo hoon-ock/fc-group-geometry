@@ -7,9 +7,10 @@ directory was named `fc_group`. Constants like `'fc_group/Results/...'` were rel
 the first and spelled the second. Import this module instead and neither holds -- the
 scripts run from any working directory, under any directory name.
 
-The four generated roots take an environment override. That is not generality for its own
-sake: on HCC the home quota cannot hold the activation tensors, so an extraction run
-points FCG_ACTIVATIONS at /work and everything else stays where it is.
+The three generated roots -- results/, data/activation/ and logs/ -- take an environment
+override. That is not generality for its own sake: on HCC the home quota cannot hold the
+activation tensors, so an extraction run points FCG_ACTIVATIONS at /work and everything
+else stays where it is.
 
     python paths.py     # print every root, marked ok / MISSING
 """
@@ -25,7 +26,9 @@ SCRIPTS = os.path.join(ROOT, 'scripts')
 
 # Generated, gitignored, overridable.
 RESULTS = os.environ.get('FCG_RESULTS', os.path.join(ROOT, 'results'))
-ACTIVATIONS = os.environ.get('FCG_ACTIVATIONS', os.path.join(ROOT, 'activations'))
+# Under data/ because the saved hidden states ARE the pipeline's data -- everything from
+# 02 onward reads them rather than the model. Gitignored all the same: ~1.1 GB.
+ACTIVATIONS = os.environ.get('FCG_ACTIVATIONS', os.path.join(DATA, 'activation'))
 LOGS = os.environ.get('FCG_LOGS', os.path.join(ROOT, 'logs'))
 
 DATASET_CSV = os.path.join(DATA, 'functional_group_dataset.csv')

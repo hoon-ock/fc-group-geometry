@@ -3,13 +3,10 @@
 
     python analysis/analogy/snapshot_quiver3d.py [--layer 31] [--mode carbon_matched]
 
-`analyze_analogy.py` snapshots the *cosine* view of the analogies. This writes the
-*geometric* one: `data/analogy_quiver3d.csv`, the 3D coordinates
+Writes `data/analogy_quiver3d.csv`, the 3D coordinates
 `analysis/figures/make_visuals_retrieval_3d.py` draws as `visuals/retrieval/analogy3d_*.png`,
-one PNG per row of the selection below. It is a separate file rather than another writer
-inside `analyze_analogy.py` because it needs two results trees and numpy, and because the
-three CSVs that script emits feed the paper's tables -- they should not move when this one
-is regenerated.
+one PNG per row of the selection below. `analysis/geometry/` carries the *numeric* view of
+the same retrievals -- hit@1 and the rank distribution; this is the geometric one.
 
 Retrieval asks whether `b2 + (a1 - a2)` lands nearest `b1`. That is a statement about a
 parallelogram, and a parallelogram is the one thing the existing quiver
@@ -23,8 +20,8 @@ So this projection is **mean-centered**. Offsets are translation-invariant, so t
 parallelogram loses nothing; what is given up is the uncentered origin's reading as "no
 change from the alkane baseline", which is not what this figure is about. Measured over the
 quadruples that retrieve perfectly, the 3D rank of the true answer is 1 everywhere centered,
-against 1/3/1 uncentered. The same position `analyze_analogy.py`'s docstring already takes
-about cosine: an uncentered number here is largely quoting the anisotropy.
+against 1/3/1 uncentered. Same reasoning `analyze_geometry.py` applies before it will quote a
+between-class cosine at all: an uncentered number here is largely quoting the anisotropy.
 
 The default pool is **carbon-matched**: one chain length at a time, so every point is a
 concrete compound rather than an average over C3-C6. The `molecules` column names them. Seven
