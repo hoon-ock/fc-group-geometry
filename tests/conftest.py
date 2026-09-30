@@ -107,9 +107,17 @@ def run(script, *args, cwd=REPO):
 
 
 def tracked_text_files():
-    """Every tracked file the hygiene sweeps read, as (path, contents)."""
+    """Every tracked file the hygiene sweeps read, as (path, contents).
+
+    tests/ is excluded, and must be: test_hygiene names every forbidden token because
+    those lists are what it searches for, and test_structure asserts the file inventory by
+    name. Scanning the tests would make each of them flag itself -- which it did, the
+    moment tests/ became tracked.
+    """
     out = subprocess.run(['git', 'ls-files'], cwd=REPO, capture_output=True, text=True)
     for rel in out.stdout.split():
+        if rel.startswith('tests/'):
+            continue
         if rel.endswith(('.py', '.md', '.sh', '.sbatch', '.inc', '.yaml', '.txt')):
             full = os.path.join(REPO, rel)
             if os.path.exists(full):

@@ -77,8 +77,7 @@ CODE_SUFFIXES = ('.py', '.sh', '.sbatch', '.inc', '.yaml')
 def test_dropped_artifact_is_not_referenced_from_code(name):
     """Caught a real one: make_visuals.py's docstrings still described `combined_figure`
     and `combined_<model>.png` after the cohesion cut removed both."""
-    hits = [rel for rel in _hits(name)
-            if rel.endswith(CODE_SUFFIXES) and not rel.startswith('tests/')]
+    hits = [rel for rel in _hits(name) if rel.endswith(CODE_SUFFIXES)]
     assert not hits, f'{name} still referenced from code: {hits}'
 
 
