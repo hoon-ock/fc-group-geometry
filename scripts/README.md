@@ -48,8 +48,8 @@ Three stages, and any one can run alone:
 ```bash
 bash scripts/run_local.sh                     # compute -> analysis -> figures
 bash scripts/run_local.sh --stages compute    # the five CPU stages, per model
-bash scripts/run_local.sh --stages analysis   # results/ -> analysis/*/data/
-bash scripts/run_local.sh --stages figures    # analysis/*/data/ -> analysis/visuals/
+bash scripts/run_local.sh --stages analysis   # results/ -> analysis/data/
+bash scripts/run_local.sh --stages figures    # analysis/data/ -> visuals/
 bash scripts/run_local.sh --models meta-llama/Llama-3.1-8B
 ```
 
@@ -59,7 +59,7 @@ npz the earlier stages wrote rather than the tensors. The probe is the long pole
 five-model compute stage is well under an hour.
 
 **`--stages figures` needs nothing but the repository.** Every `make_visuals*.py` reads only
-the committed `analysis/*/data/*.csv`, so a fresh clone with no activations draws all 70
+the committed `analysis/data/*.csv`, so a fresh clone with no activations draws all 70
 PNGs in about 15 seconds. The compute and analysis stages exist to *re-derive* those
 snapshots; the figures consume whatever is on disk.
 
@@ -75,22 +75,23 @@ Two analysis scripts read the `.pt` tensors directly and no `results/` tree at a
 
 | Figures | Count | Producer | Needs |
 |---|---|---|---|
-| `tsne/` | 28 | `analysis/tsne/compute_tsne_coords.py` | activations |
-| `prompt_structure/` | 1 | `analysis/prompt_structure/analyze_prompt_structure.py` | activations |
-| `clustermap/` | 30 | `analysis/taxonomy/analyze_taxonomy.py` | local: analogy |
-| `retrieval/rankdist`, `rankviolin` | 2 | `analysis/geometry/analyze_geometry.py` | local: anisotropy + analogy + retrieval |
-| `retrieval/analogy3d_*` | 6 | `analysis/analogy/snapshot_quiver3d.py` | local: analogy + retrieval |
-| `probe/` | 1 | `analysis/probe/analyze_sweep.py` | local: probe |
-| `ambiguity/` | 1 | `analysis/ambiguity/analyze_ambiguity.py` | local: probe + analogy + ambiguity |
+| `tsne/` | 28 | `analysis/compute_tsne_coords.py` | activations |
+| `prompt_structure/` | 1 | `analysis/analyze_prompt_structure.py` | activations |
+| `clustermap/` | 30 | `analysis/analyze_taxonomy.py` | local: analogy |
+| `retrieval/rankdist`, `rankviolin` | 2 | `analysis/analyze_geometry.py` | local: anisotropy + analogy + retrieval |
+| `retrieval/analogy3d_*` | 6 | `analysis/snapshot_quiver3d.py` | local: analogy + retrieval |
+| `probe/` | 1 | `analysis/analyze_sweep.py` | local: probe |
+| `ambiguity/` | 1 | `analysis/analyze_ambiguity.py` | local: probe + analogy + ambiguity |
 | `generation/` | 1 | `score_generations.py` → `analyze_generation.py` | **`02_generation_eval` (GPU)** |
 
 Worth being explicit about the division, because the directory names invite the opposite
-reading: **`src/` computes and `analysis/` summarises.** `analysis/probe/analyze_sweep.py`
+reading: **`src/` computes and `analysis/` summarises.** `analysis/analyze_sweep.py`
 does not fit a probe — it contains no sklearn calls at all and reads the `summary_*.json`
 that `src/probe.py` wrote. The same holds for ambiguity, taxonomy, geometry
 and generation. The two activations-only scripts above are the exceptions.
 
-Each `analysis/<topic>/README.md` carries the command that regenerates its own snapshot.
+`analysis/README.md` covers every topic, and each section names the command that
+regenerates its own snapshot.
 
 ## `models.sh`
 

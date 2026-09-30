@@ -18,7 +18,7 @@ model actually says.
 Extraction never generates text — one forward pass per prompt, per-layer hidden states
 pulled via forward hooks, last-token pooled.
 
-**The figures under `analysis/visuals/` are the output.** Everything else exists to produce
+**The figures under `visuals/` are the output.** Everything else exists to produce
 them.
 
 ## What is measured, on what
@@ -47,10 +47,8 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | `config_extract_activation.yaml` | the model, pooling and prompt templates for a run — the one file to edit to change what the pipeline does |
 | `data/` | the 92-molecule dataset |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
-| `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
-| `analysis/figures/` | the 9 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
-| `analysis/visuals/` | **the output.** 70 PNGs, gitignored and rebuilt from the snapshots |
-| `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
+| `analysis/` | one script per analysis, flat, plus the 29 snapshot CSVs in `data/` and one README covering every topic |
+| `visuals/` | the 9 figure generators *and* their output — **70 PNGs**, gitignored, rebuilt from the snapshots. Read only `analysis/data/*.csv`, never `results/` |
 | `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
 | `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.3 GB |
@@ -63,8 +61,8 @@ Four stages. Only the first two need a GPU; the rest is one local command.
 [1] 01_extract.sbatch          GPU  ->  activations/                 160 .pt, ~1.3 GB
 [2] 02_generation_eval.sbatch  GPU  ->  results/generation_eval/     3 files per model
 [3] run_local.sh --stages compute   ->  results/  (7 trees, named below)
-[4] run_local.sh --stages analysis  ->  analysis/*/data/*.csv        29 snapshots, committed
-    run_local.sh --stages figures   ->  analysis/visuals/            70 PNGs
+[4] run_local.sh --stages analysis  ->  analysis/data/*.csv        29 snapshots, committed
+    run_local.sh --stages figures   ->  visuals/            70 PNGs
 ```
 
 ### [1] Activations
@@ -103,7 +101,7 @@ results/generation_eval/<model-slug>/functional_group/data/
 | File | Contents |
 |---|---|
 | `scores.csv` | The **forced choice**: no text is emitted. Each class's surface forms are scored by log-sum-exp and the argmax is the prediction. Per prompt: `pred_raw`, `pred_norm`, `correct_raw`, `correct_norm`, `best_surface_form`, `p_true`, `margin`, plus `logp_<class>` and `logpnorm_<class>` for all 20 classes. |
-| `generations.csv` | The **free continuation**, 10 new tokens, greedy: `iupac_name`, `template_index`, `true_label`, `prompt`, `generation`. Logged verbatim and *not scored by this job* — `analysis/generation/score_generations.py` adjudicates it at [4]. |
+| `generations.csv` | The **free continuation**, 10 new tokens, greedy: `iupac_name`, `template_index`, `true_label`, `prompt`, `generation`. Logged verbatim and *not scored by this job* — `analysis/score_generations.py` adjudicates it at [4]. |
 | `summary.json` | `accuracy`, `balanced_accuracy` and `log_loss` under both `raw` and `length_normalized`, plus `chance` and `mean_top1_margin`. |
 
 Generations contain embedded newlines, so `wc -l` reports more lines than records — read
@@ -134,7 +132,7 @@ they take seconds.
 bash scripts/run_local.sh          # or --stages analysis / --stages figures
 ```
 
-**Analysis** turns `results/` into the 29 committed CSVs under `analysis/*/data/`. That is
+**Analysis** turns `results/` into the 29 committed CSVs under `analysis/data/`. That is
 the reproducibility boundary: past this point nothing reads `results/`. Two ordering
 constraints — `analyze_taxonomy` writes the matrix the clustermaps need, and
 `score_generations` must precede `analyze_generation`, which reads its adjudicated table:

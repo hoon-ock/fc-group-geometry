@@ -24,7 +24,7 @@ echo "=== task=$TASK_ID model=$MODEL ==="
 # The one behavioural stage: every other job probes frozen activations, this one asks the
 # model to answer. It records two things per prompt -- a forced choice scored by log-sum-exp
 # over the surface forms of each class (scores.csv), and the free continuation it actually
-# generates (generations.csv). analysis/generation/ reads both: analyze_generation.py the
+# generates (generations.csv). analysis/ reads both: analyze_generation.py the
 # forced choice, score_generations.py the free text through the same adjudicator this job
 # imports, so the HPC run and the local scoring cannot disagree.
 #

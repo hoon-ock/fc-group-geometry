@@ -7,12 +7,12 @@ activations/
 logs/*
 !logs/.gitkeep
 
-# Figures. Every PNG under analysis/visuals/ is rebuilt from the committed
-# analysis/*/data/*.csv by analysis/paper/make_visuals*.py, so tracking them adds a new
-# binary blob on every regeneration for no information the repo does not already hold.
-# The READMEs and the analogy3d_*.txt readouts beside them ARE tracked -- they are the
-# argument and the numbers, not the rendering.
-analysis/visuals/**/*.png
+# Figures. Every PNG under visuals/ is rebuilt from the committed analysis/data/*.csv by
+# visuals/make_visuals*.py, so tracking them adds a new binary blob on every regeneration
+# for no information the repo does not already hold. The READMEs and the analogy3d_*.txt
+# readouts beside them ARE tracked -- they are the argument and the numbers, not the
+# rendering.
+visuals/**/*.png
 
 # Working copies of the dataset, kept out by the same convention as the source repo.
 __*.csv

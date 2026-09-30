@@ -18,7 +18,7 @@
 # read the npz the earlier stages wrote rather than the tensors. The probe is the long pole.
 #
 # THE FIGURES DO NOT DEPEND ON ANY OF THIS. Every make_visuals*.py reads only the committed
-# analysis/*/data/*.csv, so `--stages figures` works on a fresh clone with no activations at
+# analysis/data/*.csv, so `--stages figures` works on a fresh clone with no activations at
 # all. The compute stages exist to RE-DERIVE those snapshots; the figures consume whatever
 # is on disk.
 
@@ -115,23 +115,23 @@ fi
 
 # ---- 2. analysis: results/ -> the committed snapshot CSVs --------------------------------
 if [ "$STAGES" = all ] || [ "$STAGES" = analysis ]; then
-  echo "== analysis (results/ -> analysis/*/data/) =="
+  echo "== analysis (results/ -> analysis/data/) =="
   # Order matters twice: analyze_taxonomy writes the matrix analyze_geometry does not need
   # but the clustermaps do, and score_generations must precede analyze_generation, which
   # reads its adjudicated table to build the response composition.
-  step "probe/analyze_sweep"                python analysis/probe/analyze_sweep.py || exit 1
-  step "taxonomy/analyze_taxonomy"          python analysis/taxonomy/analyze_taxonomy.py || exit 1
-  step "geometry/analyze_geometry"          python analysis/geometry/analyze_geometry.py || exit 1
-  step "analogy/snapshot_quiver3d"          python analysis/analogy/snapshot_quiver3d.py || exit 1
-  step "ambiguity/analyze_ambiguity"        python analysis/ambiguity/analyze_ambiguity.py || exit 1
-  step "tsne/compute_tsne_coords"           python analysis/tsne/compute_tsne_coords.py || exit 1
-  step "prompt_structure/analyze_prompt_structure" \
-                                            python analysis/prompt_structure/analyze_prompt_structure.py || exit 1
+  step "analyze_sweep"                python analysis/analyze_sweep.py || exit 1
+  step "analyze_taxonomy"          python analysis/analyze_taxonomy.py || exit 1
+  step "analyze_geometry"          python analysis/analyze_geometry.py || exit 1
+  step "snapshot_quiver3d"          python analysis/snapshot_quiver3d.py || exit 1
+  step "analyze_ambiguity"        python analysis/analyze_ambiguity.py || exit 1
+  step "compute_tsne_coords"           python analysis/compute_tsne_coords.py || exit 1
+  step "analyze_prompt_structure" \
+                                            python analysis/analyze_prompt_structure.py || exit 1
   # The behavioural half needs results/generation_eval/, which only the GPU job produces.
   # Absent, the committed snapshots stay as they are and the figure still draws from them.
   if [ -d "$RESULTS/generation_eval" ]; then
-    step "generation/score_generations"     python analysis/generation/score_generations.py || exit 1
-    step "generation/analyze_generation"    python analysis/generation/analyze_generation.py || exit 1
+    step "score_generations"     python analysis/score_generations.py || exit 1
+    step "analyze_generation"    python analysis/analyze_generation.py || exit 1
   else
     printf '  %-46s skipped (no results/generation_eval -- needs a GPU,\n' "generation"
     printf '  %-46s  scripts/02_generation_eval.sbatch)\n' ""
@@ -141,10 +141,10 @@ fi
 
 # ---- 3. figures --------------------------------------------------------------------------
 if [ "$STAGES" = all ] || [ "$STAGES" = figures ]; then
-  echo "== figures (analysis/*/data/ -> analysis/visuals/) =="
-  for f in analysis/figures/make_visuals*.py; do
+  echo "== figures (analysis/data/ -> visuals/) =="
+  for f in visuals/make_visuals*.py; do
     step "$(basename "$f")" python "$f" || exit 1
   done
   echo
-  echo "wrote $(find analysis/visuals -name '*.png' | wc -l | tr -d ' ') PNGs under analysis/visuals/"
+  echo "wrote $(find visuals -name '*.png' | wc -l | tr -d ' ') PNGs under visuals/"
 fi

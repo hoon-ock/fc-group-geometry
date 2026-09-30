@@ -22,6 +22,9 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(ROOT, 'src')
 DATA = os.path.join(ROOT, 'data')
 ANALYSIS = os.path.join(ROOT, 'analysis')
+# The figure generators and the figures they draw. A sibling of analysis/ rather than a
+# subdirectory of it: a generator and its output belong together, and neither is an analysis.
+VISUALS = os.path.join(ROOT, 'visuals')
 SCRIPTS = os.path.join(ROOT, 'scripts')
 
 # Generated, gitignored, overridable.
@@ -38,7 +41,7 @@ DATASET_CSV = os.path.join(DATA, 'functional_group_dataset.csv')
 EXTRACTION_CONFIG = os.path.join(ROOT, 'config_extract_activation.yaml')
 
 # Ordered for the report below: committed roots, generated roots, then the two files.
-_REPORT = ['ROOT', 'SRC', 'DATA', 'ANALYSIS', 'SCRIPTS',
+_REPORT = ['ROOT', 'SRC', 'DATA', 'ANALYSIS', 'VISUALS', 'SCRIPTS',
            'RESULTS', 'ACTIVATIONS', 'LOGS',
            'DATASET_CSV', 'EXTRACTION_CONFIG']
 # Overridable roots, named so the report can show which override is in effect.

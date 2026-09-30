@@ -30,12 +30,12 @@
 #
 # ONE FILE HERE IS NOT A PURE MIRROR. generation_eval/<model>/functional_group/data/
 # summary.json carries a "free_generation" block merged in locally by
-# analysis/generation/score_generations.py -- the behavioural readout that generation_eval.py
+# analysis/score_generations.py -- the behavioural readout that generation_eval.py
 # writes generations.csv for but never scores. summary.json exists on both sides and there is
 # no --delete here, so the remote copy overwrites it and that block goes away. Nothing warns
 # you: results/ is gitignored, so there is no diff to notice. Restore it after a pull:
 #
-#   python analysis/generation/score_generations.py
+#   python analysis/score_generations.py
 #
 # CPU-only, seconds. Excluding the file instead would make the sync rules conditional on one
 # leaf, which is worse than re-deriving something this cheap.
