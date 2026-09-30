@@ -1,0 +1,49 @@
+# Extraction configuration: which model to read, how to pool, and which prompts to run.
+#
+# One entity type. The working tree this was released from carried 23 of them -- the same
+# 92 molecules asked about pKa, TPSA, HBD/HBA, boiling point and so on -- as an
+# attribute-specificity sweep: is functional-group identity present in every last-token
+# state, or only when the prompt asks for it? Every result in this repository comes from
+# the `functional_group` prompts alone, so that is all that ships. The other prompt
+# families are not needed to reproduce anything here.
+#
+# `save_dir` and `data_file` are deliberately absent. They were repository-root-relative
+# strings; extract_activations_subset.py now falls back to paths.ACTIVATIONS and
+# paths.DATASET_CSV. Set either key here to override.
+
+extraction:
+  model_name: "meta-llama/Llama-3.1-8B"
+  # The five released 8B models, each an entry in src/model_registry.py and each
+  # overridable per-run via `extract_activations_subset.py --model-name`:
+  # - "meta-llama/Llama-3.1-8B"                    # base
+  # - "phenixace/Chem-R-Faithful"                  # chemistry-tuned, GRPO from Chem-R-8B
+  # - "weidawang/Chem-R-8B"                        # chemistry-tuned, same Llama-3.1-8B base
+  # - "OpenDFM/ChemDFM-v1.5-8B"                    # chemistry-tuned, but on Llama-3, not 3.1
+  # - "deepseek-ai/DeepSeek-R1-Distill-Llama-8B"   # reasoning-distilled
+  batch_size: 8
+  aggregation: "last"
+
+  quantization:
+    load_in_4bit: false
+    bnb_4bit_use_double_quant: false
+    bnb_4bit_quant_type: "nf4"
+    bnb_4bit_compute_dtype: "float16"
+
+  entities:
+    # Declarative templates: each ends on the slot that would emit the answer, so the
+    # last-token hidden state is read where the functional group is about to be named.
+    # Only {iupac_name} and {smiles} are interpolated -- no measured property enters a
+    # prompt, which is why the dataset here carries identifiers only.
+    - entity_type: "functional_group"
+      prompt_name: "10_templates"
+      templates:
+        - "{iupac_name} ({smiles}) contains the functional group "
+        - "The primary functional group in {iupac_name} ({smiles}) is "
+        - "For {iupac_name} ({smiles}), the functional-group class is "
+        - "{iupac_name} ({smiles}) is classified as a molecule containing a "
+        - "The characteristic functional group of {iupac_name} ({smiles}) is "
+        - "The main functional group present in {iupac_name} ({smiles}) is "
+        - "When classified by functional group, {iupac_name} ({smiles}) is a "
+        - "{iupac_name} ({smiles}) can be categorized by the functional group "
+        - "The functional-group identity of {iupac_name} ({smiles}) is "
+        - "For the molecule {iupac_name} ({smiles}), the defining functional group is "

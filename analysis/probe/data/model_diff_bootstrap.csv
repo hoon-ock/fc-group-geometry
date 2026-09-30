@@ -1,0 +1,2 @@
+entity_type,family,model_a,model_b,layer_a,layer_b,bacc_a,bacc_b,diff_a_minus_b,ci_lo,ci_hi,ci_excludes_zero
+functional_group,declarative,phenixace-Chem-R-Faithful,meta-llama-Llama-3.1-8B,19,29,0.9825595238095238,1.0,-0.017440476190476173,-0.03188411561264819,-0.005833333333333357,1

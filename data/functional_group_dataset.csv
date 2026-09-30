@@ -1,0 +1,93 @@
+iupac_name,common_name,formula,smiles,carbon_count,functional_group,functional_group_structure
+Propane,propane,CH3CH2CH3,CCC,3,none (alkane),C-H / C-C
+Butane,n-butane,CH3CH2CH2CH3,CCCC,4,none (alkane),C-H / C-C
+Pentane,n-pentane,CH3(CH2)3CH3,CCCCC,5,none (alkane),C-H / C-C
+Hexane,n-hexane,CH3(CH2)4CH3,CCCCCC,6,none (alkane),C-H / C-C
+Propan-1-ol,n-propyl alcohol,CH3CH2CH2OH,CCCO,3,alcohol,-OH
+Butan-1-ol,n-butyl alcohol,CH3(CH2)3OH,CCCCO,4,alcohol,-OH
+Pentan-1-ol,n-amyl alcohol,CH3(CH2)4OH,CCCCCO,5,alcohol,-OH
+Hexan-1-ol,n-hexyl alcohol,CH3(CH2)5OH,CCCCCCO,6,alcohol,-OH
+Propane-1-thiol,n-propyl mercaptan,CH3CH2CH2SH,CCCS,3,thiol,-SH
+Butane-1-thiol,n-butyl mercaptan,CH3(CH2)3SH,CCCCS,4,thiol,-SH
+Pentane-1-thiol,n-amyl mercaptan,CH3(CH2)4SH,CCCCCS,5,thiol,-SH
+Hexane-1-thiol,n-hexyl mercaptan,CH3(CH2)5SH,CCCCCCS,6,thiol,-SH
+Propanal,propionaldehyde,CH3CH2CHO,CCC=O,3,aldehyde,-CHO
+Butanal,butyraldehyde,CH3CH2CH2CHO,CCCC=O,4,aldehyde,-CHO
+Pentanal,valeraldehyde,CH3(CH2)3CHO,CCCCC=O,5,aldehyde,-CHO
+Hexanal,caproaldehyde,CH3(CH2)4CHO,CCCCCC=O,6,aldehyde,-CHO
+Propanoic acid,propionic acid,CH3CH2COOH,CCC(O)=O,3,carboxylic acid,-COOH
+Butanoic acid,butyric acid,CH3CH2CH2COOH,CCCC(O)=O,4,carboxylic acid,-COOH
+Pentanoic acid,valeric acid,CH3(CH2)3COOH,CCCCC(O)=O,5,carboxylic acid,-COOH
+Hexanoic acid,caproic acid,CH3(CH2)4COOH,CCCCCC(O)=O,6,carboxylic acid,-COOH
+Propan-1-amine,n-propylamine,CH3CH2CH2NH2,CCCN,3,amine,-NH2
+Butan-1-amine,n-butylamine,CH3(CH2)3NH2,CCCCN,4,amine,-NH2
+Pentan-1-amine,n-amylamine,CH3(CH2)4NH2,CCCCCN,5,amine,-NH2
+Hexan-1-amine,n-hexylamine,CH3(CH2)5NH2,CCCCCCN,6,amine,-NH2
+Propanenitrile,propionitrile,CH3CH2CN,CCC#N,3,nitrile,-C≡N
+Butanenitrile,butyronitrile,CH3CH2CH2CN,CCCC#N,4,nitrile,-C≡N
+Pentanenitrile,valeronitrile,CH3(CH2)3CN,CCCCC#N,5,nitrile,-C≡N
+Hexanenitrile,capronitrile,CH3(CH2)4CN,CCCCCC#N,6,nitrile,-C≡N
+Methyl ethanoate,methyl acetate,CH3COOCH3,CC(=O)OC,3,ester,-COO-
+Methyl propanoate,methyl propionate,CH3CH2COOCH3,CCC(=O)OC,4,ester,-COO-
+Methyl butanoate,methyl butyrate,CH3CH2CH2COOCH3,CCCC(=O)OC,5,ester,-COO-
+Methyl pentanoate,methyl valerate,CH3(CH2)3COOCH3,CCCCC(=O)OC,6,ester,-COO-
+Propan-2-one,acetone,CH3COCH3,CC(=O)C,3,ketone,>C=O
+Butan-2-one,methyl ethyl ketone (MEK),CH3CH2COCH3,CC(=O)CC,4,ketone,>C=O
+Pentan-2-one,methyl propyl ketone,CH3CH2CH2COCH3,CC(=O)CCC,5,ketone,>C=O
+Hexan-2-one,methyl butyl ketone,CH3(CH2)3COCH3,CC(=O)CCCC,6,ketone,>C=O
+Propanamide,propionamide,CH3CH2CONH2,CCC(N)=O,3,amide,-CONH2
+Butanamide,butyramide,CH3CH2CH2CONH2,CCCC(N)=O,4,amide,-CONH2
+Pentanamide,valeramide,CH3(CH2)3CONH2,CCCCC(N)=O,5,amide,-CONH2
+Hexanamide,caproamide,CH3(CH2)4CONH2,CCCCCC(N)=O,6,amide,-CONH2
+1-Chloropropane,n-propyl chloride,CH3CH2CH2Cl,CCCCl,3,alkyl chloride,-Cl
+1-Chlorobutane,n-butyl chloride,CH3(CH2)3Cl,CCCCCl,4,alkyl chloride,-Cl
+1-Chloropentane,n-amyl chloride,CH3(CH2)4Cl,CCCCCCl,5,alkyl chloride,-Cl
+1-Chlorohexane,n-hexyl chloride,CH3(CH2)5Cl,CCCCCCCl,6,alkyl chloride,-Cl
+1-Fluoropropane,n-propyl fluoride,CCCF,CCCF,3,alkyl fluoride,-F
+1-Fluorobutane,n-butyl fluoride,CCCCF,CCCCF,4,alkyl fluoride,-F
+1-Fluoropentane,n-amyl fluoride,CCCCCF,CCCCCF,5,alkyl fluoride,-F
+1-Fluorohexane,n-hexyl fluoride,CCCCCCF,CCCCCCF,6,alkyl fluoride,-F
+1-Bromopropane,n-propyl bromide,CCCBr,CCCBr,3,alkyl bromide,-Br
+1-Bromobutane,n-butyl bromide,CCCCBr,CCCCBr,4,alkyl bromide,-Br
+1-Bromopentane,n-amyl bromide,CCCCCBr,CCCCCBr,5,alkyl bromide,-Br
+1-Bromohexane,n-hexyl bromide,CCCCCCBr,CCCCCCBr,6,alkyl bromide,-Br
+1-Iodopropane,n-propyl iodide,CCCI,CCCI,3,alkyl iodide,-I
+1-Iodobutane,n-butyl iodide,CCCCI,CCCCI,4,alkyl iodide,-I
+1-Iodopentane,n-amyl iodide,CCCCCI,CCCCCI,5,alkyl iodide,-I
+1-Iodohexane,n-hexyl iodide,CCCCCCI,CCCCCCI,6,alkyl iodide,-I
+Methoxyethane,ethyl methyl ether,CCOC,CCOC,3,ether,-O-
+1-Methoxypropane,methyl propyl ether,CCCOC,CCCOC,4,ether,-O-
+1-Methoxybutane,methyl butyl ether,CCCCOC,CCCCOC,5,ether,-O-
+1-Methoxypentane,methyl pentyl ether,CCCCCOC,CCCCCOC,6,ether,-O-
+(Methylsulfanyl)ethane,ethyl methyl sulfide,CCSC,CCSC,3,thioether,-S-
+1-(Methylsulfanyl)propane,methyl propyl sulfide,CCCSC,CCCSC,4,thioether,-S-
+1-(Methylsulfanyl)butane,methyl butyl sulfide,CCCCSC,CCCCSC,5,thioether,-S-
+1-(Methylsulfanyl)pentane,methyl pentyl sulfide,CCCCCSC,CCCCCSC,6,thioether,-S-
+Methyl ethyl sulfoxide,methyl ethyl sulfoxide,CS(=O)CC,CS(=O)CC,3,sulfoxide,>S=O
+Methyl propyl sulfoxide,methyl propyl sulfoxide,CS(=O)CCC,CS(=O)CCC,4,sulfoxide,>S=O
+Methyl butyl sulfoxide,methyl butyl sulfoxide,CS(=O)CCCC,CS(=O)CCCC,5,sulfoxide,>S=O
+Methyl pentyl sulfoxide,methyl pentyl sulfoxide,CS(=O)CCCCC,CS(=O)CCCCC,6,sulfoxide,>S=O
+Methyl ethyl sulfone,methyl ethyl sulfone,CS(=O)(=O)CC,CS(=O)(=O)CC,3,sulfone,>SO2
+Methyl propyl sulfone,methyl propyl sulfone,CS(=O)(=O)CCC,CS(=O)(=O)CCC,4,sulfone,>SO2
+Methyl butyl sulfone,methyl butyl sulfone,CS(=O)(=O)CCCC,CS(=O)(=O)CCCC,5,sulfone,>SO2
+Methyl pentyl sulfone,methyl pentyl sulfone,CS(=O)(=O)CCCCC,CS(=O)(=O)CCCCC,6,sulfone,>SO2
+Propan-1-imine,propionaldehyde imine,CCC=N,CCC=N,3,imine,-CH=NH
+Butan-1-imine,butyraldehyde imine,CCCC=N,CCCC=N,4,imine,-CH=NH
+Pentan-1-imine,valeraldehyde imine,CCCCC=N,CCCCC=N,5,imine,-CH=NH
+Hexan-1-imine,caproaldehyde imine,CCCCCC=N,CCCCCC=N,6,imine,-CH=NH
+1-Nitropropane,1-nitropropane,CCC[N+](=O)[O-],CCC[N+](=O)[O-],3,nitro,-NO2
+1-Nitrobutane,1-nitrobutane,CCCC[N+](=O)[O-],CCCC[N+](=O)[O-],4,nitro,-NO2
+1-Nitropentane,1-nitropentane,CCCCC[N+](=O)[O-],CCCCC[N+](=O)[O-],5,nitro,-NO2
+1-Nitrohexane,1-nitrohexane,CCCCCC[N+](=O)[O-],CCCCCC[N+](=O)[O-],6,nitro,-NO2
+Propan-2-ol,isopropanol,CC(O)C,CC(O)C,3,alcohol,-OH
+Butan-2-ol,sec-butanol,CC(O)CC,CC(O)CC,4,alcohol,-OH
+Pentan-2-ol,sec-amyl alcohol,CC(O)CCC,CC(O)CCC,5,alcohol,-OH
+Hexan-2-ol,sec-hexyl alcohol,CC(O)CCCC,CC(O)CCCC,6,alcohol,-OH
+Propan-2-amine,isopropylamine,CC(N)C,CC(N)C,3,amine,-NH2
+Butan-2-amine,sec-butylamine,CC(N)CC,CC(N)CC,4,amine,-NH2
+Pentan-2-amine,sec-amylamine,CC(N)CCC,CC(N)CCC,5,amine,-NH2
+Hexan-2-amine,sec-hexylamine,CC(N)CCCC,CC(N)CCCC,6,amine,-NH2
+Propane-2-thiol,isopropyl mercaptan,CC(S)C,CC(S)C,3,thiol,-SH
+Butane-2-thiol,sec-butyl mercaptan,CC(S)CC,CC(S)CC,4,thiol,-SH
+Pentane-2-thiol,sec-amyl mercaptan,CC(S)CCC,CC(S)CCC,5,thiol,-SH
+Hexane-2-thiol,sec-hexyl mercaptan,CC(S)CCCC,CC(S)CCCC,6,thiol,-SH

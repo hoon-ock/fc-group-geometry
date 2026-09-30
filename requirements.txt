@@ -1,21 +1,27 @@
+# Pinned to the versions the released results were produced with.
+#
+# rdkit and requests are absent on purpose: they were only needed by the dataset builder
+# that fetched the molecular property columns, and this release ships the dataset as a
+# given input with identifiers only.
 
 numpy==1.23.5
 scipy==1.10.0
 pandas==2.0.3
+scikit_learn==1.2.2
+
 matplotlib==3.7.5
 seaborn==0.13.2
-scikit_learn==1.2.2
-tqdm==4.66.3
-requests==2.32.2
-fsspec==2024.5.0
-rdkit==2026.3.5
 
+# Extraction and the behavioural stage only. Everything under analysis/ is CPU-only and
+# needs no more than the four packages above -- torch appears in the probe solely as
+# torch.load(..., map_location="cpu").
+torch
 transformers==4.45.2
-
 einops==0.8.1
-
-bitsandbytes==0.47.0
-
 accelerate>=0.26.0
 
+# 4-bit quantization. Linux + NVIDIA only; on macOS/CPU extraction falls back to fp16/bf16.
+bitsandbytes==0.47.0
+
 PyYAML==6.0.1
+tqdm==4.66.3

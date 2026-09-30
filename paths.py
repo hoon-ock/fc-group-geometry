@@ -27,20 +27,17 @@ SCRIPTS = os.path.join(ROOT, 'scripts')
 RESULTS = os.environ.get('FCG_RESULTS', os.path.join(ROOT, 'results'))
 ACTIVATIONS = os.environ.get('FCG_ACTIVATIONS', os.path.join(ROOT, 'activations'))
 LOGS = os.environ.get('FCG_LOGS', os.path.join(ROOT, 'logs'))
-# Figure and table output. The paper's .tex sources live in their own repository, so the
-# default writes here and `--out-dir` points at that clone when the paper is built.
-PAPER_OUT = os.environ.get('FCG_PAPER_OUT', os.path.join(ROOT, 'paper_out'))
 
 DATASET_CSV = os.path.join(DATA, 'functional_group_dataset.csv')
 EXTRACTION_CONFIG = os.path.join(DATA, 'config_extract_activation.yaml')
 
 # Ordered for the report below: committed roots, generated roots, then the two files.
 _REPORT = ['ROOT', 'SRC', 'DATA', 'ANALYSIS', 'SCRIPTS',
-           'RESULTS', 'ACTIVATIONS', 'LOGS', 'PAPER_OUT',
+           'RESULTS', 'ACTIVATIONS', 'LOGS',
            'DATASET_CSV', 'EXTRACTION_CONFIG']
 # Overridable roots, named so the report can show which override is in effect.
 _ENV = {'RESULTS': 'FCG_RESULTS', 'ACTIVATIONS': 'FCG_ACTIVATIONS',
-        'LOGS': 'FCG_LOGS', 'PAPER_OUT': 'FCG_PAPER_OUT'}
+        'LOGS': 'FCG_LOGS'}
 
 
 def main():

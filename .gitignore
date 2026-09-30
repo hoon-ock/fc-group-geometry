@@ -6,7 +6,6 @@ results/
 activations/
 logs/*
 !logs/.gitkeep
-paper_out/
 
 # Figures. Every PNG under analysis/visuals/ is rebuilt from the committed
 # analysis/*/data/*.csv by analysis/paper/make_visuals*.py, so tracking them adds a new

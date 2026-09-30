@@ -1,7 +1,7 @@
 # Functional Group Geometry in LLM Hidden States
 
-Do LLM hidden states encode organic functional groups as a consistent geometric
-structure, analogous to word2vec-style analogies (`king - man + woman ~= queen`)?
+Do LLM hidden states encode organic functional groups as a consistent geometric structure,
+analogous to word2vec-style analogies (`king - man + woman ~= queen`)?
 
 For each non-alkane molecule the pipeline defines
 
@@ -9,41 +9,93 @@ For each non-alkane molecule the pipeline defines
 diff_vec(group, C) = act(molecule with `group` at chain length C) - act(alkane backbone at the same chain length C)
 ```
 
-e.g. `diff_vec(alcohol, 3) = act(propan-1-ol) - act(propane)`, then analyzes the geometry
-of those difference vectors: within-class consistency across chain lengths, between-class
-distinctness, retrieval, an anisotropy baseline, a layer-wise linear probe, and a
-behavioural free-generation counterpart. Extraction never generates text -- one forward
-pass per prompt, per-layer hidden states pulled via forward hooks.
+e.g. `diff_vec(alcohol, 3) = act(propan-1-ol) - act(propane)`, then measures the geometry of
+those difference vectors: within-class consistency across chain lengths, between-class
+distinctness, analogy retrieval, an anisotropy baseline, a layer-wise linear probe, and a
+behavioural free-generation counterpart to check whether any of it shows up in what the
+model actually says.
 
-> **Migration in progress.** This repository is being assembled from the `fc_group/`
-> subdirectory of an earlier working tree. `MIGRATION.md` tracks what has landed and the
-> path rewrites each file needs. Until it is complete, this README is a skeleton and the
-> sections below are the layout contract, not a usage guide.
+Extraction never generates text — one forward pass per prompt, per-layer hidden states
+pulled via forward hooks, last-token pooled.
+
+**The figures under `analysis/visuals/` are the output.** Everything else exists to produce
+them.
+
+## What is measured, on what
+
+92 molecules × 20 functional groups × 10 declarative prompt templates = 920 prompts, run
+through five 8B checkpoints at all 32 layers.
+
+| | |
+|---|---|
+| `meta-llama/Llama-3.1-8B` | base |
+| `weidawang/Chem-R-8B` | chemistry-tuned, same base |
+| `phenixace/Chem-R-Faithful` | chemistry-tuned, GRPO-trained *from* Chem-R-8B |
+| `OpenDFM/ChemDFM-v1.5-8B` | chemistry-tuned, but on Llama-3 rather than 3.1 |
+| `deepseek-ai/DeepSeek-R1-Distill-Llama-8B` | reasoning-distilled |
+
+The set is deliberately all-Llama at one size, so every contrast varies one thing against a
+shared architecture and tokenizer. ChemDFM is the exception and is marked as such everywhere
+it appears: it sits on Llama-3, so a ChemDFM-vs-base gap confounds chemistry training with
+the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what carries that.
 
 ## Layout
 
 | Path | Contents |
 |---|---|
-| `paths.py` | Every path in the project, resolved from its own location. Import this; never hardcode. |
-| `data/` | Committed inputs: the curated molecule dataset and the extraction/prompt config |
-| `src/` | The pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, t-SNE, generation eval |
-| `analysis/` | One directory per analysis topic, each with the `analyze_*.py` and the `data/*.csv` snapshot it writes |
-| `analysis/paper/` | Table, figure and verification generators. Read only `analysis/*/data/*.csv` -- never `results/` |
-| `scripts/` | SLURM jobs for the sweep, plus `scripts/chem/` for the chemistry-model track |
-| `results/` | Generated, gitignored. Raw per-model pipeline output |
-| `activations/` | Generated, gitignored. Saved hidden-state tensors, one subdirectory per model |
-| `paper_out/` | Generated, gitignored. Figure and table output |
+| `paths.py` | every path in the project, resolved from its own location. Import this; never hardcode |
+| `data/` | the 92-molecule dataset and the extraction/prompt config |
+| `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, separability, generation eval |
+| `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
+| `analysis/figures/` | the 12 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
+| `analysis/visuals/` | **the output.** 88 PNGs, gitignored and rebuilt from the snapshots |
+| `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
+| `scripts/` | nine SLURM array jobs that fill `results/` and `activations/` |
+| `results/` | generated, gitignored. Raw per-model pipeline output |
+| `activations/` | generated, gitignored. Saved hidden states, ~1.1 GB |
+
+## Reproducing the figures
+
+Two entry points, depending on how far back you want to start.
+
+**From the committed snapshots** — no GPU, no cluster, no `results/`, about a minute:
+
+```bash
+pip install -r requirements.txt
+cd analysis/figures
+for f in make_visuals*.py; do python "$f"; done
+python make_visuals_prompt_structure.py --column raw   # the second variant
+```
+
+That rebuilds all 88 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
+works is the reproducibility test the whole layout is arranged around: no generator may read
+`results/`, so if one ever needs it, a snapshot step was missed upstream.
+
+**From scratch**, which needs a GPU and re-derives the snapshots too:
+
+```bash
+export HF_TOKEN=...                        # the Llama checkpoints are gated
+sbatch scripts/01_extract.sbatch           # then 02..08 -- see scripts/README.md
+python analysis/probe/analyze_sweep.py     # and the other analyze_*.py
+```
+
+`scripts/README.md` has the job order and dependencies; each `analysis/<topic>/README.md`
+has the command that regenerates its own snapshot. The order among the analyses is:
+`analyze_sweep` → `analyze_taxonomy` → `analyze_block_cohesion` → `analyze_geometry` →
+`analyze_analogy` → `snapshot_quiver3d` → `analyze_ambiguity` → `compute_tsne_coords` →
+`analyze_prompt_structure` → `score_generations` → `analyze_generation` →
+`analyze_generation_vs_representation`.
 
 ## Paths
 
-`paths.py` is the single source of truth, resolved from `__file__`. Scripts therefore run
+`paths.py` is the single source of truth, resolved from `__file__`, so every script runs
 from any working directory:
 
 ```bash
 python paths.py          # print every root, marked ok / MISSING
 ```
 
-The four generated roots take an environment override, which is what a cluster run needs
+The three generated roots take an environment override, which is what a cluster run needs
 when the home quota cannot hold the activation tensors:
 
 ```bash
@@ -51,8 +103,40 @@ export FCG_ACTIVATIONS=/work/$USER/fc_group/activations
 export FCG_RESULTS=/work/$USER/fc_group/results
 ```
 
-`FCG_LOGS` and `FCG_PAPER_OUT` work the same way. Output directories are created by the
-scripts that write them, so a fresh clone needs no `mkdir`.
+`FCG_LOGS` works the same way. Output directories are created by the scripts that write
+them, so a fresh clone needs no `mkdir`.
+
+## Adding a model
+
+`model_name` is a config/CLI parameter, not hardcoded. Since the pipeline only does forward
+passes — no chat template, no output parsing — a new checkpoint needs no prompt-format work.
+It needs an entry in `src/model_registry.py` and must satisfy two constraints: it exposes
+`model.model.layers` (true for Llama/Mistral/Qwen-family causal LMs in `transformers`, not
+guaranteed generally), and the *installed* `transformers` must recognise its `model_type` —
+a newer architecture than the environment knows fails inside `AutoConfig.from_pretrained`
+only after the weights have downloaded.
+
+```bash
+python src/check_model_registry.py
+```
+
+checks both, plus `hidden_dim`/`num_layers` against the model's real `config.json`, in
+seconds and without a GPU. Run it before adding an entry or submitting a sweep.
+
+Registered is not the same as swept: `scripts/models.sh` does a subset check and names any
+registered-but-unswept model on startup.
+
+## Scope
+
+One prompt type ships. The working tree this was released from swept 23 — the same 92
+molecules asked about pKa, TPSA, boiling point and so on — as an attribute-specificity
+matrix asking whether functional-group identity is present in every last-token state or only
+when the prompt asks for it. Every released result comes from the `functional_group`
+declarative prompts alone, so that is all the config declares, and the dataset here carries
+identifiers only (no measured property columns — nothing interpolates them into a prompt).
+
+The `entity_type` and `family` columns survive in the CSVs because the analysis scripts are
+unchanged and would emit more if more prompt types were extracted.
 
 ## Setup
 
@@ -61,20 +145,11 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-`bitsandbytes` 4-bit quantization is Linux + NVIDIA only; on macOS/CPU the extraction
-falls back to plain fp16/bf16. Gated checkpoints need Hugging Face auth -- `export
-HF_TOKEN=...` (checked first, and the one to use on a cluster) or `huggingface-cli login`
-once. Do not put a token in the tracked config.
+Everything under `analysis/` is CPU-only. `bitsandbytes` 4-bit quantization is Linux +
+NVIDIA only; on macOS/CPU extraction falls back to fp16/bf16. Gated checkpoints need
+`export HF_TOKEN=...` (checked first, and the one to use on a cluster) or a one-time
+`huggingface-cli login`. Do not put a token in the tracked config.
 
-## Reproducibility
+## License
 
-The paper is rebuilt from committed artifacts alone -- no GPU, no `results/`:
-
-```bash
-python analysis/paper/check_claims.py     # assert the numbers the argument rests on
-python analysis/paper/make_figures.py     # -> paper_out/
-python analysis/paper/make_tables.py      # -> paper_out/
-```
-
-That these read only `analysis/*/data/*.csv` is the reproducibility test: if one of them
-ever needs `results/`, a snapshot step was missed upstream.
+See `LICENSE`.
