@@ -48,7 +48,7 @@ the 3 → 3.1 difference and is never a controlled contrast. Chem-R-8B is what c
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, separability, generation eval |
 | `analysis/<topic>/` | one directory per analysis, each with its `analyze_*.py`, the `data/*.csv` snapshot it writes, and a README arguing what the numbers show |
 | `analysis/figures/` | the 12 figure generators. Read only `analysis/*/data/*.csv` — never `results/` |
-| `analysis/visuals/` | **the output.** 88 PNGs, gitignored and rebuilt from the snapshots |
+| `analysis/visuals/` | **the output.** 78 PNGs, gitignored and rebuilt from the snapshots |
 | `analysis/narrative/` | interpretation notes, each number traced to a committed CSV |
 | `scripts/` | nine SLURM array jobs that fill `results/` and `activations/` |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
@@ -67,7 +67,7 @@ for f in make_visuals*.py; do python "$f"; done
 python make_visuals_prompt_structure.py --column raw   # the second variant
 ```
 
-That rebuilds all 88 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
+That rebuilds all 78 PNGs from the `analysis/*/data/*.csv` files in this repository. That it
 works is the reproducibility test the whole layout is arranged around: no generator may read
 `results/`, so if one ever needs it, a snapshot step was missed upstream.
 
@@ -81,7 +81,7 @@ python analysis/probe/analyze_sweep.py     # and the other analyze_*.py
 
 `scripts/README.md` has the job order and dependencies; each `analysis/<topic>/README.md`
 has the command that regenerates its own snapshot. The order among the analyses is:
-`analyze_sweep` → `analyze_taxonomy` → `analyze_block_cohesion` → `analyze_geometry` →
+`analyze_sweep` → `analyze_taxonomy` → `analyze_geometry` →
 `analyze_analogy` → `snapshot_quiver3d` → `analyze_ambiguity` → `compute_tsne_coords` →
 `analyze_prompt_structure` → `score_generations` → `analyze_generation` →
 `analyze_generation_vs_representation`.

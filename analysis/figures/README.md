@@ -16,7 +16,7 @@ cd /tmp/repro/analysis/figures && python3 make_visuals_probe.py && python3 make_
 
 If a generator needs `results/`, a snapshot step is missing upstream. Three such gaps were
 found and closed this way: `generation/` (the behavioural half of the argument),
-`taxonomy/between_class_matrix.csv` (the dendrograms), and `probe/confusion_errors.csv` (the
+`taxonomy/between_class_matrix.csv` (the clustermaps), and `probe/confusion_errors.csv` (the
 nitrogen→oxygen counts, which had been read from an uncommitted tree).
 
 `_common.load()` is what enforces it — it resolves paths relative to `analysis/` only, and
@@ -28,7 +28,7 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 
 | Generator | Output | Reads |
 |---|---|---|
-| `make_visuals.py` | `clustermap/`: `heat_<model>_L<layer>.png`, `heatrow_`, `cohesion_`, `combined_` (40 PNGs) | `taxonomy/between_class_matrix.csv`, `geometry/block_cohesion_by_layer.csv` |
+| `make_visuals.py` | `clustermap/`: `heat_<model>_L<layer>.png` (25), `heatrow_<model>.png` (5) | `taxonomy/between_class_matrix.csv` |
 | `make_visuals_tsne.py` | `tsne/tsne_depth_{coarse,fine,template}.png`, plus per-model `fine_L<layer>.png` | `tsne/tsne_coords.csv`, `probe/layer_curves.csv` |
 | `make_visuals_probe.py` | `probe/probe_depth.png` | `probe/layer_curves.csv`, `probe/surface_baseline.csv` |
 | `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `ambiguity/ambiguity_family_probability.csv` |
