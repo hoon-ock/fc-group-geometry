@@ -1,0 +1,41 @@
+# --- Generated artifacts -------------------------------------------------------
+# Everything here is rebuilt by the pipeline. The committed reproducibility layer is
+# analysis/*/data/*.csv -- the snapshots the paper's tables and figures are built from.
+# If a figure generator ever needs results/, a snapshot step was missed upstream.
+results/
+activations/
+logs/*
+!logs/.gitkeep
+paper_out/
+
+# Figures. Every PNG under analysis/visuals/ is rebuilt from the committed
+# analysis/*/data/*.csv by analysis/paper/make_visuals*.py, so tracking them adds a new
+# binary blob on every regeneration for no information the repo does not already hold.
+# The READMEs and the analogy3d_*.txt readouts beside them ARE tracked -- they are the
+# argument and the numbers, not the rendering.
+analysis/visuals/**/*.png
+
+# Working copies of the dataset, kept out by the same convention as the source repo.
+__*.csv
+
+# --- Cluster ------------------------------------------------------------------
+slurm-*.out
+slurm-*.err
+
+# --- Python -------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv
+venv/
+env/
+.Python
+*.egg-info/
+build/
+dist/
+
+# --- Editors and OS -----------------------------------------------------------
+.DS_Store
+.ipynb_checkpoints
+.claude/
