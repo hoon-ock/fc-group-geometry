@@ -641,7 +641,8 @@ def save_json(data, output_path):
 # Orchestration
 # ============================
 
-def run_layer(layer, df, alkane_index, entity_type, activations_dir, num_null_samples, output_dir, rng):
+def run_layer(layer, df, alkane_index, entity_type, activations_dir, num_null_samples,
+              output_dir, rng, make_plots=True):
     print(f"\n=== Layer {layer} ===")
     file_path = os.path.join(activations_dir, find_layer_file(activations_dir, entity_type, layer))
     activations = load_activations(file_path)
@@ -730,7 +731,7 @@ def run_layer(layer, df, alkane_index, entity_type, activations_dir, num_null_sa
             ['pair_a_group1', 'pair_a_group2', 'pair_b_group1', 'pair_b_group2', 'carbon_count', 'cosine_sim'],
             os.path.join(output_dir, 'data', f'second_order_analogy_by_carbon_layer_{layer}.csv'),
         )
-    if by_carbon_plot_data:
+    if by_carbon_plot_data and make_plots:
         plot_second_order_analogy_by_carbon(
             by_carbon_plot_data, layer,
             os.path.join(output_dir, f'second_order_analogy_by_carbon_layer_{layer}.png'),
@@ -766,51 +767,52 @@ def run_layer(layer, df, alkane_index, entity_type, activations_dir, num_null_sa
         **{f'{group}_{C}': vec for group, C, vec in diffs_flat},
     )
 
-    plot_within_class_small_multiples(
-        within_matrices, chain_labels_by_group, layer,
-        os.path.join(output_dir, f'within_class_heatmap_layer_{layer}.png'),
-    )
-    plot_between_class_heatmap(
-        between_matrix, between_groups, layer,
-        os.path.join(output_dir, f'between_class_heatmap_layer_{layer}.png'),
-    )
-    plot_between_class_clustermap(
-        between_matrix, between_groups, layer,
-        os.path.join(output_dir, f'between_class_clustermap_layer_{layer}.png'),
-    )
-    plot_between_class_heatmap(
-        bc_mean_matrix, between_groups, layer,
-        os.path.join(output_dir, f'between_class_heatmap_by_carbon_layer_{layer}.png'),
-        title_suffix='carbon-matched',
-    )
-    plot_between_class_clustermap(
-        bc_mean_matrix, between_groups, layer,
-        os.path.join(output_dir, f'between_class_clustermap_by_carbon_layer_{layer}.png'),
-        title_suffix='carbon-matched',
-    )
-    plot_between_class_by_carbon_spread(
-        bc_std_matrix, between_groups, layer,
-        os.path.join(output_dir, f'between_class_by_carbon_std_layer_{layer}.png'),
-    )
-    sims_by_C_by_quadruple = {(pair_a, pair_b): sims_by_C for pair_a, pair_b, sims_by_C, _ in by_carbon_plot_data}
-    for pair_a, pair_b in ANALOGY_QUADRUPLES:
-        missing = [g for g in (*pair_a, *pair_b) if g not in mean_diff_by_group]
-        if missing:
-            continue
-        slug = '_'.join(g.replace(' ', '-') for g in (*pair_a, *pair_b))
-        plot_diff_vector_quiver_3d(
-            mean_diff_by_group, layer,
-            os.path.join(output_dir, f'diff_vector_quiver_3d_layer_{layer}_{slug}.png'),
-            highlight_pair=(pair_a, pair_b),
+    if make_plots:
+        plot_within_class_small_multiples(
+            within_matrices, chain_labels_by_group, layer,
+            os.path.join(output_dir, f'within_class_heatmap_layer_{layer}.png'),
         )
-        for C in sims_by_C_by_quadruple[(pair_a, pair_b)]:
-            diff_at_C = build_diff_by_group_at_carbon(diffs, C)
+        plot_between_class_heatmap(
+            between_matrix, between_groups, layer,
+            os.path.join(output_dir, f'between_class_heatmap_layer_{layer}.png'),
+        )
+        plot_between_class_clustermap(
+            between_matrix, between_groups, layer,
+            os.path.join(output_dir, f'between_class_clustermap_layer_{layer}.png'),
+        )
+        plot_between_class_heatmap(
+            bc_mean_matrix, between_groups, layer,
+            os.path.join(output_dir, f'between_class_heatmap_by_carbon_layer_{layer}.png'),
+            title_suffix='carbon-matched',
+        )
+        plot_between_class_clustermap(
+            bc_mean_matrix, between_groups, layer,
+            os.path.join(output_dir, f'between_class_clustermap_by_carbon_layer_{layer}.png'),
+            title_suffix='carbon-matched',
+        )
+        plot_between_class_by_carbon_spread(
+            bc_std_matrix, between_groups, layer,
+            os.path.join(output_dir, f'between_class_by_carbon_std_layer_{layer}.png'),
+        )
+        sims_by_C_by_quadruple = {(pair_a, pair_b): sims_by_C for pair_a, pair_b, sims_by_C, _ in by_carbon_plot_data}
+        for pair_a, pair_b in ANALOGY_QUADRUPLES:
+            missing = [g for g in (*pair_a, *pair_b) if g not in mean_diff_by_group]
+            if missing:
+                continue
+            slug = '_'.join(g.replace(' ', '-') for g in (*pair_a, *pair_b))
             plot_diff_vector_quiver_3d(
-                diff_at_C, layer,
-                os.path.join(output_dir, f'diff_vector_quiver_3d_layer_{layer}_{slug}_C{C}.png'),
+                mean_diff_by_group, layer,
+                os.path.join(output_dir, f'diff_vector_quiver_3d_layer_{layer}_{slug}.png'),
                 highlight_pair=(pair_a, pair_b),
-                carbon_count=C,
             )
+            for C in sims_by_C_by_quadruple[(pair_a, pair_b)]:
+                diff_at_C = build_diff_by_group_at_carbon(diffs, C)
+                plot_diff_vector_quiver_3d(
+                    diff_at_C, layer,
+                    os.path.join(output_dir, f'diff_vector_quiver_3d_layer_{layer}_{slug}_C{C}.png'),
+                    highlight_pair=(pair_a, pair_b),
+                    carbon_count=C,
+                )
 
     return {
         'within_scores': within_scores,
@@ -850,6 +852,14 @@ def parse_args():
     parser.add_argument('--num-null-samples', type=int, default=DEFAULT_NUM_NULL_SAMPLES,
                          help="Number of cross-group pairs to sample for the empirical null. "
                               "Default: %(default)s")
+    # 212 PNGs per model at the default five layers, and no released figure reads any of
+    # them -- the 3D quivers in particular were superseded by visuals/analogy3d_*, drawn
+    # from the committed analogy_quiver3d.csv instead. They stay ON by default because they
+    # are worth eyeballing on a manual run; scripts/run_local.sh opts out. Suppressing them
+    # changes no CSV, npz or JSON, which the snapshots coming back byte-identical asserts.
+    parser.add_argument('--no-plots', action='store_true',
+                        help="Skip every figure. The CSVs, the npz and the JSON summary are "
+                             "unaffected; this is most of the runtime.")
     return parser.parse_args()
 
 
@@ -886,16 +896,19 @@ def main():
     summary_by_layer = {}
     within_by_group_layer = {}
     for layer in layers:
-        result = run_layer(layer, df, alkane_index, entity_type, activations_dir, args.num_null_samples, output_dir, rng)
+        result = run_layer(layer, df, alkane_index, entity_type, activations_dir,
+                           args.num_null_samples, output_dir, rng,
+                           make_plots=not args.no_plots)
         summary_by_layer[layer] = result
         within_by_group_layer[layer] = result['within_scores']
 
     groups = summary_by_layer[layers[0]]['groups']
-    plot_layer_trend(summary_by_layer, os.path.join(output_dir, 'layer_trend.png'))
-    plot_within_consistency_by_group_and_layer(
-        within_by_group_layer, groups, layers,
-        os.path.join(output_dir, 'within_consistency_by_group_and_layer.png'),
-    )
+    if not args.no_plots:
+        plot_layer_trend(summary_by_layer, os.path.join(output_dir, 'layer_trend.png'))
+        plot_within_consistency_by_group_and_layer(
+            within_by_group_layer, groups, layers,
+            os.path.join(output_dir, 'within_consistency_by_group_and_layer.png'),
+        )
 
     save_json(
         {str(L): {k: v for k, v in s.items() if k != 'groups'} for L, s in summary_by_layer.items()},

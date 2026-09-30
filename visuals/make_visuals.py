@@ -168,11 +168,10 @@ def heat_row(fig, axes, model, groups, z_by, order, lim, tick_fs, cb_label_fs, c
              cb_fraction, cb_pad, title_fs=None):
     """Five clustermaps in one row on pre-made axes, sharing one colour limit.
 
-    Used by BOTH `combined_figure` and `heatrow_figure`, so the two can never disagree about
+    Used by both `heat_figure` and `heatrow_figure`, so the two can never disagree about
     the arrays, the leaf order or the scale -- they differ only in page geometry and type
-    size, which is everything the caller passes in. The axes arrive already allocated because
-    the callers lay out differently: the composite takes its row from a 2-row gridspec, the
-    standalone owns the whole figure.
+    size, which is everything the caller passes in. The axes arrive already allocated
+    because the callers lay out differently: one panel per figure against five in a row.
 
     The colourbar is attached to THESE axes, never to `fig.axes`: in the composite that would
     stretch the bar over the trajectory panel below, which is a different quantity in
@@ -204,10 +203,10 @@ def heat_row(fig, axes, model, groups, z_by, order, lim, tick_fs, cb_label_fs, c
 
 
 def heatrow_figure(model, groups, z_by, order, lim):
-    """The composite's clustermap row, alone: five depths, one colour limit, no trajectory.
+    """All five depths in one row: one colour limit, larger type, read on its own.
 
-    Same `heat_row` the composite calls, so this is a re-layout of the top half of
-    `combined_<model>.png` and never a second opinion about the numbers.
+    Same `heat_row` that `heat_figure` calls, so this is a re-layout of the same arrays and
+    never a second opinion about the numbers.
     """
     fig, axes = plt.subplots(1, len(LAYERS), figsize=ROW_SIZE,
                              gridspec_kw=dict(wspace=0.06))

@@ -18,11 +18,17 @@ bash scripts/run_local.sh --stages analysis     # all of them, in dependency ord
 | ambiguity | `analyze_ambiguity.py` | [The convention-labelled groups, read two ways](#the-convention-labelled-groups-read-two-ways) |
 | tsne | `compute_tsne_coords.py` | [t-SNE of the activations](#t-sne-of-the-activations) |
 | prompt_structure | `analyze_prompt_structure.py` | [Prompt wording or chemistry? A depth curve](#prompt-wording-or-chemistry-a-depth-curve) |
-| generation | `analyze_generation.py`, `score_generations.py` | — (never had a write-up) |
+| generation | `analyze_generation.py`, `score_generations.py` | — see below |
 
 Two of these read the activations rather than `results/` — `compute_tsne_coords.py` and
 `analyze_prompt_structure.py` — so their figures need only the extraction stage. The figure
 generators and their output live in `visuals/`.
+
+**The generation topic has no section here.** It is the one analysis that never had a
+write-up, and inventing one after the fact would mean asserting readings nobody checked. Its
+two scripts are documented by their own module docstrings, and the figure they feed is
+argued in `visuals/generation/README.md` — which carries the numbers, the three failure modes
+strict recall pools together, and the commitment claim.
 
 ---
 

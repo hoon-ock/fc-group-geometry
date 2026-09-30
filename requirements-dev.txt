@@ -1,0 +1,7 @@
+# Test-only. requirements.txt stays the pinned runtime set that reproduces the published
+# results -- a reader rebuilding figures should not have to install a test runner.
+#
+#   pip install -r requirements-dev.txt && pytest
+-r requirements.txt
+
+pytest>=8,<9

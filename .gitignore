@@ -38,3 +38,6 @@ dist/
 .DS_Store
 .ipynb_checkpoints
 .claude/
+
+# pytest
+.pytest_cache/

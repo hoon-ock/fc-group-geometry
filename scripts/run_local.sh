@@ -13,9 +13,10 @@
 # plus pull_results.sh buys nothing. What still needs a GPU is in scripts/*.sbatch: the
 # extraction itself and the behavioural generation eval.
 #
-# Measured on an M-series laptop, per model: anisotropy ~6 s, analogy ~1-3 min (the null
-# dominates), probe ~8 min for all 32 layers, retrieval and ambiguity seconds each -- they
-# read the npz the earlier stages wrote rather than the tensors. The probe is the long pole.
+# Measured on an M-series laptop, per model: anisotropy ~6 s, analogy ~2 s with --no-plots
+# (47 s without -- the figures are 95% of it), probe ~8 min for all 32 layers, retrieval and
+# ambiguity seconds each since they read the npz the earlier stages wrote rather than the
+# tensors. The probe is the long pole by a wide margin.
 #
 # THE FIGURES DO NOT DEPEND ON ANY OF THIS. Every make_visuals*.py reads only the committed
 # analysis/data/*.csv, so `--stages figures` works on a fresh clone with no activations at
@@ -94,16 +95,22 @@ if [ "$STAGES" = all ] || [ "$STAGES" = compute ]; then
       python src/anisotropy_diagnostic.py --model-name "$MODEL" --entity-type "$ENTITY" \
         --layers 0,8,16,24,31 || exit 1
     # Carbon-matched: writes the diff-vector npz that retrieval and taxonomy both read.
+    # --no-plots because it draws 212 PNGs per model that no released figure reads -- the 3D
+    # quivers were superseded by visuals/analogy3d_*, drawn from the committed
+    # analogy_quiver3d.csv. Measured: 47.7 s with them, 2.3 s without, and all 41 data
+    # outputs byte-identical either way.
     step "analogy (carbon-matched)" \
       python src/analogy_carbon_matched.py --model-name "$MODEL" \
-        --entity-type "$ENTITY" --layers 0,8,16,24,31 || exit 1
+        --entity-type "$ENTITY" --layers 0,8,16,24,31 --no-plots || exit 1
     # Three axes in one pass over the npz the analogy stage just wrote, so all three come
     # from the same diff vectors. No activations, no model.
     for QSET in inter halide carbon; do
+      # --no-plots for the same reason: 7 PNGs per model per axis, read by nothing.
       step "retrieval ($QSET)" \
         python src/analogy_retrieval.py \
           --analogy-dir "$RESULTS/analogy" \
-          --model-name "$MODEL" --entity-type "$ENTITY" --quadruple-set "$QSET" || exit 1
+          --model-name "$MODEL" --entity-type "$ENTITY" --quadruple-set "$QSET" \
+          --no-plots || exit 1
     done
     # Reads the probe's out-of-fold probabilities; --mode proba keeps it off the tensors.
     step "ambiguity" \

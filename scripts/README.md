@@ -53,10 +53,19 @@ bash scripts/run_local.sh --stages figures    # analysis/data/ -> visuals/
 bash scripts/run_local.sh --models meta-llama/Llama-3.1-8B
 ```
 
-Measured per model: anisotropy ~6 s, analogy ~1–3 min (the permutation null dominates),
-probe ~8 min for all 32 layers, retrieval and ambiguity seconds each — those two read the
-npz the earlier stages wrote rather than the tensors. The probe is the long pole; the whole
-five-model compute stage is well under an hour.
+Measured per model: anisotropy ~6 s, analogy ~2 s, probe ~8 min for all 32 layers,
+retrieval and ambiguity seconds each — those two read the npz the earlier stages wrote
+rather than the tensors. The probe is the long pole by a wide margin; the whole five-model
+compute stage is well under an hour.
+
+The analogy stage is 2 s rather than 47 s because `run_local.sh` passes `--no-plots` to it
+and to retrieval. Between them they drew **1,165 PNGs into `results/` that no released
+figure reads** — 212 per model from the analogy stage alone, 140 of those being 3D quivers
+that `visuals/analogy3d_*` superseded, drawn properly from the committed
+`analogy_quiver3d.csv`. Measured at 47.7 s with the figures against 2.3 s without, with all
+41 data outputs byte-identical either way. Both flags default to *on*, so a manual run still
+gets its diagnostics; only the driver opts out. `probe/`, `anisotropy_diagnostic/` and
+`ambiguity_metric/` keep their 80 diagnostic PNGs — they have no such flag and are cheap.
 
 **`--stages figures` needs nothing but the repository.** Every `make_visuals*.py` reads only
 the committed `analysis/data/*.csv`, so a fresh clone with no activations draws all 70

@@ -231,6 +231,39 @@ identifiers only (no measured property columns — nothing interpolates them int
 The `entity_type` and `family` columns survive in the CSVs because the analysis scripts are
 unchanged and would emit more if more prompt types were extracted.
 
+## Tests
+
+```bash
+pip install -r requirements-dev.txt
+pytest                    # 228 checks, ~7 s
+pytest --runslow          # + rebuild all 70 figures, + reproduce the snapshots
+```
+
+**Nothing in the suite needs a GPU**, and `tests/test_no_gpu.py` pins that: it asserts by
+AST that no test hands a checkpoint-loading script or the scheduler to a subprocess, and
+that no test imports torch. The GPU stages' outputs are inputs to the tests, never things
+the tests produce.
+
+The fast tier covers structure, `paths.py` resolution (including cwd-independence and the
+`FCG_*` overrides), that all 30 modules import, that every producer is wired into
+`run_local.sh` and every `load()` name exists, the 29 snapshots' schema and record
+terminators, shell syntax and the `--array`/`check_array_size` agreement, and that no
+renamed or dropped name survives in code.
+
+`--runslow` adds the two end-to-end tiers:
+
+| tier | needs | what it proves |
+|---|---|---|
+| figures | nothing but this repo | all 9 generators run and produce exactly 70 PNGs at the right per-topic counts |
+| reproduce · activations | `activations/` | `compute_tsne_coords` and `analyze_prompt_structure` reproduce their 3 snapshots byte-for-byte |
+| reproduce · results | a populated `results/` | the 9-script chain reproduces all 29 snapshots byte-for-byte |
+
+The reproduce tiers **skip rather than fail** when their inputs are absent, and the skip
+message names which `(tree, model)` pairs are missing and the CPU-only command that fills
+them. Everything writes to a pytest `tmp_path` and is compared against the committed file,
+so running the suite cannot modify `analysis/data/` or `visuals/` — the artifacts under
+test.
+
 ## Setup
 
 ```bash
