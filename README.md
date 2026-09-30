@@ -62,11 +62,6 @@ no token at all. See [Where to start](#where-to-start) for which of those applie
 `Propan-2-ol` above. 17 × 4 + 3 × 8 = **92**. `none (alkane)` is a group here because the
 alkanes are the backbone every diff-vector subtracts.
 
-**No measured properties.** Nothing interpolates a boiling point or a pKa; a prompt needs the
-name and the SMILES and nothing else. `formula` is vestigial — it duplicates the SMILES in 48
-of the 92 rows (see `Propan-2-ol` above), and nothing in the released pipeline puts it in a
-prompt.
-
 Each molecule is asked 10 ways, so 92 × 10 = **920 prompts** per model:
 
 ```
