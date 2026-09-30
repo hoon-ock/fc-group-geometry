@@ -427,23 +427,52 @@ def check_proba(data, df, output_dir, tag):
               "the summed family mass by construction")
         return problems
 
+    # probe.py saves this array as float16 on purpose -- it is read back for ratios and a
+    # softmax temperature fit, not for bitwise reproduction. float16 spacing near 0.5 is
+    # 2.4e-4, so two classes whose full-precision masses differ by less than that round to
+    # the SAME stored value. predict() ranked them at full precision; argmax here sees a
+    # bitwise tie and breaks it by lower index. Where the stored array ties it cannot
+    # adjudicate its own disagreement, so counting that as corruption is a false alarm --
+    # and it was one: ChemDFM L21 row 325 had nitrogen and oxygen both at exactly
+    # 0.461181640625, which failed this check and stopped a five-model sweep. Measured
+    # across the sweep, 1 disagreeing row in 28160 and all of it this.
+    #
+    # The check keeps its teeth. Probabilities belonging to a different run disagree on many
+    # rows AND with a real margin, and any row where the stored array strictly ranks the
+    # argmax above the recorded prediction still fails.
+    idx = {n: i for i, n in enumerate(names)}
+    tolerated = 0
     for layer in data['layers']:
         csv = os.path.join(output_dir, 'data', f'predictions_{tag}_layer_{layer}.csv')
         if not os.path.isfile(csv):
             continue
         best = int(layer)
         pred = pd.read_csv(csv)['y_pred'].values
-        li = int(np.where(data['layers'] == best)[0][0])  # noqa: E501
-        got = np.array([names[i] for i in P[li].argmax(axis=1)])
+        li = int(np.where(data['layers'] == best)[0][0])
+        top = P[li].argmax(axis=1)
+        got = np.array([names[i] for i in top])
         if len(pred) != len(got):
             problems.append(f"L{best}: predictions CSV has {len(pred)} rows, proba has "
                             f"{len(got)}")
-        elif not np.array_equal(pred, got):
-            n = int(np.sum(pred != got))
+            continue
+        differs = np.flatnonzero(pred != got)
+        if not len(differs):
+            continue
+        ties = [i for i in differs if P[li][i, idx[pred[i]]] == P[li][i, top[i]]]
+        real = [i for i in differs if i not in set(ties)]
+        tolerated += len(ties)
+        if real:
             problems.append(
                 f"L{best}: argmax of the saved probabilities disagrees with "
-                f"predictions_{tag}_layer_{best}.csv on {n}/{len(got)} rows -- the "
-                f"probabilities do not belong to the predictions they were saved with")
+                f"predictions_{tag}_layer_{best}.csv on {len(real)}/{len(got)} rows with a "
+                f"real margin -- the probabilities do not belong to the predictions they "
+                f"were saved with")
+    # Announced rather than silently swallowed, the same rule the skip above follows:
+    # "checked and passed" and "checked, with rounding ties ignored" must not look alike.
+    if tolerated:
+        print(f"  proba/prediction agreement: {tolerated} row(s) differ only where the "
+              f"float16 probabilities are bitwise tied, which cannot be adjudicated from "
+              f"the stored array; not counted as a mismatch")
     return problems
 
 
