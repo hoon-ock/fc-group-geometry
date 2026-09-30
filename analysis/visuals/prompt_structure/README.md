@@ -1,7 +1,7 @@
 # Prompt wording against chemistry, by depth
 
 ```bash
-python analysis/figures/make_visuals_prompt_structure.py [--column raw]
+python analysis/figures/make_visuals_prompt_structure.py
 ```
 
 **`label_agreement_depth.png`** — two panels. For each of the 920 prompts, the share of its 10
@@ -15,10 +15,11 @@ groups, so the same height means very different things in the two panels.
 Per `(model, layer)`, over the 920 activation rows (92 molecules × 10 prompt templates), in
 `knn_agreement` (`Analysis/prompt_structure/analyze_prompt_structure.py:62`):
 
-1. **Mean-centre**, `acts - acts.mean(axis=0)`. The headline PNG is centred; `--column raw`
-   skips this. Not housekeeping — the residual stream is strongly anisotropic (mean pairwise
-   cosine 0.944 in base at layer 31), so on raw vectors the shared mean direction drives the
-   neighbour ranking and every model is scored partly on how collapsed its space is.
+1. **Mean-centre**, `acts - acts.mean(axis=0)`. The residual stream is strongly anisotropic
+   (mean pairwise cosine 0.944 in base at layer 31), so on raw vectors the shared mean
+   direction contributes to every neighbour ranking and a model could be scored partly on how
+   collapsed its space is. On this data it makes almost no difference — see the centring note
+   in `analysis/prompt_structure/README.md` for the measured spread.
 2. **L2-normalise the rows and take `Z @ Z.T`.** Cosine on normalised rows ranks identically to
    Euclidean distance; the dot product is the cheap way to get there for 920 points.
 3. **Set the diagonal to `-inf`**, so a point is never its own neighbour.
@@ -82,10 +83,6 @@ still holds and is worth knowing while reading these two: family agreement satur
 0.90–0.94 for *every* checkpoint, so the separation here is not "chemistry models learn the
 families" — base already has those — but "chemistry models suppress wording and resolve within
 family".
-
-`--column raw` redraws from the uncentred neighbour ranking. It is not the headline — see the
-centring note in `Analysis/prompt_structure/README.md` — but the two agree on this data, and
-the flag exists so that can be checked rather than believed.
 
 The full argument, the k-sensitivity analysis, and what in it is **not** robust live in
 [`analysis/prompt_structure/README.md`](../../prompt_structure/README.md). Read that

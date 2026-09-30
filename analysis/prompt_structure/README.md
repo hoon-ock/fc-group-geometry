@@ -78,24 +78,34 @@ against base is not evidence of anything.
 The fine ordering *within* the three chemistry models is also not k-stable (chem-r and chemdfm
 swap between k=5 and k=10). Quote the group, not the ranking.
 
-## The centring choice, inspectable
+## The centring choice, and why it turned out not to matter
 
 Neighbours are ranked on **mean-centred** cosine. The residual stream is strongly anisotropic —
 mean pairwise cosine 0.944 in base at layer 31 (`geometry/data/geometry_by_layer.csv`) — so on
-raw vectors the shared mean direction contributes to every neighbour ranking, and models would
-be scored partly on how collapsed their space is. `analyze_geometry.py` applies the same
-correction before it will quote a between-class cosine at all.
+raw vectors the shared mean direction contributes to every neighbour ranking, and a model could
+be scored partly on how collapsed its space is. `analyze_geometry.py` applies the same
+correction before it will quote a between-class cosine at all. Centring is therefore the
+defensible default and costs nothing.
 
-Both readings are released. On this data they agree, so the finding does not rest on the choice
-(layer 31, template):
+**It also changes almost nothing here, which is why the uncentred reading is no longer
+shipped.** An uncentred column and a second figure were released alongside this one while the
+question was open. Measured over all 160 rows, centred minus uncentred spans **−0.027 to
++0.032, mean 0.000** — per label: template −0.011/+0.032, family −0.009/+0.009, group
+−0.027/+0.013. At layer 31 on the template panel, the widest case:
 
-| model | centred | raw |
+| model | centred | uncentred |
 |---|---|---|
 | base | 0.759 | 0.751 |
 | chem-r | 0.587 | 0.563 |
 | chem-faithful | 0.489 | 0.460 |
 | chemdfm | 0.568 | 0.559 |
 | reason | 0.778 | 0.773 |
+
+The model ordering is identical under both readings, and no claim in this document changes.
+The comparison is recorded here rather than carried as a duplicate column and a duplicate
+figure indefinitely. Re-deriving it needs the activations and one line in
+`analyze_prompt_structure.py`: pass the uncentred `acts` to `knn_agreement` beside the
+centred call.
 
 ## Against the t-SNE measure
 
@@ -133,7 +143,7 @@ and checked against a 200-draw label shuffle.
 ## Sources
 
 - `analysis/prompt_structure/data/label_agreement_by_layer.csv` — 160 rows
-  (5 models × 32 layers), `knn_*_centered`, `knn_*_raw` and `chance_*` for all three labels.
+  (5 models × 32 layers), `knn_*_centered` and `chance_*` for all three labels.
 - generators — `analyze_prompt_structure.py` (reads activations),
   `analysis/figures/make_visuals_prompt_structure.py` (figure, reads only the CSV).
 - `template_index` is not a dataset column: it is reconstructed from the molecule-major /

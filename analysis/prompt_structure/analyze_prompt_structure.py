@@ -16,11 +16,16 @@ two are companions, not substitutes: the t-SNE numbers stay where they are.
 
 CENTRING IS LOAD-BEARING, NOT HOUSEKEEPING. The residual stream is strongly anisotropic --
 mean pairwise cosine 0.944 in the base model at layer 31 (`geometry/data/geometry_by_layer.csv`)
--- so on raw vectors the shared mean direction dominates the neighbour ranking and every model
-is scored partly on how collapsed its space is rather than on what it groups by. Mean-centring
+-- so on raw vectors the shared mean direction can dominate the neighbour ranking and score a
+model partly on how collapsed its space is rather than on what it groups by. Mean-centring
 first is the same correction `analyze_geometry.py` applies before it will quote a between-class
-cosine at all. Both readings are released, `_centered` and `_raw`: centring is a choice, and a
-reader has to be able to see whether the result depends on it.
+cosine at all.
+
+An uncentred reading was released alongside this one while that was being checked. It made
+almost no difference -- across all 160 rows the centred minus uncentred gap spans -0.027 to
++0.032 with a mean of 0.000 -- so the second column and the second figure were dropped rather
+than carried indefinitely. Centring is kept because it is the defensible default and costs
+nothing, not because it rescues the result. See `prompt_structure/README.md`.
 
 Each label gets its own CHANCE FLOOR, because the three are not comparable otherwise -- the
 10 templates are balanced (floor ~0.098) while the 5 families and 20 groups are not. Computed
@@ -125,12 +130,10 @@ def main():
                 'functional_group': groups,
             }
             cent = knn_agreement(acts - acts.mean(axis=0, keepdims=True), labels, args.k)
-            raw = knn_agreement(acts, labels, args.k)
             row = {'model': model, 'entity_type': args.entity_type, 'layer': layer,
                    'k': args.k, 'n_points': acts.shape[0]}
             for name in LABELS:
                 row[f'knn_{name}_centered'] = round(cent[name], 4)
-                row[f'knn_{name}_raw'] = round(raw[name], 4)
                 row[f'chance_{name}'] = round(chance_floor(labels[name]), 4)
             rows.append(row)
         print(f"{model}: {len(args.layers)} layers")

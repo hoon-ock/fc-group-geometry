@@ -32,7 +32,7 @@ Each writes into `analysis/visuals/<topic>/` and takes `--out-dir` to write else
 | `make_visuals_tsne.py` | `tsne/tsne_depth_{coarse,fine,template}.png`, plus per-model `fine_L<layer>.png` | `tsne/tsne_coords.csv`, `probe/layer_curves.csv` |
 | `make_visuals_probe.py` | `probe/probe_depth.png` | `probe/layer_curves.csv`, `probe/surface_baseline.csv` |
 | `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `ambiguity/ambiguity_family_probability.csv` |
-| `make_visuals_prompt_structure.py` | `prompt_structure/label_agreement_depth.png` (`--column raw` for the second) | `prompt_structure/label_agreement_by_layer.csv` |
+| `make_visuals_prompt_structure.py` | `prompt_structure/label_agreement_depth.png` | `prompt_structure/label_agreement_by_layer.csv` |
 | `make_visuals_generation_composition.py` | `generation/group_response_composition.png` | `generation/group_response_composition.csv` |
 | `make_visuals_retrieval.py` | `retrieval/hit1.png`, `hit2.png`, `hit3.png` | `geometry/retrieval_by_axis.csv` |
 | `make_visuals_retrieval_rank.py` | `retrieval/meanrank.png` | `geometry/retrieval_by_axis.csv` |

@@ -60,10 +60,6 @@ def main():
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--out-dir', default=DEFAULT_VISUALS)
-    p.add_argument('--column', default='centered', choices=('centered', 'raw'),
-                   help="Which reading to draw. `centered` is the headline -- see the "
-                        "analysis script on why raw neighbour ranking is contaminated by "
-                        "anisotropy. `raw` exists so the choice can be inspected, not hidden.")
     args = p.parse_args()
     style()
 
@@ -78,7 +74,7 @@ def main():
     for ax, (label, title) in zip(axes, PANELS):
         for m in models:
             dash = DASH5[m]
-            ax.plot(layers, [num(rows[(m, L)], f'knn_{label}_{args.column}') for L in layers],
+            ax.plot(layers, [num(rows[(m, L)], f'knn_{label}_centered') for L in layers],
                     color=COLOR5[m], marker=MARKER5[m], markersize=2.6, linewidth=1.2,
                     markevery=4, dashes=dash if dash[0] else (), label=DISPLAY5[m])
         # Each panel's own floor: 10 balanced templates sit near 0.099, the 5 families near
@@ -110,9 +106,7 @@ def main():
     fig.subplots_adjust(bottom=0.27, top=0.90, left=0.098, right=0.994, wspace=0.17)
 
     os.makedirs(args.out_dir, exist_ok=True)
-    name = ('label_agreement_depth.png' if args.column == 'centered'
-            else f'label_agreement_depth_{args.column}.png')
-    path = os.path.join(args.out_dir, name)
+    path = os.path.join(args.out_dir, 'label_agreement_depth.png')
     fig.savefig(path)
     plt.close(fig)
     print(f'wrote {os.path.relpath(path, REPO)}')
