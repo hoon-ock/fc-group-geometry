@@ -19,7 +19,7 @@ k-NN label agreement, which is computed on the embedding with the labels named.
 
 One row per prompt: 92 molecules x 10 templates = 920 per (model, layer). Row order is
 molecule-major, template-minor -- the layout `generate_prompts()` in
-`extract_activations_subset.py` writes and that `functional_group_probe.py` already relies on.
+`extract_activations_subset.py` writes and that `probe.py` already relies on.
 
 CPU-only. Reads activations; writes one CSV.
 """
@@ -39,8 +39,8 @@ import paths  # noqa: E402
 REPO = paths.ROOT
 sys.path.insert(0, paths.SRC)
 
-from functional_group_probe import BASE_ACTIVATIONS_DIR, COARSE_MAP, CSV_PATH  # noqa: E402
-from functional_group_analogy_carbon_matched import (  # noqa: E402
+from probe import BASE_ACTIVATIONS_DIR, COARSE_MAP, CSV_PATH  # noqa: E402
+from analogy_carbon_matched import (  # noqa: E402
     find_layer_file, load_activations,
 )
 

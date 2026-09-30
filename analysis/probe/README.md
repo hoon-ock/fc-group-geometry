@@ -1,6 +1,6 @@
 # Functional-group probe — what the released sweep shows
 
-`analyze_sweep.py` reads `results/functional_group_probe/` across all five models and writes
+`analyze_sweep.py` reads `results/probe/` across all five models and writes
 the tables below into `data/`. Nothing here loads a model or touches activations — it reads
 the probe's own outputs and runs CPU-only in a few seconds.
 
@@ -133,7 +133,7 @@ a **leak detector**: if the molecule-level shuffle ever broke, it would rise abo
 Run it per model and quote it as a reference band:
 
 ```bash
-python src/functional_group_probe.py --model-name meta-llama/Llama-3.1-8B \
+python src/probe.py --model-name meta-llama/Llama-3.1-8B \
   --entity-type functional_group --num-null-samples 50 \
   --output-dir results/null_ref_base
 ```
@@ -149,7 +149,7 @@ what `scripts/run_local.sh` runs and what the committed `data/` carries. Another
 job re-run with `PROBE_TARGET` set, and would overwrite these same filenames — the
 snapshot holds one target at a time.
 
-Needs a populated `results/functional_group_probe/`. CPU-only, no model loading, a few
+Needs a populated `results/probe/`. CPU-only, no model loading, a few
 seconds. `--n-boot` and `--seed` control the bootstrap; CI bounds move by < 0.002 between
 seeds at the default 20,000 draws.
 

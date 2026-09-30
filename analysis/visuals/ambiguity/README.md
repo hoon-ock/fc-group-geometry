@@ -101,7 +101,7 @@ Committed CSVs only, never `results/`:
 
 - mass, accuracy, structures — `analysis/ambiguity/data/ambiguity_family_probability.csv`
   (1440 rows = 5 models × 32 layers × 9 groups, snapshotted by `analyze_ambiguity.py`).
-  `accuracy` is copied from `results/functional_group_probe/*/probe_scores_coarse_group.csv`;
+  `accuracy` is copied from `results/probe/*/probe_scores_coarse_group.csv`;
   `structure` from the `functional_group_structure` column of
   `data/functional_group_dataset.csv`, so the notation on the figure has one authority.
 - delta, `best_C` — `analysis/ambiguity/data/ambiguity_two_readings.csv`

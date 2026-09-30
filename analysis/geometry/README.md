@@ -8,8 +8,8 @@ python analysis/geometry/analyze_geometry.py
 ```
 
 Sources (all **gitignored**, so `data/geometry_by_layer.csv` is the durable record):
-`results/anisotropy_diagnostic/`, `results/functional_group_analogy/`,
-`results/functional_group_analogy_retrieval/`.
+`results/anisotropy_diagnostic/`, `results/analogy/`,
+`results/analogy_retrieval/`.
 
 ## 1. The honest-signal check comes first
 

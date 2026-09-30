@@ -47,8 +47,8 @@ import paths  # noqa: E402
 REPO = paths.ROOT
 sys.path.insert(0, paths.SRC)
 
-from functional_group_probe import BASE_ACTIVATIONS_DIR, COARSE_MAP, CSV_PATH  # noqa: E402
-from functional_group_analogy_carbon_matched import (  # noqa: E402
+from probe import BASE_ACTIVATIONS_DIR, COARSE_MAP, CSV_PATH  # noqa: E402
+from analogy_carbon_matched import (  # noqa: E402
     find_layer_file, load_activations,
 )
 

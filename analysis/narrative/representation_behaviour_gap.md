@@ -92,7 +92,7 @@ representation-behaviour one. State the comparison as coarse-probe versus fine-g
 say so in the text.
 
 > **The fix once proposed here has been tried and does not work.** A
-> `functional_group_probe.py --target fine --split molecule` run was done on all five
+> `probe.py --target fine --split molecule` run was done on all five
 > checkpoints. It returns 1.0000 balanced accuracy in every one — and 0.95–0.999 at *layer 0*,
 > with the character n-gram surface baseline on the same folds at **1.0000**, above every probe.
 > Every extraction template embeds `{iupac_name}`, so `1-bromobutane` spells its own answer and

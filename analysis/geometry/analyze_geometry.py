@@ -6,9 +6,9 @@ otherwise read together:
 
   anisotropy_diagnostic/   how much of any cosine is the shared dominant direction,
                            and what survives mean-centering
-  functional_group_analogy/    within-class (same group, different chain lengths)
+  analogy/    within-class (same group, different chain lengths)
                            and between-class diff-vector cosines
-  functional_group_analogy_retrieval/  degenerate_top1_rate -- how often the analogy
+  analogy_retrieval/  degenerate_top1_rate -- how often the analogy
                            offset fails to leave the source group's neighbourhood
 
 Two columns carry most of the weight.
@@ -57,9 +57,9 @@ RETRIEVAL_MODE = 'lumped'
 # differ (19 groups vs 4 halides vs the full chain-length ladder) -- so an axis cannot be
 # read against another axis's chance line.
 RETRIEVAL_AXES = {
-    'inter_group': ('functional_group_analogy_retrieval', 'lumped'),
-    'halide': ('functional_group_analogy_retrieval_halide', 'lumped'),
-    'carbon_ladder': ('functional_group_analogy_retrieval_carbon', 'ladder'),
+    'inter_group': ('analogy_retrieval', 'lumped'),
+    'halide': ('analogy_retrieval_halide', 'lumped'),
+    'carbon_ladder': ('analogy_retrieval_carbon', 'ladder'),
 }
 
 
@@ -110,7 +110,7 @@ def anisotropy(results_dir, model, entity_type):
 
 
 def similarity(results_dir, model, entity_type, layer):
-    base = os.path.join(results_dir, 'functional_group_analogy', model, entity_type,
+    base = os.path.join(results_dir, 'analogy', model, entity_type,
                         'data')
     within = [float(r['cosine_sim'])
               for r in read_csv(os.path.join(
@@ -146,7 +146,7 @@ def trial_ranks(results_dir, model, entity_type, tree, mode):
 
 
 def retrieval(results_dir, model, entity_type,
-              tree='functional_group_analogy_retrieval', mode=RETRIEVAL_MODE):
+              tree='analogy_retrieval', mode=RETRIEVAL_MODE):
     """Pooled hit@1 and degenerate rate by layer, weighted by trial count.
 
     Also pooled with sulfoxide dropped: it is hit@1 = 0.00 in every model at every

@@ -10,7 +10,7 @@ This emits the same question answered from two independent places, side by side:
   posterior  from `ambiguity_metric/.../family_probability.csv` -- the probe's own
              out-of-fold p(family), as r = p(O) / [p(O) + p(home)], contrasted
              against the group's own oxygen-free family controls.
-  geometric  from `functional_group_analogy/.../between_class_similarity_layer_*.csv`
+  geometric  from `analogy/.../between_class_similarity_layer_*.csv`
              -- mean z-cosine from the group to the six oxygen-named groups, same
              control contrast. No probe, no softmax, no regularization constant.
 
@@ -116,7 +116,7 @@ def fold_accuracy(results_dir, model, entity_type, tag='coarse_group'):
     a model that got it right and a model that got it wrong; the mass shows one committed to
     a naming convention and the other to the chemistry.
     """
-    path = os.path.join(results_dir, 'functional_group_probe', model, entity_type,
+    path = os.path.join(results_dir, 'probe', model, entity_type,
                         'data', f'probe_scores_{tag}.csv')
     return {(int(r['layer']), r['fold']): float(r['accuracy']) for r in read_csv(path)}
 
@@ -170,7 +170,7 @@ def geometric_lean(results_dir, model, entity_type, layer):
     z-scored within the model's own between-class distribution, so a model with
     globally lower cosines is not read as globally less oxygen-leaning.
     """
-    path = os.path.join(results_dir, 'functional_group_analogy', model, entity_type,
+    path = os.path.join(results_dir, 'analogy', model, entity_type,
                         'data', f'between_class_similarity_layer_{layer}.csv')
     rows = read_csv(path)
     vals = np.array([float(r['cosine_sim']) for r in rows])
@@ -195,7 +195,7 @@ def best_C(results_dir, model, entity_type, layer, tag='coarse_group'):
     so that one comparison is like-for-like, while DeepSeek-8B (1e-4 x19) sits two
     orders looser and cannot be ranked against either on posterior mass.
     """
-    path = os.path.join(results_dir, 'functional_group_probe', model, entity_type,
+    path = os.path.join(results_dir, 'probe', model, entity_type,
                         'data', f'probe_scores_{tag}.csv')
     folds = [r for r in read_csv(path) if int(r['layer']) == layer]
     counts = Counter(r['best_C'] for r in folds)

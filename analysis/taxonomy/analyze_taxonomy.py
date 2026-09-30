@@ -30,7 +30,7 @@ Three outputs, in increasing order of what they defend against:
                            the paper's dendrogram figure could be rebuilt from a clean
                            checkout. ~200 KB for 5 models x 5 layers x 171 pairs.
 
-Reads only `results/functional_group_analogy/`. No activations, no model, CPU-only.
+Reads only `results/analogy/`. No activations, no model, CPU-only.
 """
 import argparse
 import csv
@@ -44,7 +44,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))
 import paths  # noqa: E402
 REPO = paths.ROOT
-DEFAULT_RESULTS = os.path.join(paths.RESULTS, 'functional_group_analogy')
+DEFAULT_RESULTS = os.path.join(paths.RESULTS, 'analogy')
 DEFAULT_OUT = os.path.join(HERE, 'data')
 
 MODELS = [

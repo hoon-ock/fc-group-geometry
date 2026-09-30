@@ -119,10 +119,10 @@ Five stages per model, single-core, no GPU, ~8 min per model with the probe domi
 
 | Stage | Reads | Writes under `results/` |
 |---|---|---|
-| probe, all 32 layers | activations | `functional_group_probe/` |
+| probe, all 32 layers | activations | `probe/` |
 | anisotropy, L 0/8/16/24/31 | activations | `anisotropy_diagnostic/` |
-| analogy, carbon-matched, same layers | activations | `functional_group_analogy/` |
-| retrieval, 3 axes | the analogy stage's `.npz` | `functional_group_analogy_retrieval{,_carbon,_halide}/` |
+| analogy, carbon-matched, same layers | activations | `analogy/` |
+| retrieval, 3 axes | the analogy stage's `.npz` | `analogy_retrieval{,_carbon,_halide}/` |
 | ambiguity | the probe's `oof_proba_*.npz` | `ambiguity_metric/` |
 
 The last two never touch the tensors — they read what the stages above wrote, which is why

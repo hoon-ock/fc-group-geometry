@@ -11,7 +11,7 @@ python analysis/tsne/compute_tsne_coords.py     # -> data/tsne_coords.csv, data/
 
 **23,000 rows**: 5 models × 5 layers (0, 8, 16, 24, 31) × 920 prompts (92 molecules × 10
 templates). Row order is molecule-major, template-minor — the layout `generate_prompts()` in
-`src/extract_activations_subset.py` writes and that `src/functional_group_probe.py` already
+`src/extract_activations_subset.py` writes and that `src/probe.py` already
 relies on. PCA to 50 components, then t-SNE at perplexity 30, both at `random_state=42`.
 
 ## Read the neighbourhood table, not the picture

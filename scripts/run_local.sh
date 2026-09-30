@@ -87,7 +87,7 @@ if [ "$STAGES" = all ] || [ "$STAGES" = compute ]; then
     # not the activations. --surface-baseline IS on -- it is the control that separates
     # recalled chemistry from reading "-ol" out of the prompt.
     step "probe (32 layers)" \
-      python src/functional_group_probe.py --model-name "$MODEL" --entity-type "$ENTITY" \
+      python src/probe.py --model-name "$MODEL" --entity-type "$ENTITY" \
         --target coarse --surface-baseline --num-null-samples 0 || exit 1
     # Five layers, the depths every downstream figure reports at.
     step "anisotropy" \
@@ -95,14 +95,14 @@ if [ "$STAGES" = all ] || [ "$STAGES" = compute ]; then
         --layers 0,8,16,24,31 || exit 1
     # Carbon-matched: writes the diff-vector npz that retrieval and taxonomy both read.
     step "analogy (carbon-matched)" \
-      python src/functional_group_analogy_carbon_matched.py --model-name "$MODEL" \
+      python src/analogy_carbon_matched.py --model-name "$MODEL" \
         --entity-type "$ENTITY" --layers 0,8,16,24,31 || exit 1
     # Three axes in one pass over the npz the analogy stage just wrote, so all three come
     # from the same diff vectors. No activations, no model.
     for QSET in inter halide carbon; do
       step "retrieval ($QSET)" \
         python src/analogy_retrieval.py \
-          --analogy-dir "$RESULTS/functional_group_analogy" \
+          --analogy-dir "$RESULTS/analogy" \
           --model-name "$MODEL" --entity-type "$ENTITY" --quadruple-set "$QSET" || exit 1
     done
     # Reads the probe's out-of-fold probabilities; --mode proba keeps it off the tensors.

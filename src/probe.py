@@ -23,7 +23,7 @@ It is the functional-group counterpart of the periodic-table probe in the parent
 
 Run from the repo root:
 
-    python src/functional_group_probe.py --entity-type functional_group
+    python src/probe.py --entity-type functional_group
 """
 
 import argparse
@@ -52,7 +52,7 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from model_registry import default_five_layers, get_model_config
 # Shared loaders, reused rather than reimplemented -- anisotropy_diagnostic.py
 # pulls from the same module for the same reason.
-from functional_group_analogy_carbon_matched import (
+from analogy_carbon_matched import (
     find_layer_file, load_activations, save_json, save_long_format_csv,
 )
 
@@ -66,7 +66,7 @@ CSV_PATH = paths.DATASET_CSV
 EXTRACTION_CONFIG_PATH = paths.EXTRACTION_CONFIG
 
 DEFAULT_ENTITY_TYPE = 'functional_group'
-DEFAULT_OUTPUT_DIR = os.path.join(paths.RESULTS, 'functional_group_probe')
+DEFAULT_OUTPUT_DIR = os.path.join(paths.RESULTS, 'probe')
 
 FINE_COLUMN = 'functional_group'
 CARBON_COLUMN = 'carbon_count'
@@ -194,7 +194,7 @@ def iter_folds(split, y_mol, mol_idx, df, n_splits, seed):
         single backbone length, which is where the headroom is. Every class still
         appears on both sides of every fold, so it still isolates invariance to
         backbone length -- the probe analogue of
-        functional_group_analogy_carbon_matched.py.
+        analogy_carbon_matched.py.
     template -- hold out prompt phrasings AND molecules together. A pure template
         holdout would be near-free: the same molecule appears in train and test
         under different wordings, so the probe can identify the molecule and

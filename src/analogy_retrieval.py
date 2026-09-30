@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Retrieval-based second-order analogy test, as a counterpart to the cosine one.
 
-`functional_group_analogy_carbon_matched.py` scores each quadruple by the cosine
+`analogy_carbon_matched.py` scores each quadruple by the cosine
 between two offset vectors -- cos(thioether-thiol, ether-alcohol). Those top out
 around +0.66, which reads as "the king-man+woman analogy isn't really here".
 
@@ -44,17 +44,17 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import paths  # noqa: E402
 # What 05_analogy writes, on the cluster and locally alike.
-DEFAULT_ANALOGY = os.path.join(paths.RESULTS, 'functional_group_analogy')
+DEFAULT_ANALOGY = os.path.join(paths.RESULTS, 'analogy')
 # Outputs follow the same shape as every other experiment here --
 # results/{experiment}/{model-slug}/{entity_type}/ with figures at the leaf and CSVs
-# under data/ (cf. functional_group_analogy_carbon_matched.py:47, functional_group_probe.py:65).
+# under data/ (cf. analogy_carbon_matched.py:47, probe.py:65).
 DEFAULT_OUTPUT_ROOT = os.path.join(paths.RESULTS,
-                                   'functional_group_analogy_retrieval')
+                                   'analogy_retrieval')
 
 sys.path.insert(0, paths.SRC)
 # The quadruple list and its chemistry rationale live in the analogy script; import
 # rather than restate so the two analyses can never drift apart.
-from functional_group_analogy_carbon_matched import (  # noqa: E402
+from analogy_carbon_matched import (  # noqa: E402
     ANALOGY_QUADRUPLES, cosine_similarity,
 )
 from model_registry import MODEL_CONFIGS, get_model_config  # noqa: E402

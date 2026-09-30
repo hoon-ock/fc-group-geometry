@@ -173,7 +173,7 @@ def slug(cell, layer):
     All four group names rather than just a1 and b1: two of the five quadruples share `amine`
     as b1, and a scheme that is unique only for the quadruples that happen to exist today
     will not stay unique. The pair-wise form follows the slug
-    `functional_group_analogy_carbon_matched.py:797` already uses for its quiver PNGs.
+    `analogy_carbon_matched.py:797` already uses for its quiver PNGs.
     """
     m = cell['meta']
     part = lambda *ks: '-'.join(m[k].replace(' ', '-') for k in ks)
@@ -467,7 +467,7 @@ def report(cell, layer, elev, azim, png_name):
         out.append('  length -- the one place this panel is still an average.')
     if int(m['is_negative_control']):
         out.append("  This quadruple is the set's DELIBERATE NEGATIVE CONTROL")
-        out.append('  (functional_group_analogy_carbon_matched.py:306-311): the two legs are')
+        out.append('  (analogy_carbon_matched.py:306-311): the two legs are')
         out.append('  formally matched (H -> CH3) but chemically are not, and it is the one')
         out.append('  that should fail if leg symmetry is what makes an analogy work. It does')
         out.append('  not fail. That is a result, not a plain success.')

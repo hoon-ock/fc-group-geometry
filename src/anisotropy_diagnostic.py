@@ -1,6 +1,6 @@
 """
 Diagnoses how much of the functional-group diff-vector geometry (see
-functional_group_analogy_carbon_matched.py) is just transformer-hidden-state
+analogy_carbon_matched.py) is just transformer-hidden-state
 anisotropy -- a dominant shared direction present in almost every activation,
 regardless of content -- versus genuine chemistry-specific structure.
 
@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from functional_group_analogy_carbon_matched import (
+from analogy_carbon_matched import (
     BASE_ACTIVATIONS_DIR, MODEL_NAME, CSV_PATH, LABEL_COLUMN, ALKANE_LABEL,
     DEFAULT_NUM_NULL_SAMPLES, HIDDEN_DIM, SEED,
     find_layer_file, load_activations, load_and_average_templates,
@@ -43,7 +43,7 @@ from model_registry import default_five_layers, get_model_config
 # ============================
 
 # Matches the default in
-# functional_group_analogy_carbon_matched.py, so all three analyses read the
+# analogy_carbon_matched.py, so all three analyses read the
 # same entity_type (and the same CSV) unless told otherwise.
 DEFAULT_ENTITY_TYPE = 'functional_group'
 DEFAULT_OUTPUT_DIR = os.path.join(paths.RESULTS, 'anisotropy_diagnostic')

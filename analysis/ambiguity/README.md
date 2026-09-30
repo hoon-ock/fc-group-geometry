@@ -16,7 +16,7 @@ against the group's own **oxygen-free** family controls so a merely-diffuse mode
 - **posterior** — the probe's out-of-fold `p(family)`, as `r = p(O) / [p(O) + p(home)]`,
   from `results/ambiguity_metric/`.
 - **geometric** — mean z-cosine from the group to the six oxygen-named groups, from
-  `results/functional_group_analogy/`. No probe, no softmax, no regularization constant.
+  `results/analogy/`. No probe, no softmax, no regularization constant.
 
 ## What holds: the within-model result, in all three models
 

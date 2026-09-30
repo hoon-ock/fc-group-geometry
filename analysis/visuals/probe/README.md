@@ -11,7 +11,7 @@ is measured on a group the probe never trained on.
 **Balanced accuracy is the mean of the per-class recalls.** Plain accuracy is the fraction of
 all test prompts called correctly. Plain accuracy weights each family by how many prompts it
 has; balanced accuracy gives every family one vote regardless of size.
-`balanced_accuracy_score` computes it at `src/functional_group_probe.py:854`.
+`balanced_accuracy_score` computes it at `src/probe.py:854`.
 
 ```
 balanced = mean over families of (that family's prompts correct / that family's prompts)
@@ -70,7 +70,7 @@ Two grey lines mark what the curve has to beat.
 ## `Random guess` — dotted, 0.20
 
 `1 / n_classes` over the 5 declared coarse families, written by the probe as
-`summary_coarse_group.json: chance` (`src/functional_group_probe.py:994`) and drawn at
+`summary_coarse_group.json: chance` (`src/probe.py:994`) and drawn at
 that value.
 
 **Labelled `Random guess`, not `chance`, on purpose.** "Chance" names no particular strategy,
@@ -86,7 +86,7 @@ looking like *the* floor when it is one of several.
 for the guesser just named.**
 `none (alkane)` is the only fine group in the `hydrocarbon` family, so holding it out leaves no
 hydrocarbon in training; it is skipped as a fold, and its 4 molecules never enter the pooled
-out-of-fold set (`src/functional_group_probe.py:257-266` prints a notice when it skips
+out-of-fold set (`src/probe.py:257-266` prints a notice when it skips
 one). The pooled evaluation is 880 rows (88 molecules × 10 templates) over `halide` / `nitrogen` /
 `oxygen` / `sulfur` only. The note on `N_MOLECULES`
 (`analysis/probe/analyze_sweep.py:60-64`) records the same thing.
@@ -108,7 +108,7 @@ line below is the reference that actually binds.
 
 The same classification task, same folds, same label space — but with **no model in it at
 all**. Character n-grams of the raw prompt string are fed to a logistic regression
-(`run_surface_baseline`, `src/functional_group_probe.py:634`):
+(`run_surface_baseline`, `src/probe.py:634`):
 
 ```python
 TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5), min_df=2)
@@ -158,7 +158,7 @@ Read from committed CSVs only, never `results/`:
 **One exception, flagged because it breaks the rule above.** The plain-accuracy column of the
 table in the metric section is *not* in any committed CSV — `layer_curves.csv` carries
 `balanced_acc` only. It was pooled from the per-fold `accuracy` and `n_test` columns of
-`results/functional_group_probe/<model>/functional_group/data/probe_scores_coarse_group.csv`,
+`results/probe/<model>/functional_group/data/probe_scores_coarse_group.csv`,
 which is gitignored, so those numbers cannot be re-derived from the repo alone. The balanced
 column beside it was pooled the same way and reproduces `layer_curves.csv` exactly at all 20
 model × layer points checked, which is what establishes the reconstruction is right.

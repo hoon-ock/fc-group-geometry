@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """How a probe resolves the functional groups whose family is a naming convention.
 
-`functional_group_probe.py` scores the coarse target against `COARSE_MAP`, which
+`probe.py` scores the coarse target against `COARSE_MAP`, which
 assigns each of the 20 fine groups to exactly one of 5 heteroatom families by the
 atom that *names* the group. Four groups contain oxygen and are labelled otherwise:
 
@@ -81,13 +81,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import paths  # noqa: E402
 sys.path.insert(0, paths.SRC)  # noqa: E402
 
-from functional_group_probe import (  # noqa: E402
+from probe import (  # noqa: E402
     BASE_ACTIVATIONS_DIR, COARSE_MAP, CSV_PATH, DEFAULT_ENTITY_TYPE,
     DEFAULT_OUTPUT_DIR, FINE_COLUMN, MODEL_NAME,
 )
 # The shared loaders, reused rather than reimplemented -- the probe and the
 # anisotropy diagnostic both pull from this module for the same reason.
-from functional_group_analogy_carbon_matched import (  # noqa: E402
+from analogy_carbon_matched import (  # noqa: E402
     find_layer_file, load_activations, load_and_average_templates,
 )
 from model_registry import get_model_config  # noqa: E402
@@ -142,7 +142,7 @@ def load_proba(output_dir, tag):
     if not os.path.isfile(path):
         raise SystemExit(
             f"No {shown(path)}.\n"
-            f"This file is written by functional_group_probe.py, which saves it by "
+            f"This file is written by probe.py, which saves it by "
             f"default; results produced before that existed do not carry it. Rerun the "
             f"probe for this model/entity_type (on the cluster: "
             f"`bash scripts/run_local.sh --stages compute`, unchanged) and try again.")

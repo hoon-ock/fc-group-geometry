@@ -3,7 +3,7 @@
 The paper's aim-2 headline, and the one result that turns "Chem-R's clustermap looks
 different" into a number with a confidence interval.
 
-Source: `results/functional_group_analogy/{model}/functional_group/data/
+Source: `results/analogy/{model}/functional_group/data/
 between_class_similarity_layer_*.csv` — the diff-vector cosine between every pair of the
 19 non-alkane groups, which the analogy script already writes. That tree is **gitignored**,
 so `data/` here is the durable record.

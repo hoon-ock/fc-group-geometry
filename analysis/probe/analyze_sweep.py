@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Derive the sweep-level findings from `results/functional_group_probe/`.
+"""Derive the sweep-level findings from `results/probe/`.
 
 The probe writes one result tree per (model, entity_type); this script reads across
 all of them and produces the four tables that `README.md` quotes, so no number in
@@ -26,7 +26,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))
 import paths  # noqa: E402
 REPO = paths.ROOT
-DEFAULT_RESULTS = os.path.join(paths.RESULTS, 'functional_group_probe')
+DEFAULT_RESULTS = os.path.join(paths.RESULTS, 'probe')
 DEFAULT_OUT = os.path.join(HERE, 'data')
 
 MODEL_8B = 'meta-llama-Llama-3.1-8B'
@@ -34,7 +34,7 @@ MODEL_CHEM = 'phenixace-Chem-R-Faithful'
 MODEL_R1 = 'deepseek-ai-DeepSeek-R1-Distill-Llama-8B'
 MODEL_70B = 'meta-llama-Llama-3.1-70B'
 # Registered after this snapshot was first taken. Their probe results were already on disk
-# under results/functional_group_probe/ -- only the CSVs had not been regenerated.
+# under results/probe/ -- only the CSVs had not been regenerated.
 MODEL_CHEM_R = 'weidawang-Chem-R-8B'
 MODEL_CHEMDFM = 'OpenDFM-ChemDFM-v1.5-8B'
 

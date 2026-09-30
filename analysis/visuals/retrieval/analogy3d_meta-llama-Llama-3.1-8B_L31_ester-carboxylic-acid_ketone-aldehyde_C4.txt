@@ -32,7 +32,7 @@ NOTES
   wants off an axis. All three share one scale, so the distances above are
   comparable with each other, and the grid on the panel shows that scale.
   This quadruple is the set's DELIBERATE NEGATIVE CONTROL
-  (functional_group_analogy_carbon_matched.py:306-311): the two legs are
+  (analogy_carbon_matched.py:306-311): the two legs are
   formally matched (H -> CH3) but chemically are not, and it is the one
   that should fail if leg symmetry is what makes an analogy work. It does
   not fail. That is a result, not a plain success.

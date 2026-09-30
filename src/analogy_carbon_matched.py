@@ -46,9 +46,9 @@ CSV_PATH = paths.DATASET_CSV
 LABEL_COLUMN = 'iupac_name'
 ALKANE_LABEL = 'none (alkane)'
 # Unused here -- main() now derives layers from default_five_layers(). Kept only
-# for parity with functional_group_analogy.py, which still has its own copy.
+# for parity with analogy.py, which still has its own copy.
 DEFAULT_LAYERS = [0, 16, 31]
-DEFAULT_OUTPUT_DIR = os.path.join(paths.RESULTS, 'functional_group_analogy')
+DEFAULT_OUTPUT_DIR = os.path.join(paths.RESULTS, 'analogy')
 DEFAULT_NUM_NULL_SAMPLES = 10000
 HIDDEN_DIM = 4096
 SEED = 42

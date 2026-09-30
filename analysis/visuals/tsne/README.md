@@ -103,14 +103,14 @@ Committed CSVs only, never `results/`:
 - coordinates — `analysis/tsne/data/tsne_coords.csv`
   (23000 rows = 5 models × 5 layers × 920 prompts; `x`, `y`, and the `functional_group`,
   `coarse_family`, `carbon_count`, `template_index` labels for each point).
-  `coarse_family` is `functional_group_probe.COARSE_MAP`, the same map the probe classifies
+  `coarse_family` is `probe.COARSE_MAP`, the same map the probe classifies
   with, so the colours and Table 1 cannot disagree.
 - neighbourhood agreement — `analysis/tsne/data/tsne_neighbourhood.csv`
 - generators — `analysis/tsne/compute_tsne_coords.py` (coordinates, reads
   activations), `analysis/figures/make_visuals_tsne.py` (all three figures, reads only
   the CSV). `template_index` is not a dataset column: it is reconstructed from the row layout,
   which is molecule-major and template-minor — the order `generate_prompts()` in
-  `extract_activations_subset.py` writes and that `functional_group_probe.py` already relies
+  `extract_activations_subset.py` writes and that `probe.py` already relies
   on. If that layout ever changes, the template figure is the first thing that breaks.
 
 **All five checkpoints**, in `_common.BEHAVIOURAL` row order — the order Tables 1 and 3 use,

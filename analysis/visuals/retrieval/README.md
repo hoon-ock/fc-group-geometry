@@ -29,7 +29,7 @@ and a bar on one axis cannot be read against another axis's baseline:
 
 | axis | tree | source groups | trials | ranked over | chance @1/@2/@3 |
 |---|---|---|---|---|---|
-| inter-group | `functional_group_analogy_retrieval` | 13 | 20 | 16-17 groups | 0.062 / 0.124 / 0.185 |
+| inter-group | `analogy_retrieval` | 13 | 20 | 16-17 groups | 0.062 / 0.124 / 0.185 |
 | halide column | `..._retrieval_halide` | 4 | 12 | 16-17 groups | 0.060 / 0.120 / 0.180 |
 | chain-length ladder | `..._retrieval_carbon` | 19 | 228 | 73-74 molecules | 0.014 / 0.027 / 0.041 |
 
@@ -283,7 +283,7 @@ claim.
 ## The ester file is the negative control
 
 `ester-carboxylic-acid_ketone-aldehyde_C4` is the quadruple set's
-`DELIBERATE NEGATIVE CONTROL` (`functional_group_analogy_carbon_matched.py:306-311`): acid →
+`DELIBERATE NEGATIVE CONTROL` (`analogy_carbon_matched.py:306-311`): acid →
 ester and aldehyde → ketone are formally the same substitution (H → CH3) but chemically are
 not, and it is the quadruple that should fail if leg symmetry is what makes an analogy work.
 It passes the selection rule cleanly at C4 and retrieves at rank 1. Its sidecar says so, so
@@ -301,7 +301,7 @@ constructed point is nearest `alkyl fluoride` and the true `amine` falls to rank
 ## Drawing choices worth knowing
 
 **The projection is mean-centered**, unlike
-`functional_group_analogy_carbon_matched.fit_uncentered_3d_basis`. Uncentered, the anisotropic
+`analogy_carbon_matched.fit_uncentered_3d_basis`. Uncentered, the anisotropic
 mean direction owns PC-1 and every group's arrow points the same way — the hairball in
 `results/.../diff_vector_quiver_3d_layer_*.png`. Offsets are translation-invariant so the
 parallelogram loses nothing; what is given up is the origin reading as the alkane baseline.

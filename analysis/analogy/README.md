@@ -36,8 +36,8 @@ cosine alone measures the strictly harder quantity, and it changes the verdict o
 quadruples.
 
 `src/analogy_retrieval.py` runs the retrieval version over the diff vectors
-`src/functional_group_analogy_carbon_matched.py` saved to
-`results/functional_group_analogy/*/data/diff_vectors_layer_{L}.npz`, so it needs no rerun
+`src/analogy_carbon_matched.py` saved to
+`results/analogy/*/data/diff_vectors_layer_{L}.npz`, so it needs no rerun
 and no GPU. For
 each quadruple it tests all four corner predictions (`b1 = b2 + (a1 − a2)`, and the three
 rotations) at each chain length: 4 quadruples × 4 corners × 4 chain lengths = 64 trials per
@@ -98,7 +98,7 @@ python src/analogy_retrieval.py --no-plots         # CSVs only
 ```
 
 Outputs land under `results/`, in the same shape every other experiment here uses —
-`results/functional_group_analogy_retrieval/{model}/{entity_type}/`, figures at the
+`results/analogy_retrieval/{model}/{entity_type}/`, figures at the
 leaf and CSVs under `data/`. Model and entity are in the path, so they are not repeated in
 the filenames, and each CSV holds exactly one model.
 
@@ -177,8 +177,8 @@ to the quadruple set the constants at the top of the file are what should change
 `analysis/figures/make_visuals_retrieval_3d.py` draws under `visuals/retrieval/` as one PNG
 plus one `.txt` per selected cell, stems `analogy3d_{model}_L{layer}_{quadruple}_C{N}`. The
 numbers live in the `.txt`; the image carries only what identifies it. It reads two results
-trees — `functional_group_analogy/` for the diff vectors and
-`functional_group_analogy_retrieval/` for the scored trials — plus the dataset.
+trees — `analogy/` for the diff vectors and
+`analogy_retrieval/` for the scored trials — plus the dataset.
 
 ```bash
 python analysis/analogy/snapshot_quiver3d.py \
@@ -226,7 +226,7 @@ Keying per **cell** rather than per quadruple matters too: `ester` is 0 degenera
 at C5, and averaging those together is exactly what the lumped pool used to do. Under lumped,
 that quadruple had 2 degenerate corners and the rule dropped it. At C4 it is clean and it is
 drawn — with its panel marked `DELIBERATE NEGATIVE CONTROL`
-(`functional_group_analogy_carbon_matched.py:306-311`): formally matched legs (H → CH3) that
+(`analogy_carbon_matched.py:306-311`): formally matched legs (H → CH3) that
 are chemically mismatched, and the one that should fail if leg symmetry is what makes an
 analogy work. It does not fail. That is a result, not a reason to hide it, but it must not
 read as a plain success. `NEGATIVE_CONTROLS` is named in the script and asserted against
@@ -235,7 +235,7 @@ dropping the annotation.
 
 ### The projection is mean-centered, and the cosine tables are not
 
-`functional_group_analogy_carbon_matched.fit_uncentered_3d_basis` deliberately does not
+`analogy_carbon_matched.fit_uncentered_3d_basis` deliberately does not
 center: the origin there reads as "no change from the alkane baseline", a real zero. This
 snapshot deliberately does, and the two should not be reconciled — they answer different
 questions.

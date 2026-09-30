@@ -10,7 +10,7 @@ the same retrievals -- hit@1 and the rank distribution; this is the geometric on
 
 Retrieval asks whether `b2 + (a1 - a2)` lands nearest `b1`. That is a statement about a
 parallelogram, and a parallelogram is the one thing the existing quiver
-(`functional_group_analogy_carbon_matched.py:408`) cannot show: it projects onto an
+(`analogy_carbon_matched.py:408`) cannot show: it projects onto an
 **uncentered** top-3 SVD basis, where the anisotropic mean direction owns SVD-1 and every
 group's arrow points the same way. Worse, that basis can invert the answer -- at base/L31 it
 puts `alkyl fluoride` nearest the constructed point for the imine/amine quadruple and drops
@@ -39,8 +39,8 @@ Two guards against the figure flattering itself:
     say so. `dist3d_true` and `dist3d_rival` carry the same comparison as a margin, so the
     panel can show that the answer won rather than merely that the residual was short.
 
-CPU-only. Reads `results/functional_group_analogy/` (the diff-vector npz),
-`results/functional_group_analogy_retrieval/` (the scored trials) and the committed
+CPU-only. Reads `results/analogy/` (the diff-vector npz),
+`results/analogy_retrieval/` (the scored trials) and the committed
 `data/functional_group_dataset.csv` (the compound names).
 """
 import argparse
@@ -54,8 +54,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.abspath(os.path.join(HERE, '..', '..')))
 import paths  # noqa: E402
 REPO = paths.ROOT
-DEFAULT_ANALOGY = os.path.join(paths.RESULTS, 'functional_group_analogy')
-DEFAULT_RETRIEVAL = os.path.join(paths.RESULTS, 'functional_group_analogy_retrieval')
+DEFAULT_ANALOGY = os.path.join(paths.RESULTS, 'analogy')
+DEFAULT_RETRIEVAL = os.path.join(paths.RESULTS, 'analogy_retrieval')
 DEFAULT_DATASET = paths.DATASET_CSV
 DEFAULT_OUT = os.path.join(HERE, 'data')
 
@@ -64,7 +64,7 @@ sys.path.insert(0, paths.SRC)
 # if the npz key format, the per-carbon pool or the set of scoreable corners ever changes,
 # this file must change with it rather than quietly keep projecting the old thing.
 from analogy_retrieval import load_diff_vectors, scoreable_corners  # noqa: E402
-from functional_group_analogy_carbon_matched import (  # noqa: E402
+from analogy_carbon_matched import (  # noqa: E402
     ANALOGY_QUADRUPLES, build_diff_by_group_at_carbon,
 )
 from model_registry import get_model_config  # noqa: E402
@@ -72,7 +72,7 @@ from model_registry import get_model_config  # noqa: E402
 MODEL_8B = 'meta-llama-Llama-3.1-8B'
 SLASH_FOR = {MODEL_8B: 'meta-llama/Llama-3.1-8B'}
 
-# The quadruple `functional_group_analogy_carbon_matched.py:306-311` marks DELIBERATE
+# The quadruple `analogy_carbon_matched.py:306-311` marks DELIBERATE
 # NEGATIVE CONTROL: acid->ester and aldehyde->ketone are formally the same substitution but
 # chemically are not, so it is the one that should fail if leg symmetry is what makes an
 # analogy work. It does not fail, which is a result -- but a panel drawing it must not read
@@ -94,7 +94,7 @@ def lumped_pool(diffs):
 
 def fit_centered_3d_basis(matrix):
     """Top-3 PCA basis, mean-CENTERED -- the sibling of
-    `functional_group_analogy_carbon_matched.fit_uncentered_3d_basis`, and deliberately not
+    `analogy_carbon_matched.fit_uncentered_3d_basis`, and deliberately not
     it. See the module docstring for why this figure inverts that choice.
 
     Returns (components (3, D), mean (D,), explained variance fraction).
@@ -304,7 +304,7 @@ def main():
     if not os.path.exists(npz):
         raise SystemExit(
             f"missing {os.path.relpath(npz, REPO)} -- run "
-            "src/functional_group_analogy_carbon_matched.py for this model first")
+            "src/analogy_carbon_matched.py for this model first")
     diffs = load_diff_vectors(npz)
     molecules = read_molecules(args.dataset)
     ordered = rank_cells(read_trials(

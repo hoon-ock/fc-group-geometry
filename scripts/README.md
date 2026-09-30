@@ -87,7 +87,7 @@ Two analysis scripts read the `.pt` tensors directly and no `results/` tree at a
 Worth being explicit about the division, because the directory names invite the opposite
 reading: **`src/` computes and `analysis/` summarises.** `analysis/probe/analyze_sweep.py`
 does not fit a probe — it contains no sklearn calls at all and reads the `summary_*.json`
-that `src/functional_group_probe.py` wrote. The same holds for ambiguity, taxonomy, geometry
+that `src/probe.py` wrote. The same holds for ambiguity, taxonomy, geometry
 and generation. The two activations-only scripts above are the exceptions.
 
 Each `analysis/<topic>/README.md` carries the command that regenerates its own snapshot.
