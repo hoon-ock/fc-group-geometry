@@ -19,7 +19,7 @@ and ABOVE it on fine groups, while the reasoning distill tracks base.
 Companion to `f1_probe_depth`, and deliberately a different question: the probe asks whether a
 linear reader CAN recover the class, this asks what the representation's own neighbourhood
 structure is organised by. They do not answer at the same depth, and the gap is the point --
-see `Analysis/prompt_structure/README.md`.
+see `visuals/prompt_structure/README.md`.
 
 Reads only `analysis/data/label_agreement_by_layer.csv`, never
 `results/`, which is gitignored.

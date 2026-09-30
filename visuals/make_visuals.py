@@ -16,12 +16,15 @@ the same layout `make_visuals_tsne.py` writes its per-model panels into. One mod
 string everywhere a path carries it, so a figure can be traced to the run that produced it
 without a lookup table. The model is therefore NOT repeated in the filename.
 
-`heat_figure` and `heatrow_figure` share ONE function for the matrix drawing (`heat_row`)
-and differ only in page geometry and type size, so the two forms cannot disagree about a
-number.
+The two forms share their INPUTS, not their drawing code: `read_matrices` builds the arrays,
+`leaf_order` fixes the row order, and `main` computes the one colour limit, all before either
+figure is laid out. So neither can hold a second opinion about a number. The `imshow` call
+itself is written twice -- `heat_figure` draws one panel, `heat_row` draws five with titles
+and without x tick labels -- and the two are kept identical by hand (`RdBu_r`, symmetric
+`lim`, `interpolation='nearest'`, NaN diagonal). Change one and change the other.
 
 Nothing is recomputed, rescaled or smoothed here. The within-(model, layer) z-score comes
-from `data/between_class_matrix.csv` as `analyze_taxonomy.py` computed it. Never
+from `analysis/data/between_class_matrix.csv` as `analyze_taxonomy.py` computed it. Never
 `results/`, which is gitignored.
 
 Two choices keep 30 separate files comparable to each other rather than 30 unrelated
@@ -168,10 +171,14 @@ def heat_row(fig, axes, model, groups, z_by, order, lim, tick_fs, cb_label_fs, c
              cb_fraction, cb_pad, title_fs=None):
     """Five clustermaps in one row on pre-made axes, sharing one colour limit.
 
-    Used by both `heat_figure` and `heatrow_figure`, so the two can never disagree about
-    the arrays, the leaf order or the scale -- they differ only in page geometry and type
-    size, which is everything the caller passes in. The axes arrive already allocated
-    because the callers lay out differently: one panel per figure against five in a row.
+    Called only by `heatrow_figure`. It does not back `heat_figure`, which draws its single
+    panel itself: that one needs x tick labels and no title, this one needs titles and no x
+    ticks, and factoring both through one function meant passing enough flags to obscure
+    which form was being drawn. What rules out a disagreement about the numbers is upstream
+    of both -- `read_matrices`, `leaf_order` and the `lim` from `main` are shared. The
+    duplicated part is the `imshow` call, which must stay in step with `heat_figure`'s.
+
+    The axes arrive already allocated because the caller owns the page layout.
 
     The colourbar is attached to THESE axes, never to `fig.axes`: in the composite that would
     stretch the bar over the trajectory panel below, which is a different quantity in
@@ -205,8 +212,8 @@ def heat_row(fig, axes, model, groups, z_by, order, lim, tick_fs, cb_label_fs, c
 def heatrow_figure(model, groups, z_by, order, lim):
     """All five depths in one row: one colour limit, larger type, read on its own.
 
-    Same `heat_row` that `heat_figure` calls, so this is a re-layout of the same arrays and
-    never a second opinion about the numbers.
+    A re-layout of the same arrays `heat_figure` draws, never a second opinion about the
+    numbers: both take them from `read_matrices` in the same `order` at the same `lim`.
     """
     fig, axes = plt.subplots(1, len(LAYERS), figsize=ROW_SIZE,
                              gridspec_kw=dict(wspace=0.06))

@@ -16,22 +16,22 @@ THREE THINGS THIS FIGURE DOES NOT SAY, all of them in that directory's README.md
     embedding with its own arbitrary orientation, scale and origin; only the within-panel
     grouping means anything. Hence no axis ticks, no shared limits, and no claim about a
     cluster "moving" between layers.
-  * no silhouette score is printed. `Analysis/tsne/README.md` establishes that the score the
+  * no silhouette score is printed. `visuals/tsne/README.md` establishes that the score the
     original sweep annotated was computed on the 2-D coordinates rather than the activations
     and "does not rank plots by how well they cluster -- sometimes it ranks them backwards".
-    Cluster quality is the probe's job (`data/layer_curves.csv`), not this figure's.
+    Cluster quality is the probe's job (`analysis/data/layer_curves.csv`), not this figure's.
   * the template panel is the control, not a result about chemistry. It answers whether a
     layout is driven by prompt wording, and through layer 16 the answer is yes -- which is
     what stops the coarse figure's early panels being read as weak chemical structure when
     they are in fact strong WORDING structure. Quantified in
-    `data/tsne_neighbourhood.csv`.
+    `analysis/data/tsne_neighbourhood.csv`.
   * cluster SEPARATION here is not evidence of linear decodability, and the two disagree on
     purpose: the base model's layer-31 panel is visually the tightest while its raw space is
     the most anisotropic (pairwise cosine 0.944, Table 3). t-SNE will happily separate points
     that no linear probe could.
 
 Reads only `analysis/data/tsne_coords.csv`, never `results/`, which is
-gitignored. `Analysis/tsne/compute_tsne_coords.py` writes that snapshot for this purpose.
+gitignored. `analysis/compute_tsne_coords.py` writes that snapshot for this purpose.
 """
 import argparse
 import math

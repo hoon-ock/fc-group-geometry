@@ -16,7 +16,7 @@ resolution effect in the scoring, not a representation deficit -- and it is visi
 because the composition is drawn rather than collapsed to an accuracy number. No correlation
 against an embedding metric could have revealed it.
 
-Reads only `data/group_response_composition.csv`, which
+Reads only `analysis/data/group_response_composition.csv`, which
 `analysis/analyze_generation.py` snapshots. Never `results/`, which is gitignored.
 
 There is no layer dimension. Generation outcomes come from what the model emitted, not from

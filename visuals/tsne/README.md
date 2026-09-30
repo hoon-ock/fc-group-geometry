@@ -30,12 +30,12 @@ Those early panels look organised, but the ten tight blobs are the **ten prompt 
 not chemistry. The layout reorganises around the molecule somewhere between layer 16 and 24 —
 the same place the probe's accuracy steps up. This holds in all five checkpoints.
 
-`data/tsne_neighbourhood.csv` puts a number on it. For each point, the share of its 10 nearest
+`analysis/data/tsne_neighbourhood.csv` puts a number on it. For each point, the share of its 10 nearest
 neighbours **in the 2-D panel** carrying the same label — a description of the layout, at the
 five layers drawn here:
 
 > The same quantity measured **in activation space, at all 32 layers**, is in
-> [`Analysis/prompt_structure/`](../../prompt_structure/README.md). That is the version to
+> [`analysis/README.md` § Prompt wording or chemistry?](../../analysis/README.md#prompt-wording-or-chemistry-a-depth-curve). That is the version to
 > quote as a claim about the model; this one describes these panels. They agree in ordering at
 > layer 31, and that agreement is itself the check that the panels are a faithful picture.
 > The per-layer analysis also locates the crossover — layer 19 — which five layers cannot, and
@@ -84,7 +84,7 @@ establishes that the score the original sweep annotated was computed on the 2-D 
 rather than on the activations, and that on this sample "it does not rank plots by how well
 they cluster — sometimes it ranks them backwards". A number that cannot be quoted does not
 belong on a figure, so it is neither computed nor stored. Cluster quality is the probe's claim
-(`data/layer_curves.csv`), not this figure's.
+(`analysis/data/layer_curves.csv`), not this figure's.
 
 The same caution applies to the table above, and it is why the column is called *neighbourhood
 agreement* rather than a cluster score: it is computed on the 2-D coordinates, so it describes

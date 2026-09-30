@@ -62,7 +62,7 @@ at all. Once that is divided out, base leans oxygen on amide slightly **more** t
 does. That is why `mass_split` draws the control groups below the rule: so the global
 sharpness is visible rather than inferred.
 
-These numbers are all in `data/ambiguity_two_readings.csv` as `posterior_r`,
+These numbers are all in `analysis/data/ambiguity_two_readings.csv` as `posterior_r`,
 `posterior_r_controls` and `posterior_delta`. `posterior_delta` averages the RATIO
 `p(O)/[p(O)+p(home)]` across the controls, which is not the same reduction as the averaged
 control BAR on the figure -- see the note above.

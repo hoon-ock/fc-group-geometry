@@ -13,7 +13,7 @@ groups, so the same height means very different things in the two panels.
 ## How kNN label agreement is calculated
 
 Per `(model, layer)`, over the 920 activation rows (92 molecules × 10 prompt templates), in
-`knn_agreement` (`Analysis/prompt_structure/analyze_prompt_structure.py:62`):
+`knn_agreement` (`knn_agreement` in `analysis/analyze_prompt_structure.py`):
 
 1. **Mean-centre**, `acts - acts.mean(axis=0)`. The residual stream is strongly anisotropic
    (mean pairwise cosine 0.944 in base at layer 31), so on raw vectors the shared mean
@@ -58,7 +58,7 @@ what lets you verify that rather than assume it.
 
 The dotted line is drawn as `Random neighbours 0.10` / `Random neighbours 0.05`, and the
 wording is load-bearing. `chance_floor`
-(`analysis/analyze_prompt_structure.py:81`) is *"P(a uniformly random
+(`analysis/analyze_prompt_structure.py`) is *"P(a uniformly random
 OTHER point shares this point's label)"* — the agreement 10 neighbours drawn at random would
 produce, which is just the label's base rate. Nothing guesses a label, so this is **not** the
 same kind of quantity as `probe_depth.png`'s `Random guess` line and is deliberately not worded
@@ -85,7 +85,7 @@ families" — base already has those — but "chemistry models suppress wording 
 family".
 
 The full argument, the k-sensitivity analysis, and what in it is **not** robust live in
-[`analysis/README.md`](../../prompt_structure/README.md). Read that
+[`analysis/README.md`](../../analysis/README.md#prompt-wording-or-chemistry-a-depth-curve). Read that
 before quoting anything here; in particular, `reason`'s rank against base is not k-stable and
 should not be stated as a result.
 

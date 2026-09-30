@@ -291,7 +291,7 @@ def main():
     # A mean and a median are two numbers off a sample that is far from normal: ranks are
     # small integers piled on 1, with a thin tail that on some axes IS the whole result.
     # Snapshotting the histogram lets a figure show the sample itself without reaching into
-    # `results/`, which nothing under Analysis/visuals is allowed to read. Lossless, because
+    # `results/`, which nothing under visuals/ is allowed to read. Lossless, because
     # ranks are integers -- repeating each rank n times reconstructs the sample exactly.
     hist_rows = []
     for model in args.models:

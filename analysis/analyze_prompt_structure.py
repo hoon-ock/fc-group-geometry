@@ -15,7 +15,7 @@ on the activations is a claim about the model, which is what a depth curve needs
 two are companions, not substitutes: the t-SNE numbers stay where they are.
 
 CENTRING IS LOAD-BEARING, NOT HOUSEKEEPING. The residual stream is strongly anisotropic --
-mean pairwise cosine 0.944 in the base model at layer 31 (`data/geometry_by_layer.csv`)
+mean pairwise cosine 0.944 in the base model at layer 31 (`analysis/data/geometry_by_layer.csv`)
 -- so on raw vectors the shared mean direction can dominate the neighbour ranking and score a
 model partly on how collapsed its space is rather than on what it groups by. Mean-centring
 first is the same correction `analyze_geometry.py` applies before it will quote a between-class
@@ -121,7 +121,7 @@ def main():
             per_mol = acts.shape[0] // n_mol
             # Molecule-major, template-minor -- the row layout `generate_prompts()` in
             # extract_activations_subset.py writes. Same assumption as
-            # Analysis/tsne/compute_tsne_coords.py; if that layout changes, both break.
+            # analysis/compute_tsne_coords.py; if that layout changes, both break.
             groups = np.array([df.iloc[i // per_mol]['functional_group']
                                for i in range(acts.shape[0])])
             labels = {

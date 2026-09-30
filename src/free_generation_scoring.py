@@ -33,7 +33,7 @@ member is a different failure from naming nothing, and the gap between that and
 `strict_accuracy` is how much of a model's shortfall is resolution rather than knowledge.
 
 Imported by both `generation_eval.py`, which adjudicates on the HPC as it generates, and
-`Analysis/generation/score_generations.py`, which re-derives from a stored `generations.csv`.
+`analysis/score_generations.py`, which re-derives from a stored `generations.csv`.
 One copy, because two would drift. Standard library only, so importing it on a GPU node costs
 nothing.
 """

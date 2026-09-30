@@ -16,7 +16,7 @@ shows five curves and lets the reader locate the climb.
 This module also owns the five-model palette (`COLOR5`, `DASH5`, `MARKER5`, `DISPLAY5`) that
 the other generators import from here rather than each keeping a copy.
 
-Reads `data/layer_curves.csv` and `data/surface_baseline.csv` -- never
+Reads `analysis/data/layer_curves.csv` and `analysis/data/surface_baseline.csv` -- never
 `results/`, which is gitignored.
 """
 import argparse

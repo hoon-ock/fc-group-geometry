@@ -183,7 +183,7 @@ def main():
          'n_boot', 'seed'])
 
     # ---- merge into each model's own summary.json ----------------------------------
-    # Last, so the committed CSVs in Analysis/ are already on disk before anything under
+    # Last, so the committed CSVs in analysis/data/ are already on disk before anything under
     # the gitignored results/ tree is touched.
     if args.strict_names_only:
         # This flag reproduces the conservative tier and is normally paired with a scratch

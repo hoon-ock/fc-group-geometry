@@ -59,7 +59,7 @@ sample size visible directly: a column of 12 dots cannot be over-read.
 **2. Retrieval is scored on the same trials as the degenerate rate.** A trial is *degenerate*
 when `b2 + (a1 - a2)` is nearest to `b2` itself once the exclusion is lifted — the offset
 never left the source group's neighbourhood, and the hit was scored on an exclusion that did
-the work. `data/geometry_by_layer.csv` carries `degenerate_rate` at L31: base 0.25,
+the work. `analysis/data/geometry_by_layer.csv` carries `degenerate_rate` at L31: base 0.25,
 chem 0.65, reason 0.70. So a model can retrieve well and still have a weak offset, and the
 fine-tunes are exactly where that gap is widest. Neither hit@1 nor a low rank should be read
 as evidence about the offset without that column beside it — see `analyze_geometry.py`'s
@@ -164,7 +164,7 @@ chance on the first two panels and good on the third.
 inter-group draws 20. A ladder column looks fuller because it holds more trials, not because
 the model did worse.
 
-Source: the committed `data/retrieval_rank_hist.csv`, a tidy
+Source: the committed `analysis/data/retrieval_rank_hist.csv`, a tidy
 `(model, axis, layer, rank, n)` histogram snapshotted by `analyze_geometry.main()`. Lossless
 for integer ranks — repeating each rank `n` times reconstructs the exact sample that produced
 `mean_rank` and `median_rank`, which is checked rather than assumed.

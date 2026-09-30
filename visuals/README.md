@@ -16,7 +16,7 @@ cd /tmp/repro/visuals && python3 make_visuals_probe.py && python3 make_visuals_t
 
 If a generator needs `results/`, a snapshot step is missing upstream. Three such gaps were
 found and closed this way: `generation/` (the behavioural half of the argument),
-`taxonomy/between_class_matrix.csv` (the clustermaps), and `probe/confusion_errors.csv` (the
+`analysis/data/between_class_matrix.csv` (the clustermaps), and `analysis/data/confusion_errors.csv` (the
 nitrogen→oxygen counts, which had been read from an uncommitted tree).
 
 `_common.load()` is what enforces it — it resolves paths relative to `analysis/` only, and
@@ -28,15 +28,15 @@ Each writes into `visuals/<topic>/` and takes `--out-dir` to write elsewhere.
 
 | Generator | Output | Reads |
 |---|---|---|
-| `make_visuals.py` | `clustermap/<model>/`: `heat_L<layer>.png` (25), `heatrow.png` (5) | `taxonomy/between_class_matrix.csv` |
-| `make_visuals_tsne.py` | `tsne/tsne_depth_{coarse,fine,template}.png`, plus per-model `fine_L<layer>.png` | `tsne/tsne_coords.csv`, `probe/layer_curves.csv` |
-| `make_visuals_probe.py` | `probe/probe_depth.png` | `probe/layer_curves.csv`, `probe/surface_baseline.csv` |
-| `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `ambiguity/ambiguity_family_probability.csv` |
-| `make_visuals_prompt_structure.py` | `prompt_structure/label_agreement_depth.png` | `prompt_structure/label_agreement_by_layer.csv` |
-| `make_visuals_generation_composition.py` | `generation/group_response_composition.png` | `generation/group_response_composition.csv` |
-| `make_visuals_retrieval_dist.py` | `retrieval/rankdist.png` | `geometry/retrieval_{rank_hist,by_axis}.csv` |
-| `make_visuals_retrieval_violin.py` | `retrieval/rankviolin.png` | `geometry/retrieval_{rank_hist,by_axis}.csv` |
-| `make_visuals_retrieval_3d.py` | `retrieval/analogy3d_*.png` + a `.txt` readout each (6 pairs) | `analogy/analogy_quiver3d.csv` |
+| `make_visuals.py` | `clustermap/<model>/`: `heat_L<layer>.png` (25), `heatrow.png` (5) | `analysis/data/between_class_matrix.csv` |
+| `make_visuals_tsne.py` | `tsne/tsne_depth_{coarse,fine,template}.png`, plus per-model `fine_L<layer>.png` | `analysis/data/tsne_coords.csv`, `analysis/data/layer_curves.csv` |
+| `make_visuals_probe.py` | `probe/probe_depth.png` | `analysis/data/layer_curves.csv`, `analysis/data/surface_baseline.csv` |
+| `make_visuals_ambiguity.py` | `ambiguity/mass_split_L<layer>.png` | `analysis/data/ambiguity_family_probability.csv` |
+| `make_visuals_prompt_structure.py` | `prompt_structure/label_agreement_depth.png` | `analysis/data/label_agreement_by_layer.csv` |
+| `make_visuals_generation_composition.py` | `generation/group_response_composition.png` | `analysis/data/group_response_composition.csv` |
+| `make_visuals_retrieval_dist.py` | `retrieval/rankdist.png` | `analysis/data/retrieval_{rank_hist,by_axis}.csv` |
+| `make_visuals_retrieval_violin.py` | `retrieval/rankviolin.png` | `analysis/data/retrieval_{rank_hist,by_axis}.csv` |
+| `make_visuals_retrieval_3d.py` | `retrieval/analogy3d_*.png` + a `.txt` readout each (6 pairs) | `analysis/data/analogy_quiver3d.csv` |
 
 Two generators split their output per checkpoint — `make_visuals.py` and
 `make_visuals_tsne.py` — and both name the subdirectory with the model's own identifier

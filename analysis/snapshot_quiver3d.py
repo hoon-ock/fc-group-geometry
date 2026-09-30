@@ -3,7 +3,7 @@
 
     python analysis/snapshot_quiver3d.py [--layer 31] [--mode carbon_matched]
 
-Writes `data/analogy_quiver3d.csv`, the 3D coordinates
+Writes `analysis/data/analogy_quiver3d.csv`, the 3D coordinates
 `visuals/make_visuals_retrieval_3d.py` draws as `visuals/retrieval/analogy3d_*.png`,
 one PNG per row of the selection below. `analysis/` carries the *numeric* view of
 the same retrievals -- hit@1 and the rank distribution; this is the geometric one.

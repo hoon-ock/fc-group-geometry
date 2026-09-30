@@ -85,9 +85,9 @@ def neighbourhood_agreement(coords, k=10):
 
     This describes THE PICTURE, not the activations: it is computed on the 2-D coordinates,
     so it says what the panel is laid out by, and nothing about how separable the underlying
-    representation is. That distinction is the one `Analysis/tsne/README.md` says the old
+    representation is. That distinction is the one `visuals/tsne/README.md` says the old
     silhouette annotation got wrong, so it is stated rather than left to be assumed. Cluster
-    quality remains the probe's claim (`data/layer_curves.csv`).
+    quality remains the probe's claim (`analysis/data/layer_curves.csv`).
 
     It exists because the figure makes a visual claim -- early layers group by prompt
     template, late layers by chemistry -- that a reader should not have to take on trust.

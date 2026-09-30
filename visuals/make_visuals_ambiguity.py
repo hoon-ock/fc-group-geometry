@@ -21,7 +21,7 @@ TWO THINGS THIS FIGURE DOES NOT SAY, both of which live in that directory's READ
     subset can be ranked on these bars.
   * base's low oxygen mass is NOT specific to the ambiguous groups. Its controls sit at
     r = 0.012 against chem-r's 0.226; base is sharper everywhere. `posterior_delta` in
-    `data/ambiguity_two_readings.csv` is the control-corrected reading, and on
+    `analysis/data/ambiguity_two_readings.csv` is the control-corrected reading, and on
     `amide` it puts base ahead of chem-r rather than far behind.
 
 Reads only `analysis/data/*.csv`, never `results/`, which is gitignored.

@@ -1,8 +1,9 @@
 """The layout is a contract: the docs, run_local.sh and paths.py all assume this shape."""
 import glob
 import os
+import subprocess
 
-from conftest import REPO
+from conftest import FIGURE_COUNTS, REPO
 
 
 def _names(pattern):
@@ -34,14 +35,40 @@ def test_analysis_is_flat():
     assert subdirs == ['data']
 
 
-def test_visuals_holds_nine_generators_and_seven_output_dirs():
+def test_visuals_holds_nine_generators():
     assert len(_names('visuals/make_visuals*.py')) == 9
     assert os.path.exists(os.path.join(REPO, 'visuals/_common.py'))
-    subdirs = sorted(d for d in os.listdir(os.path.join(REPO, 'visuals'))
-                     if os.path.isdir(os.path.join(REPO, 'visuals', d))
-                     and d != '__pycache__')
-    assert subdirs == ['ambiguity', 'clustermap', 'generation', 'probe',
-                       'prompt_structure', 'retrieval', 'tsne']
+
+
+def test_every_figure_topic_has_a_TRACKED_readme():
+    """Tracked, not merely present on disk -- which is the whole point.
+
+    Every PNG under visuals/ is gitignored and git does not track empty directories, so a
+    topic directory survives a clone only if some tracked file keeps it alive. For six of the
+    seven that is the README. clustermap had none, so it existed locally as generated output
+    and vanished on clone -- and the predecessor of this test, which read os.listdir, passed
+    in the working tree and failed on a fresh clone of the published repo. Checking the index
+    instead of the filesystem is what makes the test see what a reader gets.
+
+    Topics come from conftest.FIGURE_COUNTS so this list cannot drift from the one
+    test_figures proves the generators actually produce.
+    """
+    tracked = set(subprocess.run(['git', 'ls-files'], cwd=REPO,
+                                 capture_output=True, text=True).stdout.split())
+    missing = [t for t in FIGURE_COUNTS
+               if f'visuals/{t}/README.md' not in tracked]
+    assert not missing, (
+        f'no tracked visuals/<topic>/README.md for {missing} -- git cannot carry the '
+        'directory, so it will be absent from a fresh clone')
+
+
+def test_no_unexpected_topic_directory_on_disk():
+    """The filesystem may hold FEWER topics than FIGURE_COUNTS (nothing has been rendered
+    yet, as on a fresh clone) but never a topic nothing knows about."""
+    present = {d for d in os.listdir(os.path.join(REPO, 'visuals'))
+               if os.path.isdir(os.path.join(REPO, 'visuals', d)) and d != '__pycache__'}
+    assert not present - set(FIGURE_COUNTS), (
+        f'unknown directory under visuals/: {sorted(present - set(FIGURE_COUNTS))}')
 
 
 def test_scripts_holds_three_gpu_jobs_and_the_local_driver():

@@ -243,7 +243,7 @@ delta               = contrast(reactivity) - contrast(naming)
 
 ### What it found
 
-`data/taxonomy_contrast.csv`. **All three models start reactivity-leaning and only the base
+`analysis/data/taxonomy_contrast.csv`. **All three models start reactivity-leaning and only the base
 model crosses over**:
 
 | delta | L0 | L8 | L16 | L24 | L31 |
@@ -257,13 +257,13 @@ across the stack. Chem-R's does not. That is the mechanism: **Llama ends up orga
 naming convention its probe labels encode; Chem-R ends up organised by chemistry.**
 
 It also explains, without needing a second hypothesis, why Llama scores higher on the probe
-(`coarse_group` 1.000 vs 0.983, molecule-level CI [−0.032, −0.006] — see `../probe/`): the
+(`coarse_group` 1.000 vs 0.983, molecule-level CI [−0.032, −0.006] — see [the linear probe](#the-linear-probe)): the
 probe's labels *are* the naming partition, so a model organised that way is being scored on
 its own axis.
 
 ### Why the paired bootstrap is the only test reported
 
-`data/taxonomy_paired.csv`. Resampling unit is the **group**, n = 19.
+`analysis/data/taxonomy_paired.csv`. Resampling unit is the **group**, n = 19.
 
 | layer | Chem-R delta | Llama delta | paired | 95% CI | P(>0) |
 |---|---|---|---|---|---|
@@ -282,7 +282,7 @@ tokenizer the three models share.
 
 ### The permutation control
 
-`data/taxonomy_permutation.csv`. A partition into more, smaller families scores a higher
+`analysis/data/taxonomy_permutation.csv`. A partition into more, smaller families scores a higher
 within-minus-between contrast for purely combinatorial reasons, so the control shuffles group
 labels while **matching the family-size profile** — reactivity's [4,5,4,4,2] against naming's
 [4,5,6,4].
@@ -326,7 +326,7 @@ story and are never otherwise read together.
 python analysis/analyze_geometry.py
 ```
 
-Sources (all **gitignored**, so `data/geometry_by_layer.csv` is the durable record):
+Sources (all **gitignored**, so `analysis/data/geometry_by_layer.csv` is the durable record):
 `results/anisotropy_diagnostic/`, `results/analogy/`,
 `results/analogy_retrieval/`.
 
@@ -343,7 +343,7 @@ other two). Within-class does not: 0.754 / 0.616 / 0.736 against a null of ±0.1
 So the durable geometric claim is **within-class**: the functional-group diff vector is
 consistent across chain lengths. Any claim resting on between-class similarity — including
 every dendrogram in the paper — has to be framed as *relative* structure, with the centered
-null stated. `../taxonomy/` is built that way on purpose: it z-scores within each model's own
+null stated. [The taxonomy contrast](#which-taxonomy-the-geometry-follows) is built that way on purpose: it z-scores within each model's own
 between-class distribution and never quotes a level.
 
 ### 2. Fine-tuning de-anisotropises
@@ -407,13 +407,13 @@ Scope is the **declarative `functional_group` prompt only**; `snapshot_quiver3d.
 `--entity-type` if others are extracted.
 
 This directory holds one producer, `snapshot_quiver3d.py`, which writes
-`data/analogy_quiver3d.csv` — the 3D coordinates behind
+`analysis/data/analogy_quiver3d.csv` — the 3D coordinates behind
 `visuals/retrieval/analogy3d_*.png`. The retrieval *numbers* live in `../geometry/`; §1 and
 §2 below document the test those numbers come from, because it is
 `src/analogy_retrieval.py`'s method rather than `analyze_geometry.py`'s.
 
 > **`analogy_quiver3d.csv` is base-only**, which is all the 3D figure draws. Per-model
-> retrieval across all five checkpoints is in `../data/retrieval_by_axis.csv` and
+> retrieval across all five checkpoints is in `analysis/data/retrieval_by_axis.csv` and
 > `retrieval_rank_hist.csv`.
 
 > **The activation space is strongly anisotropic** — raw pairwise cosine runs 0.78–1.00 — so
@@ -576,7 +576,7 @@ to the quadruple set the constants at the top of the file are what should change
 
 ### 3. The 3D projection snapshot
 
-`snapshot_quiver3d.py` writes `data/analogy_quiver3d.csv`, the coordinates
+`snapshot_quiver3d.py` writes `analysis/data/analogy_quiver3d.csv`, the coordinates
 `visuals/make_visuals_retrieval_3d.py` draws under `visuals/retrieval/` as one PNG
 plus one `.txt` per selected cell, stems `analogy3d_{model}_L{layer}_{quadruple}_C{N}`. The
 numbers live in the `.txt`; the image carries only what identifies it. It reads two results
@@ -713,7 +713,7 @@ against the group's own **oxygen-free** family controls so a merely-diffuse mode
 
 ### What holds: the within-model result, in all three models
 
-Layer 31, `data/ambiguity_two_readings.csv`:
+Layer 31, `analysis/data/ambiguity_two_readings.csv`:
 
 | group | post. Δ Llama | post. Δ Chem-R | post. Δ DSR1 | geom. Δ Llama | geom. Δ Chem-R | geom. Δ DSR1 |
 |---|---|---|---|---|---|---|
@@ -796,7 +796,7 @@ relies on. PCA to 50 components, then t-SNE at perplexity 30, both at `random_st
 ### Read the neighbourhood table, not the picture
 
 A t-SNE plot invites cluster-quality judgements it cannot support, so the honest quantity is
-released alongside the coordinates. `data/tsne_neighbourhood.csv` asks, for each point, what
+released alongside the coordinates. `analysis/data/tsne_neighbourhood.csv` asks, for each point, what
 share of its **k = 10 nearest neighbours in the embedding** carries the same label — for
 three competing labels at once:
 
@@ -854,8 +854,8 @@ between models and between depths, not against chance.
 
 | file | contents |
 |---|---|
-| `data/tsne_coords.csv` | model × layer × 920 prompts: `x`, `y`, plus `molecule`, `functional_group`, `coarse_family`, `carbon_count`, `template_index` |
-| `data/tsne_neighbourhood.csv` | model × layer × k: k-NN label agreement for template, coarse family and fine group |
+| `analysis/data/tsne_coords.csv` | model × layer × 920 prompts: `x`, `y`, plus `molecule`, `functional_group`, `coarse_family`, `carbon_count`, `template_index` |
+| `analysis/data/tsne_neighbourhood.csv` | model × layer × k: k-NN label agreement for template, coarse family and fine group |
 | `compute_tsne_coords.py` | the embedding; reads `activations/`, writes both CSVs |
 
 The figures are drawn by `visuals/make_visuals_tsne.py` into
@@ -892,7 +892,7 @@ wording.
 **Family agreement overtakes template agreement at layer 19** — and within one layer of
 that in every checkpoint (base 19, chem-r 19, chem-faithful 19, chemdfm 19, reason 20). This is *later* than the probe's accuracy step — the largest
 single-layer jump is 15→16 in four of the five checkpoints and 17→18 in chem-faithful, and the
-probe first clears 0.90 balanced accuracy at layer 16–18 (`data/layer_curves.csv`). The
+probe first clears 0.90 balanced accuracy at layer 16–18 (`analysis/data/layer_curves.csv`). The
 gap is the interesting part: a linear reader can recover the family two to three layers before
 the representation's own neighbourhood structure reorganises around it. Decodability and
 dominant structure are not the same event, and the probe sees the earlier one.
@@ -920,7 +920,7 @@ not bias the comparison across checkpoints — every model is scored against the
 but it makes the panel easy to misread, so the figure draws only `template` and
 `functional_group`, which carry no such convention. The columns stay in the CSV because the
 crossover layer is measured against them and because a number worth computing is worth
-releasing. The same caveat is the subject of `Analysis/ambiguity/`.
+releasing. The same caveat is the subject of [the convention-labelled groups](#the-convention-labelled-groups-read-two-ways).
 
 ### What is robust, and what is not
 
@@ -950,7 +950,7 @@ swap between k=5 and k=10). Quote the group, not the ranking.
 ### The centring choice, and why it turned out not to matter
 
 Neighbours are ranked on **mean-centred** cosine. The residual stream is strongly anisotropic —
-mean pairwise cosine 0.944 in base at layer 31 (`data/geometry_by_layer.csv`) — so on
+mean pairwise cosine 0.944 in base at layer 31 (`analysis/data/geometry_by_layer.csv`) — so on
 raw vectors the shared mean direction contributes to every neighbour ranking, and a model could
 be scored partly on how collapsed its space is. `analyze_geometry.py` applies the same
 correction before it will quote a between-class cosine at all. Centring is therefore the
@@ -1016,6 +1016,6 @@ and checked against a 200-draw label shuffle.
 - generators — `analyze_prompt_structure.py` (reads activations),
   `visuals/make_visuals_prompt_structure.py` (figure, reads only the CSV).
 - `template_index` is not a dataset column: it is reconstructed from the molecule-major /
-  template-minor row layout, the same assumption `Analysis/tsne/compute_tsne_coords.py` makes.
+  template-minor row layout, the same assumption `analysis/compute_tsne_coords.py` makes.
 
 ---

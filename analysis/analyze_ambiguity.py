@@ -122,7 +122,7 @@ def fold_accuracy(results_dir, model, entity_type, tag='coarse_group'):
 
 
 def snapshot_family_probability(results_dir, model, entity_type, structures):
-    """Copy the probe's family-probability table into Analysis/ for every layer.
+    """Copy the probe's family-probability table into analysis/data/ for every layer.
 
     `posterior_ratio` reduces this to one ratio at one layer, which is the right input for
     the two-readings table but throws away what a figure needs: the actual mass on each of

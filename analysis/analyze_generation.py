@@ -11,7 +11,7 @@ Its results live in `results/generation_eval/`, which is gitignored, and no othe
 script reads them. This snapshots them so the paper builds from committed files.
 
 It also adds what `summary.json` lacks: a **molecule-level bootstrap CI** on the accuracy
-difference between two models, matching `../probe/analyze_sweep.py:bootstrap_diff`. Without
+difference between two models, matching `bootstrap_diff` in `analysis/analyze_sweep.py`. Without
 it Table 1 would pair a probe difference that has an interval against a generation difference
 that does not.
 

@@ -66,7 +66,7 @@ The `ester : carboxylic acid :: ketone : aldehyde` file is the quadruple set's d
 negative control, and its sidecar says so. It passes the selection rule cleanly at C4, which
 is a result rather than a reason to hide it, but it must not read as a plain success.
 
-Reads only `data/analogy_quiver3d.csv`, never `results/`, in line with every other
+Reads only `analysis/data/analogy_quiver3d.csv`, never `results/`, in line with every other
 generator here. Written to `visuals/retrieval/`, so
 nothing here can reach the manuscript by accident.
 """

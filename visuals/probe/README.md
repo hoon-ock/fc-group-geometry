@@ -11,7 +11,7 @@ is measured on a group the probe never trained on.
 **Balanced accuracy is the mean of the per-class recalls.** Plain accuracy is the fraction of
 all test prompts called correctly. Plain accuracy weights each family by how many prompts it
 has; balanced accuracy gives every family one vote regardless of size.
-`balanced_accuracy_score` computes it at `src/probe.py:854`.
+`balanced_accuracy_score` computes it in `src/probe.py`.
 
 ```
 balanced = mean over families of (that family's prompts correct / that family's prompts)
@@ -70,7 +70,7 @@ Two grey lines mark what the curve has to beat.
 ## `Random guess` — dotted, 0.20
 
 `1 / n_classes` over the 5 declared coarse families, written by the probe as
-`summary_coarse_group.json: chance` (`src/probe.py:994`) and drawn at
+`summary_coarse_group.json: chance` (`src/probe.py`) and drawn at
 that value.
 
 **Labelled `Random guess`, not `chance`, on purpose.** "Chance" names no particular strategy,
@@ -86,15 +86,15 @@ looking like *the* floor when it is one of several.
 for the guesser just named.**
 `none (alkane)` is the only fine group in the `hydrocarbon` family, so holding it out leaves no
 hydrocarbon in training; it is skipped as a fold, and its 4 molecules never enter the pooled
-out-of-fold set (`src/probe.py:257-266` prints a notice when it skips
+out-of-fold set (`src/probe.py` prints a notice when it skips
 one). The pooled evaluation is 880 rows (88 molecules × 10 templates) over `halide` / `nitrogen` /
 `oxygen` / `sulfur` only. The note on `N_MOLECULES`
-(`analysis/analyze_sweep.py:60-64`) records the same thing.
+(`analysis/analyze_sweep.py`) records the same thing.
 
 That makes 0.25 a tempting correction — the chance level of a 4-class problem — but it is
 the wrong one *for this classifier*. Hydrocarbon is absent from the out-of-fold **labels**, not
 from the **output space**: every fold trains on the alkane molecules, so the probe keeps all
-five output units and uses them. `data/confusion_errors.csv` records **1,095 out-of-fold
+five output units and uses them. `analysis/data/confusion_errors.csv` records **1,095 out-of-fold
 prompts predicted `hydrocarbon`** across models and layers, against zero where it is the true
 class. A guesser drawing uniformly from the five labels this probe can actually emit scores
 recall 0.20 on each of the four evaluated families, and the mean of four 0.20s is **0.20**.
@@ -108,7 +108,7 @@ line below is the reference that actually binds.
 
 The same classification task, same folds, same label space — but with **no model in it at
 all**. Character n-grams of the raw prompt string are fed to a logistic regression
-(`run_surface_baseline`, `src/probe.py:634`):
+(`run_surface_baseline` in `src/probe.py`):
 
 ```python
 TfidfVectorizer(analyzer='char_wb', ngram_range=(2, 5), min_df=2)

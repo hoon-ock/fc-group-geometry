@@ -35,8 +35,8 @@ Two things are done differently from a default violin, both because the default 
 Bandwidth is Scott's rule via `gaussian_kde`, stated rather than tuned: a bandwidth chosen to
 make these panels look right would be a choice about the conclusion.
 
-Reads the same committed CSVs as `rankdist.png` -- `data/retrieval_rank_hist.csv`
-and `data/retrieval_by_axis.csv`, never `results/`.
+Reads the same committed CSVs as `rankdist.png` -- `analysis/data/retrieval_rank_hist.csv`
+and `analysis/data/retrieval_by_axis.csv`, never `results/`.
 """
 import argparse
 import os

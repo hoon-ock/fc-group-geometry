@@ -1,10 +1,10 @@
 # `visuals/generation/` — what per-group generation failure is made of
 
 One figure. Written by
-[`visuals/make_visuals_generation_composition.py`](../../figures/make_visuals_generation_composition.py),
-which reads only `data/group_response_composition.csv` and never `results/` — the
+[`visuals/make_visuals_generation_composition.py`](../make_visuals_generation_composition.py),
+which reads only `analysis/data/group_response_composition.csv` and never `results/` — the
 same rule every generator in that directory follows. That CSV is snapshotted by
-[`analysis/analyze_generation.py`](../../generation/analyze_generation.py).
+[`analysis/analyze_generation.py`](../../analysis/analyze_generation.py).
 
 Regenerate:
 

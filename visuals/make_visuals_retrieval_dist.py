@@ -37,8 +37,8 @@ Panels keep their own y-limits, and must: a rank is only meaningful against its 
 the pool is ~16 candidates on the first two axes and ~74 on the ladder. Rank 8 is chance on
 one and good on another, so a shared axis would invite exactly the wrong comparison.
 
-Read from the committed `data/retrieval_rank_hist.csv` and
-`data/retrieval_by_axis.csv` -- never `results/`. The histogram is lossless for
+Read from the committed `analysis/data/retrieval_rank_hist.csv` and
+`analysis/data/retrieval_by_axis.csv` -- never `results/`. The histogram is lossless for
 integer ranks, so repeating each rank `n` times reconstructs the exact sample that produced
 `mean_rank` and `median_rank`.
 """

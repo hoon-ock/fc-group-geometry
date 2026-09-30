@@ -1,5 +1,9 @@
 # Functional Group Geometry in LLM Hidden States
 
+[![tests](https://github.com/hoon-ock/fc-group-geometry/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/hoon-ock/fc-group-geometry/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
+
 Do LLM hidden states encode organic functional groups as a consistent geometric structure,
 analogous to word2vec-style analogies (`king - man + woman ~= queen`)?
 
@@ -235,8 +239,8 @@ unchanged and would emit more if more prompt types were extracted.
 
 ```bash
 pip install -r requirements-dev.txt
-pytest                    # 228 checks, ~5 s
-pytest --runslow          # 247 -- + rebuild all 70 figures, + reproduce the snapshots
+pytest                    # 315 checks, ~5 s
+pytest --runslow          # 334 -- + rebuild all 70 figures, + reproduce the snapshots
 ```
 
 **Nothing in the suite needs a GPU**, and `tests/test_no_gpu.py` pins that: it asserts by
@@ -249,6 +253,16 @@ The fast tier covers structure, `paths.py` resolution (including cwd-independenc
 `run_local.sh` and every `load()` name exists, the 29 snapshots' schema and record
 terminators, shell syntax and the `--array`/`check_array_size` agreement, and that no
 renamed or dropped name survives in code.
+
+It also checks that **the documentation points at things that exist** — every markdown link
+and `#anchor`, and every backticked path anchored on a real directory, in prose *and* in
+docstrings. This exists because a fresh clone once failed: `visuals/clustermap/` had no
+tracked file, so git could not carry the directory, and checking for more of the same found
+that all four markdown links in the repo were broken along with 32 stale path references —
+all of it rot from flattening `analysis/`. The structural test that missed it read
+`os.listdir`; it now reads `git ls-files`, so it sees what a reader gets rather than what the
+working tree happens to hold. The same rule covers the README badges: an Actions badge must
+name a workflow that exists, in *this* repository.
 
 `--runslow` adds the two end-to-end tiers:
 
