@@ -62,7 +62,7 @@ Four stages. Only the first two need a GPU; the rest is one local command.
 ```
 [1] 01_extract.sbatch          GPU  ->  activations/                 160 .pt, ~1.3 GB
 [2] 02_generation_eval.sbatch  GPU  ->  results/generation_eval/     3 files per model
-[3] run_local.sh --stages compute   ->  results/  (6 more trees)
+[3] run_local.sh --stages compute   ->  results/  (7 trees, named below)
 [4] run_local.sh --stages analysis  ->  analysis/*/data/*.csv        29 snapshots, committed
     run_local.sh --stages figures   ->  analysis/visuals/            70 PNGs
 ```
