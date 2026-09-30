@@ -92,8 +92,15 @@ python analysis/paper/check_claims.py && echo OK
 
 It reads only `analysis/*/data/*.csv` and asserts the numbers the paper's argument rests
 on. Exit 0 proves the migration preserved both the snapshot CSVs and the code that reads
-them. Capture the same command's output in the source tree first -- that is the reference
-to diff against.
+them.
+
+Measured in the source tree on 2026-09-29, before any file was copied, this is the target:
+
+```
+74/74 checks passed          # exit 0
+```
+
+Anything short of 74 means a snapshot CSV did not come across intact.
 
 A grep for the old layout should come back empty:
 
