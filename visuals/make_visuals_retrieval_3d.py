@@ -316,32 +316,46 @@ def spread_labels(anchors, heights):
     return anchors
 
 
-def panel(ax, cell):
+def panel(ax, cell, camera=None, scale=1.0):
+    """Draw one analogy cell.
+
+    `camera` overrides `pick_camera`, which is needed where that objective is the wrong one:
+    it maximises the smallest gap between the five key POINTS and says nothing about the
+    arrows, so it can choose a view that separates every point while showing the two offsets
+    nearly end-on.
+
+    `scale` multiplies every mark size and line width. These are sized for the 8in standalone
+    panel, and in a composite a third of that the squares swamp the arrows they sit on. Areas
+    (`s=`) scale by the square, widths linearly.
+
+    Both default to the standalone behaviour, so released output is unaffected.
+    """
+    a2_ = scale * scale
     xyz, lab = cell['xyz'], cell['label']
     a1, a2, b1, b2, pred = (xyz['a1'], xyz['a2'], xyz['b1'], xyz['b2'], xyz['predicted'])
-    elev, azim = pick_camera(cell)
+    elev, azim = camera if camera is not None else pick_camera(cell)
 
     equalize(ax, np.vstack([cell['others'], a1, a2, b1, b2, pred]))
     ax.view_init(elev=elev, azim=azim)
     recessive3d(ax)
 
     # The candidate pool first, so every arrow draws over it.
-    ax.scatter(*cell['others'].T, s=16, color=POOL, alpha=0.8, depthshade=False,
+    ax.scatter(*cell['others'].T, s=16 * a2_, color=POOL, alpha=0.8, depthshade=False,
                linewidth=0, zorder=1)
 
     # b2 -> b1 goes down first and heavier. Where the analogy is tight the dashed transported
     # offset lands on top of it -- that coincidence IS the result, so the one underneath is
     # drawn wide enough to still show either side of the dashes.
-    arrow(ax, b2, b1, color=TGT, linewidth=3.4, alpha=0.9, zorder=3)
-    arrow(ax, a2, a1, color=SRC, linewidth=2.6, zorder=4)
-    arrow(ax, b2, pred, color=SRC, linewidth=2.1, linestyle=(0, (5, 2.5)), zorder=5)
-    ax.plot(*zip(pred, b1), color='0.2', linewidth=1.4, linestyle=':', zorder=6)
-    ax.scatter(*pred, s=130, color='black', marker='x', linewidth=2.3,
+    arrow(ax, b2, b1, color=TGT, linewidth=3.4 * scale, alpha=0.9, zorder=3)
+    arrow(ax, a2, a1, color=SRC, linewidth=2.6 * scale, zorder=4)
+    arrow(ax, b2, pred, color=SRC, linewidth=2.1 * scale, linestyle=(0, (5, 2.5)), zorder=5)
+    ax.plot(*zip(pred, b1), color='0.2', linewidth=1.4 * scale, linestyle=':', zorder=6)
+    ax.scatter(*pred, s=130 * a2_, color='black', marker='x', linewidth=2.3 * scale,
                depthshade=False, zorder=8)
 
     for role in ROLES:
-        ax.scatter(*xyz[role], s=64, color=HUE[role], marker=MARK[role], depthshade=False,
-                   edgecolor='white', linewidth=0.8, zorder=7)
+        ax.scatter(*xyz[role], s=64 * a2_, color=HUE[role], marker=MARK[role],
+                   depthshade=False, edgecolor='white', linewidth=0.8 * scale, zorder=7)
 
     # Placed on screen, after the camera is fixed. Each label is pushed away from the
     # on-screen centre of the five points that carry the claim, so two groups that sit close
@@ -478,19 +492,14 @@ def report(cell, layer, elev, azim, png_name):
     return '\n'.join(out) + '\n'
 
 
-def figure(cell, layer):
-    m, lab = cell['meta'], cell['label']
-    fig = plt.figure(figsize=Q3D_SIZE)
-    ax = fig.add_subplot(111, projection='3d')
-    elev, azim = panel(ax, cell)
-
-
-    alert(fig, cell)
-
+def legend_handles(cell):
+    """The six legend entries, lifted out of `figure()` so a composite can draw one
+    legend over two panels instead of repeating it. Identical to what the standalone
+    figure built inline; no output changes."""
     # Sentence case, except `b2 + (a1 - a2)`: that one is a FORMULA, and `b2` is the same
     # variable the two pair labels above it and every analogy3d_*.txt readout spell in lower
     # case. Capitalising it would make the legend disagree with the rest of the figure.
-    handles = [
+    return [
         Line2D([], [], color=SRC, marker='o', linestyle='-', linewidth=2.6,
                markersize=7, label='Source pair  a2 $\\rightarrow$ a1'),
         Line2D([], [], color=TGT, marker='s', linestyle='-', linewidth=3.4,
@@ -506,6 +515,18 @@ def figure(cell, layer):
         Line2D([], [], color=POOL, marker='o', linestyle='none', markersize=5.5,
                label=f'Other {len(cell["others"])} groups'),
     ]
+
+
+def figure(cell, layer):
+    m, lab = cell['meta'], cell['label']
+    fig = plt.figure(figsize=Q3D_SIZE)
+    ax = fig.add_subplot(111, projection='3d')
+    elev, azim = panel(ax, cell)
+
+
+    alert(fig, cell)
+
+    handles = legend_handles(cell)
     fig.legend(handles=handles, loc='upper center', bbox_to_anchor=(0.5, 1.0), ncol=3,
                fontsize=Q3D_LEGEND, handlelength=2.2, columnspacing=1.8, frameon=False)
     fig.subplots_adjust(left=-AXES_BLEED, right=1.0 + AXES_BLEED,
