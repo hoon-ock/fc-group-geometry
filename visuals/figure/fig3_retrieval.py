@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Manuscript Figure 3: rank violins beside two analogy quivers.
+"""Manuscript Figure 3: rank violins over two analogy quivers.
 
     python visuals/figure/fig3_retrieval.py [--out-dir DIR]
 
   f3_retrieval.pdf    (a) rank distributions, three axes; (b, c) two analogy cells in 3-D
 
-Left is the retrieval rank distribution on all three axes, five checkpoints each. Right are
-two analogy cells drawn in the first three principal components, sharing one legend.
+Across the top is the retrieval rank distribution on all three axes, five checkpoints each.
+Beneath it are two analogy cells drawn in the first three principal components, sharing one
+legend. Each block gets the full text width, and each legend sits under its own block.
 
 PDF, not PNG, like the other scripts here: the destination is a LaTeX manuscript whose figures
 are vector. It is not one of the 70 release figures and `run_local.sh` does not build it.
@@ -14,8 +15,8 @@ are vector. It is not one of the 70 release figures and `run_local.sh` does not 
 Composed from the two standalone generators rather than reimplemented: `violin_panel` and
 `panel` both take an axes, so this supplies the layout and they supply the drawing. Their type
 sizes are module globals read at call time, which is what makes re-tuning possible -- the
-sources are 10x4.8in at 14pt and 8x7.8in at 20pt, so composing is roughly a 0.3x downscale and
-a naive shrink would put the violin ticks near 4pt. The constants are rebound below for the
+sources are 10x4.8in at 14pt and 8x7.8in at 20pt, so composing is roughly a 0.5x downscale and
+a naive shrink would put the violin ticks near 7pt. The constants are rebound below for the
 composite's scale; nothing in the shared modules is edited.
 
 Reads `analysis/data/retrieval_by_axis.csv`, `analysis/data/retrieval_rank_hist.csv` and
@@ -42,7 +43,7 @@ from matplotlib.lines import Line2D  # noqa: E402
 
 DEFAULT_OUT = os.path.join(VISUALS, 'figure')
 
-WIDTH, HEIGHT = 6.5, 5.2      # included at \textwidth, not the 5.5in the other figures use
+WIDTH, HEIGHT = 6.5, 5.8      # included at \textwidth, not the 5.5in the other figures use
 
 # The two cells, by the stem `slug()` builds.
 #
@@ -71,7 +72,7 @@ CAMERAS = {}
 
 # Marks are sized for the 8in standalone panel; these are far smaller, so they scale with the
 # panel or the squares swamp the arrows they sit on.
-MARK_SCALE = 0.42
+MARK_SCALE = 0.58
 
 # Fraction of each quiver cell the axes box overruns on every side -- see quiver_block.
 BLEED = 0.15
@@ -94,7 +95,7 @@ def retune():
     rdist.RETR_TICK = 5.4         # y tick labels only, by the seam above
     rdist.RETR_LABEL = 9.5        # 'Rank (log scale)'
     rdist.DIST_LEGEND = 8.5
-    rdist.HIT_FS = 6.5            # five values across a ~1.2in panel; collides much above this
+    rdist.HIT_FS = 6.5            # five values across a ~2.0in panel
     q3d.Q3D_LABEL = 7.0           # PC-1 / PC-2 / PC-3
     q3d.Q3D_POINT = 7.0           # the four group names inside the axes
     q3d.Q3D_LEGEND = 7.5
@@ -102,7 +103,7 @@ def retune():
 
 
 def violin_block(fig, gs_cell, layer):
-    """(a) -- the three retrieval axes, sharing one legend below them."""
+    """(a) -- the three retrieval axes across the full width, one legend below them."""
     by, labels = rviolin.read_axis_rows(layer)
     hist = rviolin.rank_hist(layer)
     sub = gs_cell.subgridspec(1, 3, wspace=0.36)
@@ -113,15 +114,14 @@ def violin_block(fig, gs_cell, layer):
         # the two cannot print different values for the same column.
         rdist.annotate_hit1(ax, by, axis, show_key=(j == 0))
         # Axis name only. The standalone label carries '(13 groups, 20 trials)' on a second
-        # line, which at this panel width runs into its neighbours; the counts belong in the
-        # caption instead, where they are not competing for 1in of column.
+        # line; the counts belong in the caption, not stacked under every panel.
         ax.set_xlabel(labels[axis].split('\n')[0], fontsize=XLAB_FS)
     axs[0].set_ylabel('Rank (log scale)', fontsize=rdist.RETR_LABEL)
     return axs
 
 
 def quiver_block(fig, cells, gs_cells):
-    """(b) and (c) -- two analogy cells, one legend between them."""
+    """(b) and (c) -- two analogy cells side by side, one legend beneath the pair."""
     axes = []
     for cell, gc in zip(cells, gs_cells):
         ax = fig.add_subplot(gc, projection='3d')
@@ -130,7 +130,7 @@ def quiver_block(fig, cells, gs_cells):
         # mplot3d fits its cube inside the axes box and leaves a wide margin around it, so a
         # cell-sized axes draws a small cube in a lot of white. The standalone figure buys that
         # back by letting the box run past the figure edges (AXES_BLEED); doing the same per
-        # cell is what lets the right column narrow without the cubes shrinking with it.
+        # cell is what keeps the cubes large in a half-width cell.
         bb = ax.get_position()
         ax.set_position([bb.x0 - bb.width * BLEED, bb.y0 - bb.height * BLEED,
                          bb.width * (1 + 2 * BLEED), bb.height * (1 + 2 * BLEED)])
@@ -160,12 +160,16 @@ def main():
         raise SystemExit(f'no quiver cell for {missing} at layer {args.layer} -- '
                          're-run analysis/snapshot_quiver3d.py')
 
+    # (a) across the top, (b) and (c) side by side beneath it. Stacking the quivers down a
+    # narrow right-hand column had squeezed the violins to about 1.2in each; full width gives
+    # them 2.0in and the quivers 3.1in, so both blocks roughly double.
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    gs = fig.add_gridspec(2, 2, width_ratios=[4.6, 1.8], height_ratios=[1, 1],
-                          left=0.062, right=0.972, top=0.865, bottom=0.115,
-                          wspace=0.17, hspace=0.16)
-    violin_block(fig, gs[:, 0], args.layer)
-    quiver_block(fig, [cells[w] for w in CELLS], [gs[0, 1], gs[1, 1]])
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.08],
+                          left=0.072, right=0.962, top=0.962, bottom=0.150,
+                          hspace=0.34)
+    violin_block(fig, gs[0, 0], args.layer)
+    qgs = gs[1, 0].subgridspec(1, 2, wspace=0.02)
+    quiver_block(fig, [cells[w] for w in CELLS], [qgs[0, 0], qgs[0, 1]])
 
     # The violin's own legend: five checkpoints plus the three summary marks. Kept separate
     # from the quiver legend because the two describe unrelated encodings, and merging them
@@ -175,18 +179,18 @@ def main():
     vhandles += [Line2D([], [], **rdist.TICK), Line2D([], [], **rdist.MEAN),
                  Line2D([], [], color='0.35', linewidth=1.2, linestyle='--')]
     vnames = [DISPLAY5[m] for m in BEHAVIOURAL] + ['Median', 'Mean', 'Random']
-    fig.legend(vhandles, vnames, loc='lower left', bbox_to_anchor=(0.012, 0.005),
-               ncol=4, fontsize=rdist.DIST_LEGEND, handlelength=1.5, columnspacing=1.0,
+    fig.legend(vhandles, vnames, loc='upper center', bbox_to_anchor=(0.5, 0.586),
+               ncol=8, fontsize=rdist.DIST_LEGEND, handlelength=1.5, columnspacing=1.2,
                frameon=False)
 
-    # One legend for both quivers, which is the point of stacking them.
-    fig.legend(handles=q3d.legend_handles(cells[CELLS[0]]), loc='upper right',
-               bbox_to_anchor=(0.995, 1.0), ncol=2, fontsize=q3d.Q3D_LEGEND,
-               handlelength=1.9, columnspacing=1.2, frameon=False)
+    # One legend for both quivers, under the pair rather than beside them.
+    fig.legend(handles=q3d.legend_handles(cells[CELLS[0]]), loc='lower center',
+               bbox_to_anchor=(0.5, 0.0), ncol=3, fontsize=q3d.Q3D_LEGEND,
+               handlelength=1.9, columnspacing=1.6, frameon=False)
 
-    fig.text(0.004, 0.985, '(a)', **PANEL_LAB)
-    fig.text(0.672, 0.872, '(b)', **PANEL_LAB)
-    fig.text(0.672, 0.492, '(c)', **PANEL_LAB)
+    fig.text(0.004, 0.996, '(a)', **PANEL_LAB)
+    fig.text(0.004, 0.516, '(b)', **PANEL_LAB)
+    fig.text(0.498, 0.516, '(c)', **PANEL_LAB)
 
     os.makedirs(args.out_dir, exist_ok=True)
     path = os.path.join(args.out_dir, 'f3_retrieval.pdf')

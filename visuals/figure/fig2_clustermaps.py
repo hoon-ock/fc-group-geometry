@@ -117,7 +117,7 @@ def figure(groups, z_by, order, layer):
     cell.axis('off')
     cax = cell.inset_axes([0.10, 0.08, 0.085, 0.84])
     cb = fig.colorbar(im, cax=cax, extend='both')
-    cb.set_label('$z$-cosine (within model)', fontsize=CB_LABEL_FS)
+    cb.set_label('$Z$-Cosine Similarity', fontsize=CB_LABEL_FS)
     cb.ax.tick_params(labelsize=CB_TICK_FS)
     cb.outline.set_visible(False)
     return fig
