@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""Manuscript Figure 4: probe accuracy against depth, and the geometry at two of those depths.
+"""Manuscript Figure 4: probe accuracy against depth, with the geometry at two of those depths.
 
     python visuals/figure/fig4_depth_structure.py [--out-dir DIR]
 
-  f4_depth_structure.pdf    (a) probe accuracy vs layer; (b, c) Base clustermaps at L8 and L24
+  f4_depth_structure.pdf    probe accuracy vs layer, with two clustermap insets
 
-Panel (a) is the probe curve, five checkpoints. Panels (b) and (c) are the base model's
-between-class matrix at the two layers marked on it -- layer 8, on the low plateau, and layer
-24, after the rise. The pairing is the figure's point: the jump is a change in how the groups
-sit relative to one another, not only in what a classifier can score off them.
+One plot, five checkpoints, carrying its own evidence: two insets show the base model's
+between-class matrix at layer 8 and at layer 24, each joined by a leader to the point on the
+base curve it is taken from. Layer 8 sits on the low plateau and layer 24 after the rise, and
+the insets say what that rise is -- the groups stop being speckle and fall into blocks. The
+claim is that the jump is a change in the geometry, not only in what a classifier scores off it.
 
-Both clustermaps carry ONE leaf order, the base model's at layer 31 -- the same order Figure 2
-uses, so a cell is the same group pair in (b), in (c) and in Figure 2. Ordering each layer by
-its own dendrogram would be wrong here rather than merely different: clustering always returns
-some order, so layer 8 would be drawn with blocks it does not have.
+Both insets carry ONE leaf order, the base model's at layer 31 -- the same order Figure 2 uses,
+so a cell is the same group pair in both insets and in Figure 2. Ordering each layer by its own
+dendrogram would be wrong here rather than merely different: clustering always returns some
+order, so layer 8 would be drawn with blocks it does not have.
+
+The insets are deliberately unlabelled. At this size each of the 19 cells is about 3pt, so
+group names are not an option; the insets carry texture, and Figure 2 is the labelled reference.
 
 PDF, not PNG, like the other scripts here: the destination is a LaTeX manuscript whose figures
 are vector. It is not one of the 70 release figures and `run_local.sh` does not build it.
@@ -44,26 +48,33 @@ import fig2_clustermaps as f2  # noqa: E402
 
 DEFAULT_OUT = os.path.join(VISUALS, 'figure')
 
-WIDTH, HEIGHT = 6.5, 6.2      # included at \textwidth
+WIDTH, HEIGHT = 6.5, 5.0      # included at \textwidth
 
-# The two depths, and the panel each one becomes. Layer 8 sits on the probe's low plateau and
-# layer 24 after its rise, which is what makes the pair worth drawing.
-CUTS = [(8, '(b)'), (24, '(c)')]
+# The two depths drawn as insets. Layer 8 sits on the probe's low plateau and layer 24 after
+# its rise, which is what makes the pair worth drawing.
+CUTS = (8, 24)
 
-# Where the two floor annotations sit, moved off layer 8 because this figure draws a guide
-# line there. Far enough right that 'Character $n$-gram baseline' still ends well before the
-# layer-24 guide.
-REF_X = 10
+# Inset geometry, in axes fractions.
+#
+# Both insets sit LOW, and that is forced by the data rather than chosen. At layer 8 the base
+# model is the LOWEST of the five curves and at layer 24 the HIGHEST, so a leader reaching
+# layer 8 from above would cross all four other checkpoints; from below it crosses nothing but
+# the n-gram baseline rule. The band between the two reference rules -- random guess at 0.20,
+# baseline at 0.475 -- is empty across the full width, and these two corners hold no curve
+# point at all.
+INSET_W, INSET_H = 0.185, 0.240
+INSET_Y = 0.078
+INSET_X = (0.030, 0.785)
 
-GUIDE = dict(color='0.45', linewidth=0.8, linestyle=(0, (4, 2)), zorder=1.5)
+# Horizontal colourbar in the gap between the insets, the only part of that band not spoken for
+# -- the two floor annotations run rightward from layer 8, below and above it.
+CB_RECT = (0.410, 0.150, 0.180, 0.030)
 
-PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
+LEADER = dict(arrowstyle='-', color='0.45', linewidth=0.8, shrinkA=1.5, shrinkB=2.5)
 
-TICK_FS = 5.6         # the 19 group labels, panel (b) only
-CUTLAB_FS = 7.5       # the '(b)' / '(c)' tags on the guide lines
-MAPTITLE_FS = 8.0
-CB_LABEL_FS = 6.5
-CB_TICK_FS = 6.0
+INSETLAB_FS = 7.0
+CB_LABEL_FS = 6.2
+CB_TICK_FS = 5.6
 
 
 def retune():
@@ -72,60 +83,47 @@ def retune():
     Module globals read when the drawing functions run, so this changes only this figure --
     `make_visuals_probe`'s own released output is unaffected.
     """
-    # The released curve is 7.2 x 4.2in; panel (a) here is about 6.0 x 2.3in, so the type comes
-    # down and the marks come down further -- there is one on every a one of the 32 layers.
-    probe.PROBE_LABEL = 8.5
-    probe.PROBE_TICK = 7.5
-    probe.PROBE_LEGEND = 7.5
-    probe.PROBE_REF = 6.8
-    probe.PROBE_MARK = 2.8
-    probe.PROBE_LW = 1.1
-    probe.PROBE_REF_X = REF_X
+    # The released curve is 7.2 x 4.2in; this one is about 5.8 x 4.2in, so only the type and
+    # the marks come down -- there is a marker on every one of the 32 layers.
+    probe.PROBE_LABEL = 9.0
+    probe.PROBE_TICK = 8.0
+    probe.PROBE_LEGEND = 8.0
+    probe.PROBE_REF = 7.0
+    probe.PROBE_MARK = 3.0
+    probe.PROBE_LW = 1.2
+    # Left at its default 8: the floor labels run rightward from there, which lands them in the
+    # gap between the two insets. The earlier guide-line draft had to move them off layer 8.
+    probe.PROBE_REF_X = 8
 
 
-def probe_block(fig, gs_cell, curves, surface):
-    """(a) -- the probe curve, with a guide at each layer the clustermaps are taken from."""
-    ax = fig.add_subplot(gs_cell)
-    probe.probe_panel(ax, curves, surface)
-    for layer, tag in CUTS:
-        ax.axvline(layer, **GUIDE)
-        # Tagged in the empty band between the random-guess line and the n-gram baseline --
-        # about a third of the axes height with nothing in it. Neither end of the plot works:
-        # the five curves converge on 1.0, so a tag at the top lands on them at layer 24, and
-        # the strip below the random-guess line is only ~9pt tall at this panel height. x in
-        # data coordinates so the tag tracks the guide, y in axes coordinates so it does not
-        # move if the limits change.
-        ax.annotate(tag, xy=(layer, 0.10), xycoords=('data', 'axes fraction'),
-                    textcoords='offset points', xytext=(2, 0), ha='left', va='bottom',
-                    fontsize=CUTLAB_FS, fontweight='bold', color='0.25')
-    return ax
+def inset_block(ax, curves, z_by, order):
+    """The two clustermap insets, each joined to its point on the base curve."""
+    im = None
+    for layer, x0 in zip(CUTS, INSET_X):
+        cell = ax.inset_axes([x0, INSET_Y, INSET_W, INSET_H])
+        im = f2.clustermap_panel(cell, z_by[(BASE, layer)], order)
+        cell.set_xticks([])
+        cell.set_yticks([])
+        cell.set_title(f'Layer {layer}', pad=2, fontsize=INSETLAB_FS)
 
-
-def map_block(fig, gs_cell, groups, z_by, order):
-    """(b) and (c) -- the base model at the two marked depths, sharing one colourbar."""
-    sub = gs_cell.subgridspec(1, 2, wspace=0.08)
-    labels = [groups[i] for i in order]
-    axes, im = [], None
-    for k, (layer, _) in enumerate(CUTS):
-        ax = fig.add_subplot(sub[0, k])
-        im = f2.clustermap_panel(ax, z_by[(BASE, layer)], order)
-        ax.set_title(f'Layer {layer}', pad=3, fontsize=MAPTITLE_FS)
-        ax.set_xticks([])
-        # Rows and columns carry the same order, so one set of labels serves both panels and
-        # a second copy would only cost width.
-        if k == 0:
-            ax.set_yticks(range(len(groups)))
-            ax.set_yticklabels(labels, fontsize=TICK_FS)
-        else:
-            ax.set_yticks([])
-        axes.append(ax)
-    return axes, im
-
-
-def _fig_bbox(fig, artist):
-    """An artist's drawn extent in figure coordinates."""
-    bb = artist.get_window_extent(fig.canvas.get_renderer())
-    return bb.transformed(fig.transFigure.inverted())
+        value = curves[BASE][layer]
+        # Leader from the top CORNER nearest the anchor, not the top centre: the title sits at
+        # the centre, and a leader leaving from there runs straight through it -- which is
+        # exactly what the first render did to 'Layer 24'. Which corner is derived from where
+        # the anchor actually falls, so it stays right if the insets move.
+        anchor_x = ax.transLimits.transform((layer, value))[0]
+        x_start = x0 + INSET_W if anchor_x > x0 + INSET_W / 2 else x0
+        # zorder BELOW the curves: at layer 24 base is the top of a converged bundle with no
+        # room above it, so the leader has to cross the others and should pass under them.
+        ax.annotate('', xy=(layer, value), xycoords='data',
+                    xytext=(x_start, INSET_Y + INSET_H), textcoords='axes fraction',
+                    arrowprops=LEADER, zorder=1.5)
+        # A ring on the anchor, so the leader lands on something the eye can find among five
+        # overlapping curves.
+        ax.plot([layer], [value], linestyle='none', marker='o', markersize=7,
+                markerfacecolor='none', markeredgecolor='0.25', markeredgewidth=1.0,
+                zorder=8)
+    return im
 
 
 def main():
@@ -133,7 +131,7 @@ def main():
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('--out-dir', default=DEFAULT_OUT)
     p.add_argument('--order-layer', type=int, default=FIGURE_LAYER,
-                   help=f'layer whose base-model dendrogram orders both maps. Default '
+                   help=f'layer whose base-model dendrogram orders both insets. Default '
                         f'{FIGURE_LAYER}, matching Figure 2.')
     args = p.parse_args()
 
@@ -144,7 +142,7 @@ def main():
 
     curves, surface = probe.read_curves()
     groups, z_by = read_matrices()
-    missing = [L for L, _ in CUTS if (BASE, L) not in z_by]
+    missing = [L for L in CUTS if (BASE, L) not in z_by]
     if missing or (BASE, args.order_layer) not in z_by:
         raise SystemExit(
             f'no base-model matrix at layer(s) {missing or [args.order_layer]} in '
@@ -152,34 +150,24 @@ def main():
     order = leaf_order(z_by[(BASE, args.order_layer)])
 
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.28],
-                          left=0.135, right=0.895, top=0.900, bottom=0.030,
-                          hspace=0.30)
-    ax_a = probe_block(fig, gs[0, 0], curves, surface)
-    map_axes, im = map_block(fig, gs[1, 0], groups, z_by, order)
+    ax = fig.add_axes([0.095, 0.092, 0.890, 0.835])
+    probe.probe_panel(ax, curves, surface)
+    im = inset_block(ax, curves, z_by, order)
 
-    # Placed from measured extents rather than figure-fraction constants, which on Figures 3
-    # and 5 were the single largest source of retune churn: every one of them silently
-    # misplaces itself the moment WIDTH or HEIGHT changes.
-    fig.canvas.draw()
-    a_pos = ax_a.get_position()
-    handles, labels = ax_a.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, a_pos.y1 + 0.004),
-               ncol=5, fontsize=probe.PROBE_LEGEND, handlelength=2.4, columnspacing=1.2,
-               frameon=False)
-
-    # The colourbar spans the two maps' shared height, in the margin `right` leaves for it.
-    m0, m1 = map_axes[0].get_position(), map_axes[-1].get_position()
-    cax = fig.add_axes([m1.x1 + 0.016, m0.y0, 0.016, m0.height])
-    cb = fig.colorbar(im, cax=cax, extend='both')
-    cb.set_label('$Z$-Cosine Similarity', fontsize=CB_LABEL_FS)
-    cb.ax.tick_params(labelsize=CB_TICK_FS)
+    cax = ax.inset_axes(CB_RECT)
+    cb = fig.colorbar(im, cax=cax, orientation='horizontal', extend='both')
+    cb.set_label('$Z$-Cosine Similarity', fontsize=CB_LABEL_FS, labelpad=3)
+    cb.ax.xaxis.set_label_position('top')
+    cb.ax.tick_params(labelsize=CB_TICK_FS, length=2, pad=1)
     cb.outline.set_visible(False)
 
-    lab = dict(PANEL_LAB, va='bottom')
-    fig.text(0.004, 0.992, '(a)', **PANEL_LAB)
-    fig.text(0.004, _fig_bbox(fig, map_axes[0].title).y1 + 0.004, '(b)', **lab)
-    fig.text(m1.x0 - 0.030, _fig_bbox(fig, map_axes[1].title).y1 + 0.004, '(c)', **lab)
+    # Measured, not a figure-fraction constant: on Figures 3 and 5 those were the single
+    # largest source of retune churn, silently misplacing themselves whenever the canvas moved.
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='lower center',
+               bbox_to_anchor=(0.5, ax.get_position().y1 + 0.006), ncol=5,
+               fontsize=probe.PROBE_LEGEND, handlelength=2.4, columnspacing=1.2,
+               frameon=False)
 
     os.makedirs(args.out_dir, exist_ok=True)
     path = os.path.join(args.out_dir, 'f4_depth_structure.pdf')
