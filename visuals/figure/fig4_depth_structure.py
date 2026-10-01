@@ -64,17 +64,18 @@ CUTS = (8, 24)
 # point at all.
 INSET_W, INSET_H = 0.185, 0.240
 INSET_Y = 0.078
-INSET_X = (0.030, 0.785)
+INSET_X = (0.030, 0.712)
 
-# Horizontal colourbar in the gap between the insets, the only part of that band not spoken for
-# -- the two floor annotations run rightward from layer 8, below and above it.
-CB_RECT = (0.410, 0.150, 0.180, 0.030)
+# Vertical colourbar immediately right of the layer-24 inset. This is what sets that inset's
+# x position: the bar, its tick labels and its rotated label together need about 0.09 of the
+# axes width between the inset's right edge and the frame.
+CB_X, CB_W = 0.912, 0.020
 
 LEADER = dict(arrowstyle='-', color='0.45', linewidth=0.8, shrinkA=1.5, shrinkB=2.5)
 
-INSETLAB_FS = 7.0
-CB_LABEL_FS = 6.2
-CB_TICK_FS = 5.6
+INSETLAB_FS = 9.0
+CB_LABEL_FS = 8.0
+CB_TICK_FS = 7.5
 
 
 def retune():
@@ -83,14 +84,15 @@ def retune():
     Module globals read when the drawing functions run, so this changes only this figure --
     `make_visuals_probe`'s own released output is unaffected.
     """
-    # The released curve is 7.2 x 4.2in; this one is about 5.8 x 4.2in, so only the type and
-    # the marks come down -- there is a marker on every one of the 32 layers.
-    probe.PROBE_LABEL = 9.0
-    probe.PROBE_TICK = 8.0
-    probe.PROBE_LEGEND = 8.0
-    probe.PROBE_REF = 7.0
-    probe.PROBE_MARK = 3.0
-    probe.PROBE_LW = 1.2
+    # The released curve is 7.2 x 4.2in and this one is about 5.8 x 4.2in -- nearly the same
+    # plotting area, so the type barely comes down at all. The first draft scaled it as if this
+    # were a small sub-panel, which left everything unreadably small at print size.
+    probe.PROBE_LABEL = 11.5
+    probe.PROBE_TICK = 10.5
+    probe.PROBE_LEGEND = 10.0
+    probe.PROBE_REF = 9.0
+    probe.PROBE_MARK = 3.6
+    probe.PROBE_LW = 1.4
     # Left at its default 8: the floor labels run rightward from there, which lands them in the
     # gap between the two insets. The earlier guide-line draft had to move them off layer 8.
     probe.PROBE_REF_X = 8
@@ -120,7 +122,7 @@ def inset_block(ax, curves, z_by, order):
                     arrowprops=LEADER, zorder=1.5)
         # A ring on the anchor, so the leader lands on something the eye can find among five
         # overlapping curves.
-        ax.plot([layer], [value], linestyle='none', marker='o', markersize=7,
+        ax.plot([layer], [value], linestyle='none', marker='o', markersize=8.5,
                 markerfacecolor='none', markeredgecolor='0.25', markeredgewidth=1.0,
                 zorder=8)
     return im
@@ -154,10 +156,9 @@ def main():
     probe.probe_panel(ax, curves, surface)
     im = inset_block(ax, curves, z_by, order)
 
-    cax = ax.inset_axes(CB_RECT)
-    cb = fig.colorbar(im, cax=cax, orientation='horizontal', extend='both')
-    cb.set_label('$Z$-Cosine Similarity', fontsize=CB_LABEL_FS, labelpad=3)
-    cb.ax.xaxis.set_label_position('top')
+    cax = ax.inset_axes([CB_X, INSET_Y, CB_W, INSET_H])
+    cb = fig.colorbar(im, cax=cax, orientation='vertical', extend='both')
+    cb.set_label('$Z$-Cosine Similarity', fontsize=CB_LABEL_FS, labelpad=4)
     cb.ax.tick_params(labelsize=CB_TICK_FS, length=2, pad=1)
     cb.outline.set_visible(False)
 
