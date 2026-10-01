@@ -42,6 +42,12 @@ PROBE_LABEL = 13
 PROBE_TICK = 12
 PROBE_LEGEND = 11
 PROBE_REF = 10
+# Layer the two reference-line labels are pinned at. A module global because a composite
+# drawing its own guide line at layer 8 has to move them off it; see the comment at their
+# `ax.text` calls for why 8 is the default.
+PROBE_REF_X = 8
+PROBE_MARK = 4.6      # a marker on every one of the 32 layers, so this is density-sensitive
+PROBE_LW = 1.8
 
 # `_common` defines COLOR/MARKER/DASH for the three models the paper draws. Those three keep
 # their paper styling exactly; the two additions are given the remaining usable Okabe-Ito
@@ -109,15 +115,19 @@ def read_curves():
     return curves, float(surface)
 
 
-def probe_figure(curves, surface):
-    """One axes: balanced accuracy against depth, five models, untitled."""
-    fig, ax = plt.subplots(figsize=PROBE_SIZE)
+def probe_panel(ax, curves, surface):
+    """Balanced accuracy against depth, five models, into a caller-supplied axes.
 
+    Lifted out of `probe_figure` so a composite can place this curve in its own layout --
+    the move `make_visuals_prompt_structure.agreement_panel` records in its docstring. The
+    LEGEND is deliberately not drawn here: it sits outside the axes, so only the caller knows
+    where there is room for it. `probe_figure` below adds its own.
+    """
     for m in BEHAVIOURAL:
         layers = sorted(curves[m])
         dash = DASH5[m]
         ax.plot(layers, [curves[m][L] for L in layers], color=COLOR5[m],
-                marker=MARKER5[m], markersize=4.6, linewidth=1.8,
+                marker=MARKER5[m], markersize=PROBE_MARK, linewidth=PROBE_LW,
                 dashes=dash if dash[0] else (), label=DISPLAY5[m])
 
     # 0.20 is the balanced accuracy of a guesser drawing uniformly from the FIVE labels the
@@ -128,11 +138,11 @@ def probe_figure(curves, surface):
     ax.axhline(0.20, linestyle=':', **REF)
     # Both reference labels sit at layer 8, where every curve is well clear of them; at the
     # right edge they collided with the curves converging on 1.0.
-    ax.text(8, 0.215, 'Random guess', ha='left', va='bottom', fontsize=PROBE_REF,
+    ax.text(PROBE_REF_X, 0.215, 'Random guess', ha='left', va='bottom', fontsize=PROBE_REF,
             color='0.45')
     ax.axhline(surface, linestyle='--', **REF)
-    ax.text(8, surface + 0.018, 'Character $n$-gram baseline', ha='left', va='bottom',
-            fontsize=PROBE_REF, color='0.45')
+    ax.text(PROBE_REF_X, surface + 0.018, 'Character $n$-gram baseline', ha='left',
+            va='bottom', fontsize=PROBE_REF, color='0.45')
 
     ax.set_xlabel('Layer', fontsize=PROBE_LABEL)
     ax.set_ylabel('Balanced accuracy', fontsize=PROBE_LABEL)
@@ -141,11 +151,17 @@ def probe_figure(curves, surface):
     # below the curves is where the chance line and its label live.
     ax.set_ylim(0.15, 1.04)
     ax.tick_params(labelsize=PROBE_TICK)
+    recessive(ax)
+
+
+def probe_figure(curves, surface):
+    """One axes: balanced accuracy against depth, five models, untitled."""
+    fig, ax = plt.subplots(figsize=PROBE_SIZE)
+    probe_panel(ax, curves, surface)
     # Outside the axes entirely: the plot area has two reference lines across its full width
     # and five curves converging top-right, with no corner left to put a legend in.
     ax.legend(loc='lower center', bbox_to_anchor=(0.5, 1.01), ncol=3,
               fontsize=PROBE_LEGEND, handlelength=2.8, columnspacing=1.2)
-    recessive(ax)
     return fig
 
 

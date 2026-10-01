@@ -75,6 +75,29 @@ def style():
     })
 
 
+def clustermap_panel(ax, z, order, lim=None):
+    """One between-class matrix into a caller-supplied axes. Returns the image.
+
+    Shared with `fig4_depth_structure.py` rather than retyped. `make_visuals.py` writes its
+    own `imshow` twice on purpose -- its docstring says inputs are shared and drawing is not --
+    and that is right for the released figures, which are independent. These two manuscript
+    figures are NOT independent: a reader compares Figure 4's layer-24 panel against Figure 2
+    directly, so they have to agree on the colour limit and on which cells saturate. `LIM` is
+    a tuned constant, not an obvious one, and a second copy of it would drift.
+    """
+    zz = z[np.ix_(order, order)]
+    np.fill_diagonal(zz, np.nan)
+    # Diverging, because z has a meaningful zero -- the model's own mean similarity -- with a
+    # neutral midpoint and never a rainbow. `nearest` so no cell is interpolated into its
+    # neighbour.
+    lim = LIM if lim is None else lim
+    im = ax.imshow(zz, cmap='RdBu_r', vmin=-lim, vmax=lim, interpolation='nearest')
+    ax.tick_params(length=0)
+    for sp in ax.spines.values():
+        sp.set_visible(False)
+    return im
+
+
 def figure(groups, z_by, order, layer):
     """3 + 2, with the vacant sixth cell carrying the colourbar.
 
@@ -91,12 +114,7 @@ def figure(groups, z_by, order, layer):
     im = None
     for k, model in enumerate(BEHAVIOURAL):
         ax = flat[k]
-        zz = z_by[(model, layer)][np.ix_(order, order)]
-        np.fill_diagonal(zz, np.nan)
-        # Diverging, because z has a meaningful zero -- the model's own mean similarity --
-        # with a neutral midpoint and never a rainbow. `nearest` so no cell is interpolated
-        # into its neighbour.
-        im = ax.imshow(zz, cmap='RdBu_r', vmin=-LIM, vmax=LIM, interpolation='nearest')
+        im = clustermap_panel(ax, z_by[(model, layer)], order)
         # The dagger is the manuscript's convention, not the release's: ChemDFM is built
         # on Llama-3 rather than 3.1, so a ChemDFM-base gap confounds chemistry training
         # with the base-model change. The paper's tables mark it the same way and the
@@ -109,9 +127,6 @@ def figure(groups, z_by, order, layer):
             ax.set_yticklabels(labels, fontsize=TICK_FS)
         else:
             ax.set_yticks([])
-        ax.tick_params(length=0)
-        for sp in ax.spines.values():
-            sp.set_visible(False)
 
     cell = flat[-1]
     cell.axis('off')
