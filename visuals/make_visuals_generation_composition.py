@@ -63,32 +63,48 @@ def read_composition():
             for r in load('group_response_composition.csv')}
 
 
+def composition_panel(ax, comp, model, groups, label=False):
+    """One model's stacked composition, into a caller-supplied axes.
+
+    Lifted out of `fig_response_composition` so a composite can place these rows in its own
+    layout -- the move `make_visuals_probe.probe_panel` and
+    `make_visuals_prompt_structure.agreement_panel` both record. `label` replaces the old
+    `mi == 0` guard: only the row that passes it contributes legend handles, because every
+    row draws the same six artists and six handles are wanted, not thirty. The legend itself
+    is the caller's, and so are the x tick labels, which belong to the bottom row of whatever
+    grid these land in.
+    """
+    ax.grid(True, axis='y', color='0.9', linewidth=0.5)
+    ax.set_axisbelow(True)
+    for side in ('top', 'right'):
+        ax.spines[side].set_visible(False)
+    x = np.arange(len(groups))
+    bottom = np.zeros(len(groups))
+    for field, lab, color in RESPONSE_STACK:
+        vals = np.array([num(comp[(model, g)], field) for g in groups])
+        ax.bar(x, vals, 0.76, bottom=bottom, color=color, linewidth=0,
+               label=lab if label else None)
+        bottom += vals
+    tf = [num(comp[(model, g)], 'tf_raw_recall') for g in groups]
+    # `s` is in points squared and the dash width is therefore ABSOLUTE -- it does not track
+    # the axes width. A composite drawing this narrower must scale COMP_TF_MARK by the square
+    # of the width ratio or every dash overhangs its bar.
+    ax.scatter(x, tf, marker='_', s=COMP_TF_MARK, color='0.12', linewidth=2.0,
+               zorder=4,
+               label='Teacher-forced recall' if label else None)
+    ax.set_ylim(0, 1.02)
+    ax.set_ylabel(DISPLAY5[model], fontsize=COMP_YLABEL)
+    ax.set_yticks([0, 0.5, 1.0])
+    ax.tick_params(labelsize=COMP_TICK)
+
+
 def fig_response_composition(comp, out_dir):
     groups = sorted({g for (_, g) in comp})
     fig, axes = plt.subplots(len(BEHAVIOURAL), 1,
                              figsize=(COMP_SIZE_W, COMP_PANEL_H * len(BEHAVIOURAL)),
                              sharex=True)
     for mi, model in enumerate(BEHAVIOURAL):
-        ax = axes[mi]
-        ax.grid(True, axis='y', color='0.9', linewidth=0.5)
-        ax.set_axisbelow(True)
-        for side in ('top', 'right'):
-            ax.spines[side].set_visible(False)
-        x = np.arange(len(groups))
-        bottom = np.zeros(len(groups))
-        for field, label, color in RESPONSE_STACK:
-            vals = np.array([num(comp[(model, g)], field) for g in groups])
-            ax.bar(x, vals, 0.76, bottom=bottom, color=color, linewidth=0,
-                   label=label if mi == 0 else None)
-            bottom += vals
-        tf = [num(comp[(model, g)], 'tf_raw_recall') for g in groups]
-        ax.scatter(x, tf, marker='_', s=COMP_TF_MARK, color='0.12', linewidth=2.0,
-                   zorder=4,
-                   label='Teacher-forced recall' if mi == 0 else None)
-        ax.set_ylim(0, 1.02)
-        ax.set_ylabel(DISPLAY5[model], fontsize=COMP_YLABEL)
-        ax.set_yticks([0, 0.5, 1.0])
-        ax.tick_params(labelsize=COMP_TICK)
+        composition_panel(axes[mi], comp, model, groups, label=(mi == 0))
     axes[-1].set_xticks(np.arange(len(groups)))
     axes[-1].set_xticklabels(groups, rotation=55, ha='right', fontsize=COMP_TICK)
     handles, labels = axes[0].get_legend_handles_labels()

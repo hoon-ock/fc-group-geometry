@@ -55,7 +55,7 @@ def import_results():
 
 
 def test_there_are_thirty_modules():
-    assert len(MODULES) == 34, MODULES
+    assert len(MODULES) == 36, MODULES
 
 
 @pytest.mark.parametrize('rel', MODULES, ids=lambda r: r.replace('/', ':'))
