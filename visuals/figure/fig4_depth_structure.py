@@ -77,9 +77,9 @@ WIDTH, HEIGHT = 6.5, 8.2       # included at \textwidth; a dedicated-page figure
 # Both rects were measured rather than guessed. Note that (a)'s legend and its panel label sit
 # ABOVE its axes and belong to the figure, not to it, so a layout checked only against the axes
 # extents looks clean while still running the page 0.18in tall.
-A_RECT = (0.098, 0.638, 0.887, 0.276)
-B_RECT = (0.300, 0.047, 0.560, 0.482)
-B_ACC_W = 0.056                # the accuracy column, `mass_figure`'s own 0.10 of the bar width
+A_RECT = (0.098, 0.638, 0.887, 0.270)
+B_RECT = (0.320, 0.047, 0.540, 0.482)
+B_ACC_W = 0.054                # the accuracy column, `mass_figure`'s own 0.10 of the bar width
 B_ACC_GAP = 0.008
 
 # The two depths drawn as insets. Layer 8 sits on the probe's low plateau and layer 24 after
@@ -94,9 +94,17 @@ CUTS = (8, 24)
 # the n-gram baseline rule. The band between the two reference rules -- random guess at 0.20,
 # baseline at 0.475 -- is empty across the full width, and these two corners hold no curve
 # point at all.
-INSET_W, INSET_H = 0.185, 0.240
+# Height in axes fractions; the WIDTH is derived, not set. `clustermap_panel` holds the matrix
+# square, so a box wider than it is tall draws the map in the middle and leaves empty box on
+# both sides -- which is where the leaders used to start, detached from the image by ~0.3in.
+# Deriving the width from the axes aspect makes the box match its content, so a corner of the
+# box IS a corner of the clustermap.
+INSET_H = 0.240
 INSET_Y = 0.078
-INSET_X = (0.030, 0.700)
+# Horizontal CENTRES, so the maps stay put when the derived width changes.
+# The right one sits a little right of its anchor so its leader leans away from the
+# 'Layer 24' title rather than running up the title's left edge.
+INSET_CX = (0.1225, 0.812)
 
 # Vertical colourbar immediately right of the layer-24 inset. This is what sets that inset's
 # x position: the bar, its tick labels and its rotated label together need about 0.09 of the
@@ -134,14 +142,18 @@ def retune():
     # Panel (b): the released figure is 12.6in nominal wide against 5.8in here, and its rows
     # are compressed harder still -- 43.8 data units into ~4.2in is 6.9pt of pitch, so the
     # model names have to clear that rather than merely scale with the width.
-    amb.LABEL_FS = 10.0
-    amb.DIVIDER_FS = 8.0
-    amb.GROUP_FS = 8.5
-    amb.LEGEND_FS = 8.5
-    amb.TICK_FS = 8.0
-    amb.MODEL_FS = 6.0
-    amb.ACC_FS = 6.0
-    amb.STRUCT_FS = 6.0
+    amb.LABEL_FS = 12.0
+    amb.DIVIDER_FS = 11.0
+    amb.GROUP_FS = 11.0
+    amb.LEGEND_FS = 11.0
+    amb.TICK_FS = 10.0
+    # The only pitch-bound sizes in (b): one model name and one accuracy number per bar against
+    # 6.5pt of row pitch. Measured, consecutive accuracy numbers clear by 1.68pt at 6, 0.77pt
+    # at 7, and OVERLAP at 8 -- so 7 is the ceiling at this panel height. Going higher needs
+    # row pitch, which needs more page than one allows.
+    amb.MODEL_FS = 7.0
+    amb.ACC_FS = 7.0
+    amb.STRUCT_FS = 7.5
     # Left at its default 8: the floor labels run rightward from there, which lands them in the
     # gap between the two insets. The earlier guide-line draft had to move them off layer 8.
     probe.PROBE_REF_X = 8
@@ -150,8 +162,12 @@ def retune():
 def inset_block(ax, curves, z_by, order):
     """The two clustermap insets, each joined to its point on the base curve."""
     im = None
-    for layer, x0 in zip(CUTS, INSET_X):
-        cell = ax.inset_axes([x0, INSET_Y, INSET_W, INSET_H])
+    pos = ax.get_position()
+    # A square box in inches is this wide in axes fractions.
+    inset_w = INSET_H * (pos.height * HEIGHT) / (pos.width * WIDTH)
+    for layer, cx in zip(CUTS, INSET_CX):
+        x0 = cx - inset_w / 2
+        cell = ax.inset_axes([x0, INSET_Y, inset_w, INSET_H])
         im = f2.clustermap_panel(cell, z_by[(BASE, layer)], order)
         cell.set_xticks([])
         cell.set_yticks([])
@@ -163,7 +179,7 @@ def inset_block(ax, curves, z_by, order):
         # exactly what the first render did to 'Layer 24'. Which corner is derived from where
         # the anchor actually falls, so it stays right if the insets move.
         anchor_x = ax.transLimits.transform((layer, value))[0]
-        x_start = x0 + INSET_W if anchor_x > x0 + INSET_W / 2 else x0
+        x_start = x0 + inset_w if anchor_x > cx else x0
         # zorder BELOW the curves: at layer 24 base is the top of a converged bundle with no
         # room above it, so the leader has to cross the others and should pass under them.
         ax.annotate('', xy=(layer, value), xycoords='data',
@@ -213,7 +229,8 @@ def main():
 
     cax = ax.inset_axes([CB_X, INSET_Y, CB_W, INSET_H])
     cb = fig.colorbar(im, cax=cax, orientation='vertical', extend='both')
-    cb.set_label('$Z$-Cosine Similarity', fontsize=CB_LABEL_FS, labelpad=4)
+    # No label: the tick numbers already carry the scale, and the rotated caption ran the whole
+    # height of the inset band for a quantity the figure caption names anyway.
     cb.ax.tick_params(labelsize=CB_TICK_FS, length=2, pad=1)
     cb.outline.set_visible(False)
 
@@ -232,6 +249,14 @@ def main():
     axr = fig.add_axes([bx + bw + B_ACC_GAP, by, B_ACC_W, bh], sharey=axb)
     amb.mathtext_serif()
     amb.mass_panel(axb, axr, mass, FIGURE_LAYER)
+    # `mass_panel` sets the model names with `fontsize=MODEL_FS` and then calls
+    # `ax.tick_params(labelsize=TICK_FS)` with no `axis=`, which applies to BOTH axes and
+    # silently overrides it. In the released figure TICK_FS 18 and MODEL_FS 17 are close enough
+    # that the override never showed; here they are 10 and 7, so the names came out at the x
+    # tick size and ran into the group formulae. Re-applied here rather than fixed upstream:
+    # `axis='x'` there would change the released PNG, which is the reproducibility boundary.
+    for t in axb.get_yticklabels():
+        t.set_fontsize(amb.MODEL_FS)
 
     lab = dict(PANEL_LAB, va='bottom')
     fig.text(0.004, A_RECT[1] + A_RECT[3] + 0.052, '(a)', **lab)
