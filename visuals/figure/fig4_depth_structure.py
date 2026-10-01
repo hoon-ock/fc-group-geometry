@@ -3,9 +3,10 @@
 
     python visuals/figure/fig4_depth_structure.py [--out-dir DIR]
 
-  f4_depth_structure.pdf    probe accuracy vs layer, with two clustermap insets
+  f4_depth_structure.pdf    (a) probe accuracy vs layer, with clustermap insets;
+                            (b) where the probe puts its probability mass
 
-One plot, five checkpoints, carrying its own evidence: two insets show the base model's
+Panel (a) is one plot, five checkpoints, carrying its own evidence: two insets show the base model's
 between-class matrix at layer 8 and at layer 24, each joined by a leader to the point on the
 base curve it is taken from. Layer 8 sits on the low plateau and layer 24 after the rise, and
 the insets say what that rise is -- the groups stop being speckle and fall into blocks. The
@@ -26,8 +27,16 @@ Composed from the existing generators rather than reimplemented. `probe_panel` w
 of `make_visuals_probe.probe_figure` for this figure, and `clustermap_panel` is shared with
 `fig2_clustermaps.py` so the two manuscript figures cannot disagree on the colour limit.
 
-Reads `analysis/data/layer_curves.csv`, `surface_baseline.csv` and `between_class_matrix.csv`
-through those generators -- never `results/`, which is gitignored.
+Panel (b) is the other half of the same argument. Accuracy on these groups is near 1.000 for
+every checkpoint, but the probability behind it is split: for an amide the base model holds
+most of its mass on nitrogen and a sixth of it on oxygen, which is the honest reading of a
+group whose label is a naming convention rather than a fact about the molecule. The control
+blocks are oxygen-free members of the same families, and are what make that an argument rather
+than an observation.
+
+Reads `analysis/data/layer_curves.csv`, `surface_baseline.csv`, `between_class_matrix.csv` and
+`ambiguity_family_probability.csv` through those generators -- never `results/`, which is
+gitignored.
 """
 import argparse
 import os
@@ -44,11 +53,34 @@ sys.path.insert(0, HERE)
 from _common import BASE, FIGURE_LAYER, VISUALS  # noqa: E402
 from make_visuals import leaf_order, read_matrices  # noqa: E402
 import make_visuals_probe as probe  # noqa: E402
+import make_visuals_ambiguity as amb  # noqa: E402
 import fig2_clustermaps as f2  # noqa: E402
 
 DEFAULT_OUT = os.path.join(VISUALS, 'figure')
 
-WIDTH, HEIGHT = 6.5, 5.35      # included at \textwidth
+WIDTH, HEIGHT = 6.5, 8.2       # included at \textwidth; a dedicated-page figure
+
+# Panel rectangles, as explicit figure fractions rather than one gridspec: the two panels need
+# very different left margins. (a) runs nearly full width, while (b) has to reserve about 1.3in
+# for the group names, which `mass_panel` annotates at axes fraction -0.185 -- outside its axes.
+#
+# The vertical budget, solved from the MEASURED furniture rather than guessed. Fixed costs are
+# 1.85in: (b) x axis 0.38, (b) legend 0.31, inter-panel gap 0.10, (a) x axis 0.49, and (a)'s
+# legend plus panel label 0.67 -- that last one measured off `fig.get_tightbbox`, not estimated,
+# because (a)'s legend and label belong to the FIGURE and an axes-only check misses them
+# entirely. Fixed costs leave ~6.2in of the 8.2in page for the two axes, split 3.95 / 2.26.
+# The gap is the binding one --
+# at a smaller value (b)'s legend printed on top of (a)'s 'Layer' label. (b)'s axes height is
+# the other constraint: 43.8 data units into ~4.1in is 6.7pt of row pitch, which is what
+# MODEL_FS = 6 needs to clear.
+#
+# Both rects were measured rather than guessed. Note that (a)'s legend and its panel label sit
+# ABOVE its axes and belong to the figure, not to it, so a layout checked only against the axes
+# extents looks clean while still running the page 0.18in tall.
+A_RECT = (0.098, 0.638, 0.887, 0.276)
+B_RECT = (0.300, 0.047, 0.560, 0.482)
+B_ACC_W = 0.056                # the accuracy column, `mass_figure`'s own 0.10 of the bar width
+B_ACC_GAP = 0.008
 
 # The two depths drawn as insets. Layer 8 sits on the probe's low plateau and layer 24 after
 # its rise, which is what makes the pair worth drawing.
@@ -73,6 +105,10 @@ CB_X, CB_W = 0.900, 0.020
 
 LEADER = dict(arrowstyle='-', color='0.45', linewidth=0.8, shrinkA=1.5, shrinkB=2.5)
 
+# Back now that the figure has panels again; it was dropped when (b) and (c) collapsed into
+# a single unlettered plot.
+PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
+
 INSETLAB_FS = 11.0
 CB_LABEL_FS = 9.5
 CB_TICK_FS = 9.0
@@ -95,6 +131,17 @@ def retune():
     probe.PROBE_REF = 13.0
     probe.PROBE_MARK = 4.0
     probe.PROBE_LW = 1.5
+    # Panel (b): the released figure is 12.6in nominal wide against 5.8in here, and its rows
+    # are compressed harder still -- 43.8 data units into ~4.2in is 6.9pt of pitch, so the
+    # model names have to clear that rather than merely scale with the width.
+    amb.LABEL_FS = 10.0
+    amb.DIVIDER_FS = 8.0
+    amb.GROUP_FS = 8.5
+    amb.LEGEND_FS = 8.5
+    amb.TICK_FS = 8.0
+    amb.MODEL_FS = 6.0
+    amb.ACC_FS = 6.0
+    amb.STRUCT_FS = 6.0
     # Left at its default 8: the floor labels run rightward from there, which lands them in the
     # gap between the two insets. The earlier guide-line draft had to move them off layer 8.
     probe.PROBE_REF_X = 8
@@ -153,8 +200,14 @@ def main():
             'analysis/data/between_class_matrix.csv -- re-run analysis/analyze_taxonomy.py')
     order = leaf_order(z_by[(BASE, args.order_layer)])
 
+    mass = amb.read_mass()
+    if not any(k[1] == FIGURE_LAYER for k in mass):
+        raise SystemExit(f'no ambiguity rows at layer {FIGURE_LAYER} in '
+                         'analysis/data/ambiguity_family_probability.csv -- re-run '
+                         'src/ambiguity_metric.py')
+
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    ax = fig.add_axes([0.098, 0.104, 0.887, 0.762])
+    ax = fig.add_axes(list(A_RECT))
     probe.probe_panel(ax, curves, surface)
     im = inset_block(ax, curves, z_by, order)
 
@@ -171,6 +224,18 @@ def main():
                bbox_to_anchor=(0.5, ax.get_position().y1 + 0.006), ncol=3,
                fontsize=probe.PROBE_LEGEND, handlelength=2.4, columnspacing=1.2,
                frameon=False)
+
+    # (b). Two axes, because the accuracy column is a real sibling sharing y rather than text
+    # floated over the bars -- `mass_figure` explains why, and `mass_panel` takes both.
+    bx, by, bw, bh = B_RECT
+    axb = fig.add_axes([bx, by, bw, bh])
+    axr = fig.add_axes([bx + bw + B_ACC_GAP, by, B_ACC_W, bh], sharey=axb)
+    amb.mathtext_serif()
+    amb.mass_panel(axb, axr, mass, FIGURE_LAYER)
+
+    lab = dict(PANEL_LAB, va='bottom')
+    fig.text(0.004, A_RECT[1] + A_RECT[3] + 0.052, '(a)', **lab)
+    fig.text(0.004, by + bh + 0.028, '(b)', **lab)
 
     os.makedirs(args.out_dir, exist_ok=True)
     path = os.path.join(args.out_dir, 'f4_depth_structure.pdf')

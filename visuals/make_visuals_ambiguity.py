@@ -127,6 +127,18 @@ def mass_figure(mass, layer):
     this type size floated annotations collided with the bars, and a shared axis makes
     mis-registration between a number and its bar impossible rather than merely unlikely.
     """
+    blocks = blocks_for(mass, layer)
+    rows_per = len(BEHAVIOURAL)
+    total = len(blocks) * (rows_per + 0.9) + 2.5
+    fig, (ax, axr) = plt.subplots(
+        1, 2, figsize=(12.6, 0.232 * total + 1.7), sharey=True,
+        gridspec_kw=dict(width_ratios=[1, 0.10], wspace=0.015))
+    mass_panel(ax, axr, mass, layer)
+    return fig
+
+
+def blocks_for(mass, layer):
+    """The seven stacked blocks: four ambiguous groups, a divider sentinel, two controls."""
     ctrl = control_groups(mass, layer)
     blocks = [(g.title(), mass[(BEHAVIOURAL[0], layer, g)]['structure'], None)
               for g in AMBIGUOUS]
@@ -134,13 +146,36 @@ def mass_figure(mass, layer):
     for fam, groups in sorted(ctrl.items()):
         blocks.append((f'{fam.title()} Controls',
                        ', '.join(g.title() for g in groups), groups))
+    return blocks
 
+
+def mathtext_serif():
+    """Point mathtext at the body serif.
+
+    `formula()` emits `-CONH$_2$`, and without this a subscript arrives in DejaVu beside Times
+    and reads as a typo. `main()` sets it for the standalone figure; a composite drawing
+    `mass_panel` has to set it too, which is why it is a function rather than four lines
+    inside `main`.
+    """
+    plt.rcParams.update({'mathtext.fontset': 'custom',
+                         'mathtext.rm': plt.rcParams['font.serif'][0],
+                         'mathtext.it': plt.rcParams['font.serif'][0],
+                         'mathtext.bf': plt.rcParams['font.serif'][0]})
+
+
+def mass_panel(ax, axr, mass, layer):
+    """The bars and the accuracy column, into TWO caller-supplied axes.
+
+    Lifted out of `mass_figure` so a composite can place this in its own layout -- the move
+    `make_visuals_probe.probe_panel` and `make_visuals_generation_composition.composition_panel`
+    both record. It takes two axes because the accuracy column IS a second axes sharing y, for
+    the reason `mass_figure`'s docstring gives, and the divider rule is drawn across both.
+
+    The caller owns two things this cannot: `mathtext_serif()`, and enough left margin for the
+    group names, which are annotated at axes fraction -0.185 and therefore sit OUTSIDE `ax`.
+    """
+    blocks = blocks_for(mass, layer)
     rows_per = len(BEHAVIOURAL)
-    total = len(blocks) * (rows_per + 0.9) + 2.5
-    fig, (ax, axr) = plt.subplots(
-        1, 2, figsize=(12.6, 0.232 * total + 1.7), sharey=True,
-        gridspec_kw=dict(width_ratios=[1, 0.10], wspace=0.015))
-
     y, ticks, ticklab = 0.0, [], []
     divider_y = None
     for name, sub, members in blocks:
@@ -211,7 +246,6 @@ def mass_figure(mass, layer):
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for _, c, _ in STACK]
     ax.legend(handles, [lbl for _, _, lbl in STACK], loc='lower center',
               bbox_to_anchor=(0.5, 1.012), ncol=3, fontsize=LEGEND_FS, frameon=False)
-    return fig
 
 
 def main():
@@ -222,12 +256,7 @@ def main():
                    help='any layer present in ambiguity_family_probability.csv (0-31)')
     args = p.parse_args()
     style()
-    # Mathtext must be set in the same serif face as the surrounding label, or a subscript
-    # arrives in DejaVu beside Times and reads as a typo.
-    plt.rcParams.update({'mathtext.fontset': 'custom',
-                         'mathtext.rm': plt.rcParams['font.serif'][0],
-                         'mathtext.it': plt.rcParams['font.serif'][0],
-                         'mathtext.bf': plt.rcParams['font.serif'][0]})
+    mathtext_serif()
 
     mass = read_mass()
     missing = [m for m in BEHAVIOURAL if (m, args.layer, 'amide') not in mass]
