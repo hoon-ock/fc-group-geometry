@@ -3,17 +3,18 @@
 
     python visuals/figure/fig5_crossover.py [--out-dir DIR]
 
-  f5_crossover.pdf    (a) kNN label agreement vs layer; (b-e) t-SNE at two layers, two colourings
+  f5_crossover.pdf    (a) kNN label agreement vs layer; (b, c) t-SNE at two layers, two colourings
 
 Panel (a) is the measurement: how often a point's 10 nearest neighbours carry its own prompt
 template, and how often they carry its own functional group, at every layer. The two curves
-cross. Panels (b)-(e) are that crossover shown rather than asserted -- the same embeddings at
-layer 8 and layer 24, each coloured BOTH ways, so the swap is visible as a 2x2 rather than
+cross. Panels (b) and (c) are that crossover shown rather than asserted -- the same embeddings
+at layer 8 and at layer 24, each coloured BOTH ways, so the swap is visible rather than
 inferred from one half of it.
 
-Models are columns here and the four layer/colouring combinations are rows, which transposes
-the released grid (`visuals/tsne/tsne_depth_*.png`, models in rows and layers in columns). At
-6.5in a five-column row leaves ~1.2in per embedding; ten across would leave 0.65in.
+Models are rows, as in the released grids (`visuals/tsne/tsne_depth_*.png`), and the two layers
+sit side by side as column pairs: layer 8 in the two left columns, layer 24 in the two right.
+Within each pair the columns are the two colourings. So the crossover is read left-to-right
+along a single model's row, and a gutter separates the pairs.
 
 PDF, not PNG, like the other scripts here: the destination is a LaTeX manuscript whose figures
 are vector. It is not one of the 70 release figures and `run_local.sh` does not build it.
@@ -43,16 +44,26 @@ from make_visuals_probe import DISPLAY5, style  # noqa: E402
 
 DEFAULT_OUT = os.path.join(VISUALS, 'figure')
 
-WIDTH, HEIGHT = 6.5, 7.3      # included at \textwidth; a near-full-page figure
+WIDTH, HEIGHT = 6.5, 8.45     # included at \textwidth; a dedicated-page figure
 
-# The four scatter rows, in reading order: both colourings at each layer, layers grouped.
-# `key` is the CSV column `tsne.panel` filters on.
-ROWS = [
-    (8,  'template_index',   'Layer 8\nTemplate'),
-    (8,  'functional_group', 'Layer 8\nGroup'),
-    (24, 'template_index',   'Layer 24\nTemplate'),
-    (24, 'functional_group', 'Layer 24\nGroup'),
+# The four scatter columns, left to right: both colourings at layer 8, then both at layer 24.
+# `key` is the CSV column `tsne.panel` filters on; the label is the colouring alone, because
+# the layer is carried by the spanning header over each pair.
+COLS = [
+    (8,  'template_index',   'Template'),
+    (8,  'functional_group', 'Group'),
+    (24, 'template_index',   'Template'),
+    (24, 'functional_group', 'Group'),
 ]
+
+# Width of the empty spacer column between the two layer pairs, relative to one scatter cell.
+#
+# It is paid for out of cell width that was doing nothing. `tsne.panel` ends in
+# `set_aspect('equal', adjustable='datalim')`, so on a cell wider than it is tall matplotlib
+# widens the DATA range instead of stretching the points: the cluster is sized by cell HEIGHT
+# and the surplus width is padding. Spending some of that padding on a gutter is what makes
+# "two left, two right" read as two groups rather than four columns.
+GUTTER = 0.5
 
 # Legend geometry, following grid_figure's own choices so the keys read the same as in the
 # released figures: 20 functional groups wrap at 7, 10 templates fit one row.
@@ -61,7 +72,8 @@ FINE_NCOL, TEMPLATE_NCOL = 7, 10
 PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
 
 ROWLAB_FS = 7.0
-COLTITLE_FS = 8.0
+COLTITLE_FS = 7.5
+HEADER_FS = 8.5
 LEGEND_FS = 6.4
 LEGEND_TITLE_FS = 6.8
 
@@ -77,7 +89,7 @@ def retune():
     agr.AGR_MARK = 2.0
     agr.AGR_LW = 1.0
     agr.AGR_REF_FS = 5.4
-    # Each embedding is ~1.2in against the released grid's 1.28in, so the points barely move.
+    # Each embedding is ~0.88in tall against the released grid's 1.28in cell.
     tsne.POINT_SIZE = 3.0
     tsne.POINT_ALPHA = 0.75
     plt.rcParams.update({'axes.labelsize': 7.5, 'axes.titlesize': 8.0,
@@ -97,16 +109,28 @@ def agreement_block(fig, gs_cell, rows, models, layers):
 
 
 def scatter_block(fig, gs_cell, coords, models, styles):
-    """(b)-(e) -- four rows of five embeddings, models in columns."""
-    sub = gs_cell.subgridspec(len(ROWS), len(models), wspace=0.06, hspace=0.06)
-    for i, (layer, key, rowlab) in enumerate(ROWS):
-        for j, m in enumerate(models):
-            ax = fig.add_subplot(sub[i, j])
+    """(b) and (c) -- five model rows by four columns, split into two layer pairs.
+
+    Grid column 2 is left empty as the gutter, so the four drawn columns are at grid indices
+    0, 1, 3, 4. Returns `axes[row][col]` indexed by the LOGICAL column 0-3, which is what the
+    header and panel-label placement measures against.
+    """
+    sub = gs_cell.subgridspec(len(models), 5, wspace=0.08, hspace=0.06,
+                              width_ratios=[1, 1, GUTTER, 1, 1])
+    grid_col = (0, 1, 3, 4)
+    out = []
+    for i, m in enumerate(models):
+        row = []
+        for j, (layer, key, collab) in enumerate(COLS):
+            ax = fig.add_subplot(sub[i, grid_col[j]])
             tsne.panel(ax, coords[(m, layer)], key, styles[key])
             if i == 0:
-                ax.set_title(DISPLAY5[m], pad=3, fontsize=COLTITLE_FS)
+                ax.set_title(collab, pad=3, fontsize=COLTITLE_FS)
             if j == 0:
-                ax.set_ylabel(rowlab, labelpad=4, fontsize=ROWLAB_FS)
+                ax.set_ylabel(DISPLAY5[m], labelpad=4, fontsize=ROWLAB_FS)
+            row.append(ax)
+        out.append(row)
+    return out
 
 
 def key_handles(styles, labels):
@@ -115,6 +139,12 @@ def key_handles(styles, labels):
                        markersize=3.0, markeredgewidth=0,
                        color=tsne.as_pair(styles[v])[0], label=tsne.display(v))
             for v in labels]
+
+
+def _fig_bbox(fig, artist):
+    """An artist's drawn extent in figure coordinates."""
+    bb = artist.get_window_extent(fig.canvas.get_renderer())
+    return bb.transformed(fig.transFigure.inverted())
 
 
 def main():
@@ -130,7 +160,7 @@ def main():
     coords = tsne.read_coords()
     models = [m for m in BEHAVIOURAL
               if any((m, L) in rows for L in range(32))
-              and all((m, layer) in coords for layer, _, _ in ROWS)]
+              and all((m, layer) in coords for layer, _, _ in COLS)]
     if not models:
         raise SystemExit('no rows -- run analysis/analyze_prompt_structure.py and '
                          'analysis/compute_tsne_coords.py')
@@ -142,35 +172,60 @@ def main():
     styles = {'functional_group': fine_styles, 'template_index': tmpl_styles}
 
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 2.25],
-                          left=0.085, right=0.985, top=0.962, bottom=0.145,
-                          hspace=0.26)
-    agreement_block(fig, gs[0, 0], rows, models, layers)
-    scatter_block(fig, gs[1, 0], coords, models, styles)
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 2.85],
+                          left=0.085, right=0.985, top=0.966, bottom=0.129,
+                          hspace=0.28)
+    agr_axes = agreement_block(fig, gs[0, 0], rows, models, layers)
+    sc = scatter_block(fig, gs[1, 0], coords, models, styles)
+
+    # Everything below is placed from MEASURED positions rather than figure-fraction constants.
+    # The constants this file used to carry were tuned against a 7.3in canvas and silently
+    # misplaced themselves the moment HEIGHT changed; deriving them removes that retune.
+    fig.canvas.draw()
+    pos = [[ax.get_position() for ax in row] for row in sc]
+    sc_top = max(b.y1 for b in pos[0])
+    # Above the column titles, not just above the axes.
+    title_top = max(_fig_bbox(fig, sc[0][j].title).y1 for j in range(4))
+
+    # One spanning header per layer pair, centred over the two columns it covers, with the
+    # pair's panel label on the same baseline so '(b)' and 'Layer 8' read as one line.
+    head_y = title_top + 0.005
+    for j0, layer in ((0, COLS[0][0]), (2, COLS[2][0])):
+        mid = (pos[0][j0].x0 + pos[0][j0 + 1].x1) / 2
+        fig.text(mid, head_y, f'Layer {layer}', ha='center', va='bottom', fontsize=HEADER_FS)
+    lab = dict(PANEL_LAB, va='bottom')
+    fig.text(0.004, head_y, '(b)', **lab)
+    fig.text(pos[0][2].x0 - 0.034, head_y, '(c)', **lab)
+    fig.canvas.draw()
+    band_top = max(_fig_bbox(fig, t).y1 for t in fig.texts)
 
     # Three legends, each under the block it explains. They describe unrelated encodings --
     # five checkpoints, ten templates, twenty groups -- so merging any two would make one
     # oversized box in which none of them reads.
-    handles, labels = fig.axes[0].get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, 0.700),
+    # Stacked on the header line, not floated at a guessed midpoint: the band between (a) and
+    # the scatters holds the headers, the panel labels AND this legend, and measuring only to
+    # the scatter axes' top ignores the two that sit above it.
+    handles, labels = agr_axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='lower center', bbox_to_anchor=(0.5, band_top + 0.008),
                ncol=len(models), fontsize=LEGEND_FS, handletextpad=0.4, columnspacing=1.4,
                frameon=False)
 
-    tmpl = fig.legend(handles=key_handles(tmpl_styles, tmpl_labels), loc='lower center',
-                      bbox_to_anchor=(0.5, 0.072), ncol=TEMPLATE_NCOL, fontsize=LEGEND_FS,
-                      handletextpad=0.35, columnspacing=1.0, frameon=False,
-                      title='Prompt template index')
-    tmpl.get_title().set_fontsize(LEGEND_TITLE_FS)
-    fig.add_artist(tmpl)
-
+    # The 20-group key is the tall one, so it is placed at the canvas floor first and the
+    # 10-template key is stacked on whatever it actually occupied.
     fine = fig.legend(handles=key_handles(fine_styles, fine_labels), loc='lower center',
                       bbox_to_anchor=(0.5, 0.0), ncol=FINE_NCOL, fontsize=LEGEND_FS,
                       handletextpad=0.35, columnspacing=1.0, frameon=False,
                       title='Functional group')
     fine.get_title().set_fontsize(LEGEND_TITLE_FS)
+    fig.canvas.draw()
+    tmpl = fig.legend(handles=key_handles(tmpl_styles, tmpl_labels), loc='lower center',
+                      bbox_to_anchor=(0.5, _fig_bbox(fig, fine).y1 + 0.006),
+                      ncol=TEMPLATE_NCOL, fontsize=LEGEND_FS,
+                      handletextpad=0.35, columnspacing=1.0, frameon=False,
+                      title='Prompt template index')
+    tmpl.get_title().set_fontsize(LEGEND_TITLE_FS)
 
     fig.text(0.004, 0.996, '(a)', **PANEL_LAB)
-    fig.text(0.004, 0.690, '(b)', **PANEL_LAB)
 
     os.makedirs(args.out_dir, exist_ok=True)
     path = os.path.join(args.out_dir, 'f5_crossover.pdf')
