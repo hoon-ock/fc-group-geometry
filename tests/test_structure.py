@@ -62,13 +62,34 @@ def test_every_figure_topic_has_a_TRACKED_readme():
         'directory, so it will be absent from a fresh clone')
 
 
+# Directories under visuals/ that hold code rather than rendered figures, so they are not
+# FIGURE_COUNTS topics and own none of the 70 PNGs.
+VISUALS_CODE_DIRS = {'__pycache__', 'figure'}
+
+
 def test_no_unexpected_topic_directory_on_disk():
     """The filesystem may hold FEWER topics than FIGURE_COUNTS (nothing has been rendered
-    yet, as on a fresh clone) but never a topic nothing knows about."""
+    yet, as on a fresh clone) but never a topic nothing knows about.
+
+    `figure/` is excluded because it holds manuscript-figure scripts, not output: those
+    emit PDFs into the paper tree and are deliberately outside the 70-PNG release set. The
+    test below keeps that exclusion honest by requiring it to actually contain code.
+    """
     present = {d for d in os.listdir(os.path.join(REPO, 'visuals'))
-               if os.path.isdir(os.path.join(REPO, 'visuals', d)) and d != '__pycache__'}
+               if os.path.isdir(os.path.join(REPO, 'visuals', d))
+               and d not in VISUALS_CODE_DIRS}
     assert not present - set(FIGURE_COUNTS), (
         f'unknown directory under visuals/: {sorted(present - set(FIGURE_COUNTS))}')
+
+
+def test_the_visuals_code_dir_holds_code():
+    """Stops the exclusion above from becoming a hole. If visuals/figure/ ever stops holding
+    tracked scripts, it is an unexplained directory again and should be flagged, not waved
+    through by a name on an allow-list."""
+    tracked = subprocess.run(['git', 'ls-files', 'visuals/figure'], cwd=REPO,
+                             capture_output=True, text=True).stdout.split()
+    assert [f for f in tracked if f.endswith('.py')], (
+        'visuals/figure/ is on the code-directory allow-list but holds no tracked .py')
 
 
 def test_scripts_holds_three_gpu_jobs_and_the_local_driver():

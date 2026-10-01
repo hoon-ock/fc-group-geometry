@@ -18,7 +18,10 @@ MODULES = sorted(
     os.path.relpath(p, REPO)
     for p in glob.glob(os.path.join(REPO, 'src/*.py'))
     + glob.glob(os.path.join(REPO, 'analysis/*.py'))
-    + glob.glob(os.path.join(REPO, 'visuals/*.py')))
+    + glob.glob(os.path.join(REPO, 'visuals/*.py'))
+    # Manuscript-figure scripts live one level down; the non-recursive glob above would
+    # leave them silently untested for importability.
+    + glob.glob(os.path.join(REPO, 'visuals/figure/*.py')))
 
 # Mirrors the import stanza each script carries: its own directory, then src/, then ROOT.
 _PROBE_ALL = r"""
@@ -52,7 +55,7 @@ def import_results():
 
 
 def test_there_are_thirty_modules():
-    assert len(MODULES) == 30, MODULES
+    assert len(MODULES) == 31, MODULES
 
 
 @pytest.mark.parametrize('rel', MODULES, ids=lambda r: r.replace('/', ':'))

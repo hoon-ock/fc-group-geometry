@@ -14,6 +14,11 @@ logs/*
 # rendering.
 visuals/**/*.png
 
+# Manuscript figures. visuals/figure/ holds the scripts that build the paper's figures; their
+# output is a PDF rather than a PNG, so the rule above does not cover it. Same reasoning:
+# the script and the data are tracked, the rendering is not.
+visuals/figure/*.pdf
+
 # Working copies of the dataset, kept out by the same convention as the source repo.
 __*.csv
 
