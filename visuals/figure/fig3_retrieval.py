@@ -210,7 +210,7 @@ def main():
 
     # One legend for both quivers, under the pair rather than beside them.
     fig.legend(handles=q3d.legend_handles(cells[CELLS[0]]), loc='lower center',
-               bbox_to_anchor=(0.5, 0.0), ncol=3, fontsize=q3d.Q3D_LEGEND,
+               bbox_to_anchor=(0.5, 0.05), ncol=3, fontsize=q3d.Q3D_LEGEND,
                handlelength=1.9, columnspacing=1.6, frameon=False)
 
     fig.text(0.004, 0.996, '(a)', **PANEL_LAB)
