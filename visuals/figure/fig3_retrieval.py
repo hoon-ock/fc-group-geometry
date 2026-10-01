@@ -63,19 +63,44 @@ WIDTH, HEIGHT = 6.5, 5.8      # included at \textwidth, not the 5.5in the other 
 # thioether pair is the one the abstract names but separates the pairs so widely that
 # `equalize` zooms out and leaves two short strokes. 44-51% is the band that works.
 CELLS = ('imine-aldehyde_amine-alcohol_C4',
-         'imine-aldehyde_amine-alcohol_C6')
+         'imine-aldehyde_amine-alcohol_C6',
+         'thioether-thiol_ether-alcohol_C5')
 
-# No camera override. The previous one existed because `pick_camera` failed on a cell whose
-# geometry defeated every view; with the cell replaced there is nothing to work around, so the
-# composite uses the same camera path as the standalone figure.
-CAMERAS = {}
+# One camera override, set by measurement rather than by eye.
+#
+# `pick_camera` maximises the SMALLEST gap between the five labelled points, which is the right
+# objective when the risk is two names overprinting. For the thioether cell the binding problem
+# is different -- the arrows are 10.03 long where the imine cells' are 23, against a cube
+# `equalize` sizes from all 20 points -- so the objective to maximise is projected arrow length,
+# subject to the arrows still reading as two (projected separation across them >= 0.6x their
+# length) and no labelled pair collapsing (smallest gap within 10% of pick_camera's).
+#
+# Swept over the generator's own ELEVS x AZIMS through its `screen()`:
+#
+#   thioether C5   pick_camera (16, 105)  arrow 0.239   ->  (32, 70)  arrow 0.426   1.78x
+#   imine C4       pick_camera (20,  30)  arrow 1.050   ->  best is 0.96x, no gain
+#   imine C6       pick_camera (32,-145)  arrow 0.836   ->  1.39x, but perp/arrow 0.56 -> 0.42
+#
+# Only the first is taken. C6's longer arrows come by trading away the separation ratio that
+# decides legibility in the first place, and it already renders.
+CAMERAS = {'thioether-thiol_ether-alcohol_C5': (32, 70)}
 
 # Marks are sized for the 8in standalone panel; these are far smaller, so they scale with the
 # panel or the squares swamp the arrows they sit on.
-MARK_SCALE = 0.58
+MARK_SCALE = 0.42
 
-# Fraction of each quiver cell the axes box overruns on every side -- see quiver_block.
-BLEED = 0.15
+# Fraction of each quiver cell the axes box overruns, per axis -- see quiver_block.
+#
+# Separate because the two directions are limited by different things. Vertically the only
+# constraint is the shared legend below, so the box can overrun and buy back the margin
+# mplot3d leaves around its cube. Horizontally it cannot: mplot3d hangs the vertical axis name
+# well outside the cube on the left, so any horizontal overrun throws `PC-3` into the
+# neighbouring panel -- at three cells across, every panel was printing its PC-3 on top of the
+# one to its left, and widening the gutter only moved the collision rather than removing it.
+#
+# The outermost box must also stay on canvas: `savefig.bbox='tight'` does not clip, it silently
+# widens the figure.
+BLEED_X, BLEED_Y = 0.0, 0.16
 
 XLAB_FS = 8.5     # 'Inter-group' etc, sized apart from the y ticks
 
@@ -95,9 +120,9 @@ def retune():
     rdist.RETR_TICK = 5.4         # y tick labels only, by the seam above
     rdist.RETR_LABEL = 9.5        # 'Rank (log scale)'
     rdist.DIST_LEGEND = 8.5
-    rdist.HIT_FS = 6.5            # five values across a ~2.0in panel
-    q3d.Q3D_LABEL = 7.0           # PC-1 / PC-2 / PC-3
-    q3d.Q3D_POINT = 7.0           # the four group names inside the axes
+    rdist.HIT_FS = 8.0            # five values across a 1.56in panel; 0.24in of its 0.31in slot
+    q3d.Q3D_LABEL = 6.2           # PC-1 / PC-2 / PC-3
+    q3d.Q3D_POINT = 6.2           # the four group names inside the axes
     q3d.Q3D_LEGEND = 7.5
     q3d.Q3D_ALERT = 6.0
 
@@ -132,8 +157,8 @@ def quiver_block(fig, cells, gs_cells):
         # back by letting the box run past the figure edges (AXES_BLEED); doing the same per
         # cell is what keeps the cubes large in a half-width cell.
         bb = ax.get_position()
-        ax.set_position([bb.x0 - bb.width * BLEED, bb.y0 - bb.height * BLEED,
-                         bb.width * (1 + 2 * BLEED), bb.height * (1 + 2 * BLEED)])
+        ax.set_position([bb.x0 - bb.width * BLEED_X, bb.y0 - bb.height * BLEED_Y,
+                         bb.width * (1 + 2 * BLEED_X), bb.height * (1 + 2 * BLEED_Y)])
         axes.append(ax)
     return axes
 
@@ -165,11 +190,11 @@ def main():
     # them 2.0in and the quivers 3.1in, so both blocks roughly double.
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
     gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.08],
-                          left=0.072, right=0.962, top=0.962, bottom=0.150,
+                          left=0.085, right=0.958, top=0.962, bottom=0.150,
                           hspace=0.34)
     violin_block(fig, gs[0, 0], args.layer)
-    qgs = gs[1, 0].subgridspec(1, 2, wspace=0.02)
-    quiver_block(fig, [cells[w] for w in CELLS], [qgs[0, 0], qgs[0, 1]])
+    qgs = gs[1, 0].subgridspec(1, 3, wspace=0.10)
+    quiver_block(fig, [cells[w] for w in CELLS], [qgs[0, i] for i in range(3)])
 
     # The violin's own legend: five checkpoints plus the three summary marks. Kept separate
     # from the quiver legend because the two describe unrelated encodings, and merging them
@@ -190,7 +215,6 @@ def main():
 
     fig.text(0.004, 0.996, '(a)', **PANEL_LAB)
     fig.text(0.004, 0.516, '(b)', **PANEL_LAB)
-    fig.text(0.498, 0.516, '(c)', **PANEL_LAB)
 
     os.makedirs(args.out_dir, exist_ok=True)
     path = os.path.join(args.out_dir, 'f3_retrieval.pdf')
