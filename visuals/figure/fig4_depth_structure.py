@@ -48,7 +48,7 @@ import fig2_clustermaps as f2  # noqa: E402
 
 DEFAULT_OUT = os.path.join(VISUALS, 'figure')
 
-WIDTH, HEIGHT = 6.5, 5.0      # included at \textwidth
+WIDTH, HEIGHT = 6.5, 5.35      # included at \textwidth
 
 # The two depths drawn as insets. Layer 8 sits on the probe's low plateau and layer 24 after
 # its rise, which is what makes the pair worth drawing.
@@ -64,18 +64,18 @@ CUTS = (8, 24)
 # point at all.
 INSET_W, INSET_H = 0.185, 0.240
 INSET_Y = 0.078
-INSET_X = (0.030, 0.712)
+INSET_X = (0.030, 0.700)
 
 # Vertical colourbar immediately right of the layer-24 inset. This is what sets that inset's
 # x position: the bar, its tick labels and its rotated label together need about 0.09 of the
 # axes width between the inset's right edge and the frame.
-CB_X, CB_W = 0.912, 0.020
+CB_X, CB_W = 0.900, 0.020
 
 LEADER = dict(arrowstyle='-', color='0.45', linewidth=0.8, shrinkA=1.5, shrinkB=2.5)
 
-INSETLAB_FS = 9.0
-CB_LABEL_FS = 8.0
-CB_TICK_FS = 7.5
+INSETLAB_FS = 11.0
+CB_LABEL_FS = 9.5
+CB_TICK_FS = 9.0
 
 
 def retune():
@@ -84,15 +84,17 @@ def retune():
     Module globals read when the drawing functions run, so this changes only this figure --
     `make_visuals_probe`'s own released output is unaffected.
     """
-    # The released curve is 7.2 x 4.2in and this one is about 5.8 x 4.2in -- nearly the same
-    # plotting area, so the type barely comes down at all. The first draft scaled it as if this
-    # were a small sub-panel, which left everything unreadably small at print size.
-    probe.PROBE_LABEL = 11.5
-    probe.PROBE_TICK = 10.5
-    probe.PROBE_LEGEND = 10.0
-    probe.PROBE_REF = 9.0
-    probe.PROBE_MARK = 3.6
-    probe.PROBE_LW = 1.4
+    # At or above the released figure's own 13/12/11/10, not below it. This panel is ~5.8in
+    # wide against that figure's ~6.4in plotting area -- nearly the same -- and the first two
+    # drafts scaled the type as if it were a small sub-panel, which read far too small in print.
+    # 13pt is the ceiling the LEGEND sets: measured at ncol=5 it is 6.86in wide at 13pt against
+    # a 6.5in canvas, so it has to wrap to two rows (ncol=3, 4.33in) to get here at all.
+    probe.PROBE_LABEL = 14.0
+    probe.PROBE_TICK = 13.0
+    probe.PROBE_LEGEND = 13.0
+    probe.PROBE_REF = 13.0
+    probe.PROBE_MARK = 4.0
+    probe.PROBE_LW = 1.5
     # Left at its default 8: the floor labels run rightward from there, which lands them in the
     # gap between the two insets. The earlier guide-line draft had to move them off layer 8.
     probe.PROBE_REF_X = 8
@@ -152,7 +154,7 @@ def main():
     order = leaf_order(z_by[(BASE, args.order_layer)])
 
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    ax = fig.add_axes([0.095, 0.092, 0.890, 0.835])
+    ax = fig.add_axes([0.098, 0.104, 0.887, 0.762])
     probe.probe_panel(ax, curves, surface)
     im = inset_block(ax, curves, z_by, order)
 
@@ -166,7 +168,7 @@ def main():
     # largest source of retune churn, silently misplacing themselves whenever the canvas moved.
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(handles, labels, loc='lower center',
-               bbox_to_anchor=(0.5, ax.get_position().y1 + 0.006), ncol=5,
+               bbox_to_anchor=(0.5, ax.get_position().y1 + 0.006), ncol=3,
                fontsize=probe.PROBE_LEGEND, handlelength=2.4, columnspacing=1.2,
                frameon=False)
 
