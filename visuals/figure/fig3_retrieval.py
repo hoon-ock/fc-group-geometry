@@ -44,28 +44,39 @@ DEFAULT_OUT = os.path.join(VISUALS, 'figure')
 
 WIDTH, HEIGHT = 6.5, 5.2      # included at \textwidth, not the 5.5in the other figures use
 
-# The two cells, by the stem `slug()` builds. The second is drawn face-on (see CAMERAS).
-CELLS = ('imine-aldehyde_amine-alcohol_C4',
-         'ester-carboxylic-acid_ketone-aldehyde_C4')
-
-# `pick_camera` maximises the smallest gap between the five key POINTS, which says nothing
-# about the arrows. For the ester cell it returns (32, 105), where the source and target
-# offsets -- 97.5% parallel in the data, so genuinely near-collinear -- are also viewed nearly
-# end-on and collapse onto each other.
+# The two cells, by the stem `slug()` builds.
 #
-# elev 54 is the plane's own tilt: the five points are near-coplanar (third singular value
-# 2.5% of the first), so a view along the normal shows the parallelogram at full area. Area is
-# not the same as legibility, though -- at azim 135 the two arrows still ran along the lower
-# edge of the cube against the axis lines behind them. Ninety-five degrees further about z
-# puts them across the open face, where the two strokes read as two.
-CAMERAS = {'ester-carboxylic-acid_ketone-aldehyde_C4': (54, 230)}
+# The same analogy at two chain lengths, which is what the two panels together show: the
+# offset survives the backbone growing.
+#
+# Which cells are legible is a measurement, not a preference. Only the separation
+# PERPENDICULAR to the arrows can be drawn as a gap -- separation along them just slides one
+# arrow down the other -- so the ratio of that to the arrow length decides whether a panel
+# reads. At L31, against arrow lengths of 10-24:
+#
+#   ester-carboxylic-acid / ketone-aldehyde C4     2.8%   arrows collapse into one line
+#   imine-aldehyde / amine-alcohol        C4/5/6   44-51% both arrows read, parallel
+#   thioether-thiol / ether-alcohol       C5/C6    221%/417%  pairs far apart, arrows tiny
+#
+# The ester cell was tried first and defeated three cameras before this was measured; the
+# thioether pair is the one the abstract names but separates the pairs so widely that
+# `equalize` zooms out and leaves two short strokes. 44-51% is the band that works.
+CELLS = ('imine-aldehyde_amine-alcohol_C4',
+         'imine-aldehyde_amine-alcohol_C6')
 
-# Marks are sized for the 8in standalone panel; these are 2.6in, so they scale with the
+# No camera override. The previous one existed because `pick_camera` failed on a cell whose
+# geometry defeated every view; with the cell replaced there is nothing to work around, so the
+# composite uses the same camera path as the standalone figure.
+CAMERAS = {}
+
+# Marks are sized for the 8in standalone panel; these are far smaller, so they scale with the
 # panel or the squares swamp the arrows they sit on.
 MARK_SCALE = 0.42
 
 # Fraction of each quiver cell the axes box overruns on every side -- see quiver_block.
-BLEED = 0.10
+BLEED = 0.15
+
+XLAB_FS = 8.5     # 'Inter-group' etc, sized apart from the y ticks
 
 PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
 
@@ -77,13 +88,16 @@ def retune():
     run, so rebinding here changes this figure only -- the standalone generators keep their
     own sizes and their released output is unaffected.
     """
-    rdist.RETR_LABEL = 8.0        # 'Rank (log scale)'
-    rdist.RETR_TICK = 6.2         # axis ticks and the per-panel caption
-    rdist.DIST_LEGEND = 7.0
-    rdist.HIT_FS = 5.0            # five values across a ~1in panel
+    # RETR_TICK drives the y tick labels AND, in violin_panel, the x label. The composite
+    # re-sets the x label after calling it, so the two can be sized apart here: ticks small,
+    # label large.
+    rdist.RETR_TICK = 5.4         # y tick labels only, by the seam above
+    rdist.RETR_LABEL = 9.5        # 'Rank (log scale)'
+    rdist.DIST_LEGEND = 8.5
+    rdist.HIT_FS = 6.5            # five values across a ~1.2in panel; collides much above this
     q3d.Q3D_LABEL = 7.0           # PC-1 / PC-2 / PC-3
     q3d.Q3D_POINT = 7.0           # the four group names inside the axes
-    q3d.Q3D_LEGEND = 7.0
+    q3d.Q3D_LEGEND = 7.5
     q3d.Q3D_ALERT = 6.0
 
 
@@ -91,7 +105,7 @@ def violin_block(fig, gs_cell, layer):
     """(a) -- the three retrieval axes, sharing one legend below them."""
     by, labels = rviolin.read_axis_rows(layer)
     hist = rviolin.rank_hist(layer)
-    sub = gs_cell.subgridspec(1, 3, wspace=0.52)
+    sub = gs_cell.subgridspec(1, 3, wspace=0.36)
     axs = [fig.add_subplot(sub[0, i]) for i in range(3)]
     for j, (ax, axis) in enumerate(zip(axs, rdist.AXES)):
         rviolin.violin_panel(ax, by, hist, axis, labels[axis])
@@ -101,7 +115,7 @@ def violin_block(fig, gs_cell, layer):
         # Axis name only. The standalone label carries '(13 groups, 20 trials)' on a second
         # line, which at this panel width runs into its neighbours; the counts belong in the
         # caption instead, where they are not competing for 1in of column.
-        ax.set_xlabel(labels[axis].split('\n')[0], fontsize=rdist.RETR_TICK)
+        ax.set_xlabel(labels[axis].split('\n')[0], fontsize=XLAB_FS)
     axs[0].set_ylabel('Rank (log scale)', fontsize=rdist.RETR_LABEL)
     return axs
 
@@ -147,9 +161,9 @@ def main():
                          're-run analysis/snapshot_quiver3d.py')
 
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    gs = fig.add_gridspec(2, 2, width_ratios=[4.15, 2.05], height_ratios=[1, 1],
-                          left=0.062, right=0.972, top=0.88, bottom=0.115,
-                          wspace=0.17, hspace=0.05)
+    gs = fig.add_gridspec(2, 2, width_ratios=[4.6, 1.8], height_ratios=[1, 1],
+                          left=0.062, right=0.972, top=0.865, bottom=0.115,
+                          wspace=0.17, hspace=0.16)
     violin_block(fig, gs[:, 0], args.layer)
     quiver_block(fig, [cells[w] for w in CELLS], [gs[0, 1], gs[1, 1]])
 
@@ -171,8 +185,8 @@ def main():
                handlelength=1.9, columnspacing=1.2, frameon=False)
 
     fig.text(0.004, 0.985, '(a)', **PANEL_LAB)
-    fig.text(0.672, 0.905, '(b)', **PANEL_LAB)
-    fig.text(0.672, 0.500, '(c)', **PANEL_LAB)
+    fig.text(0.672, 0.872, '(b)', **PANEL_LAB)
+    fig.text(0.672, 0.492, '(c)', **PANEL_LAB)
 
     os.makedirs(args.out_dir, exist_ok=True)
     path = os.path.join(args.out_dir, 'f3_retrieval.pdf')
