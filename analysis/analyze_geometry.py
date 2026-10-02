@@ -105,6 +105,15 @@ def anisotropy(results_dir, model, entity_type):
             'centered_between': v['mean_centered']['full_between_mean'],
             'centered_null': v['mean_centered']['empirical_null_mean'],
             'centered_null_sd': v['mean_centered']['empirical_null_std'],
+            # The uncentered counterparts of the three above, carried so the raw trio can be
+            # reported with the null that actually belongs to it. NOTE the distinction from
+            # `raw_between` below: that one is the mean cosine among the 19 GROUP-MEAN diff
+            # vectors, while this is the mean over pairs of INDIVIDUAL (group, C) diff
+            # vectors -- the same population the null samples from, and the one
+            # `centered_between` is the centered version of. The two differ by ~0.05.
+            'raw_between_full': v['original']['full_between_mean'],
+            'raw_null': v['original']['empirical_null_mean'],
+            'raw_null_sd': v['original']['empirical_null_std'],
         }
     return out
 
@@ -250,7 +259,9 @@ def main():
     fields = ['model', 'entity_type', 'layer', 'raw_pairwise_cosine', 'raw_pairwise_sd',
               'diffvec_svd_top1', 'diffvec_svd_top5', 'raw_within', 'raw_between',
               'raw_gap', 'raw_between_max', 'centered_within', 'centered_between',
-              'centered_null', 'centered_null_sd', 'hit1', 'hit1_ex_sulfoxide',
+              'centered_null', 'centered_null_sd',
+              'raw_between_full', 'raw_null', 'raw_null_sd',
+              'hit1', 'hit1_ex_sulfoxide',
               'degenerate_rate', 'n_trials']
     rows = []
     for model in args.models:
