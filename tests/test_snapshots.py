@@ -1,4 +1,4 @@
-"""The 29 committed CSVs are the reproducibility boundary: past them nothing reads results/."""
+"""The 30 committed CSVs are the reproducibility boundary: past them nothing reads results/."""
 import csv
 import glob
 import os
@@ -13,7 +13,9 @@ SNAPSHOTS = sorted(os.path.basename(p) for p in glob.glob(os.path.join(DATA, '*.
 # The few that are a single paired contrast or a single model by construction, so a
 # five-model assertion would be wrong rather than merely strict.
 NOT_FIVE_MODELS = {
-    'analogy_quiver3d.csv',              # base only -- all the 3D figure draws
+    'analogy_quiver3d.csv',              # base only -- all the released 3D figures
+                                         # draw; analogy_quiver3d_all.csv is the
+                                         # five-model companion figure S3 reads
     'model_diff_bootstrap.csv',          # one paired chem-vs-base contrast
     'generation_diff_bootstrap.csv',
     'free_generation_diff_bootstrap.csv',
@@ -21,8 +23,8 @@ NOT_FIVE_MODELS = {
 }
 
 
-def test_there_are_twenty_nine_snapshots():
-    assert len(SNAPSHOTS) == 29, SNAPSHOTS
+def test_there_are_thirty_snapshots():
+    assert len(SNAPSHOTS) == 30, SNAPSHOTS
 
 
 def test_the_snapshot_names_are_distinct_without_a_topic_prefix():

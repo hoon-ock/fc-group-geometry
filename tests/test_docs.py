@@ -129,7 +129,7 @@ def test_no_reference_to_the_source_repositorys_capitalised_analysis_dir():
 
 
 def test_no_pre_flattening_topic_prefix_in_the_generator_table():
-    """The 29 snapshots live flat in `analysis/data/`. Before `analysis/` was flattened they
+    """The 30 snapshots live flat in `analysis/data/`. Before `analysis/` was flattened they
     sat under per-topic subdirectories, and visuals/README.md's "Reads" column still labelled
     each CSV with its old topic directory -- which reads as a real path and is not one."""
     with open(os.path.join(REPO, 'visuals/README.md'), errors='ignore') as fh:
@@ -142,7 +142,7 @@ def test_no_pre_flattening_topic_prefix_in_the_generator_table():
         r'/[^`]*\.csv)`', txt)
     assert not stale, (
         f'visuals/README.md still names snapshots by their pre-flattening topic: {stale} '
-        '-- all 29 now live flat in analysis/data/')
+        '-- all 30 now live flat in analysis/data/')
 
 
 # --- Badges -----------------------------------------------------------------------------

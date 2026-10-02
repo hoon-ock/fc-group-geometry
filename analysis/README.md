@@ -1,7 +1,7 @@
 # The analyses
 
 One script per analysis, flat in this directory, each reading `results/` (or the activations
-directly) and writing its snapshot into `data/`. Those 29 CSVs are the reproducibility
+directly) and writing its snapshot into `data/`. Those 30 CSVs are the reproducibility
 boundary: past them nothing reads `results/`, and every figure in `visuals/` is drawn from
 them alone.
 

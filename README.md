@@ -97,7 +97,7 @@ change silently.
 | `config_extract_activation.yaml` | the model, pooling and prompt templates for a run — the one file to edit to change what the pipeline does |
 | `data/` | the 92-molecule dataset |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
-| `analysis/` | one script per analysis, flat, plus the 29 snapshot CSVs in `data/` and one README covering every topic |
+| `analysis/` | one script per analysis, flat, plus the 30 snapshot CSVs in `data/` and one README covering every topic |
 | `visuals/` | the 9 figure generators *and* their output — **70 PNGs**, gitignored, rebuilt from the snapshots. Read only `analysis/data/*.csv`, never `results/` |
 | `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
@@ -111,7 +111,7 @@ Four stages. Only the first two need a GPU; the rest is one local command.
 [1] 01_extract.sbatch          GPU  ->  activations/                 160 .pt, ~1.2 GB
 [2] 02_generation_eval.sbatch  GPU  ->  results/generation_eval/     3 files per model
 [3] run_local.sh --stages compute   ->  results/  (7 trees, named below)
-[4] run_local.sh --stages analysis  ->  analysis/data/*.csv        29 snapshots, committed
+[4] run_local.sh --stages analysis  ->  analysis/data/*.csv        30 snapshots, committed
     run_local.sh --stages figures   ->  visuals/            70 PNGs
 ```
 

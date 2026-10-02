@@ -67,10 +67,28 @@ from analogy_retrieval import load_diff_vectors, scoreable_corners  # noqa: E402
 from analogy_carbon_matched import (  # noqa: E402
     ANALOGY_QUADRUPLES, build_diff_by_group_at_carbon,
 )
-from model_registry import get_model_config  # noqa: E402
+from model_registry import MODEL_CONFIGS, get_model_config  # noqa: E402
 
 MODEL_8B = 'meta-llama-Llama-3.1-8B'
-SLASH_FOR = {MODEL_8B: 'meta-llama/Llama-3.1-8B'}
+# Built from the registry rather than hardcoded, the idiom `src/analogy_retrieval.py:68`
+# already uses. The one-entry dict this replaces meant `--model` accepted any checkpoint but
+# `project()` then raised KeyError on the registry lookup for all but the base model, so the
+# script was only ever runnable for one of the five.
+SLASH_FOR = {m.replace('/', '-'): m for m in MODEL_CONFIGS}
+
+# Append-only, matching `analysis/analyze_taxonomy.py`'s list. Only `--all-models` reads it.
+ALL_MODELS = [
+    'meta-llama-Llama-3.1-8B',
+    'weidawang-Chem-R-8B',
+    'phenixace-Chem-R-Faithful',
+    'OpenDFM-ChemDFM-v1.5-8B',
+    'deepseek-ai-DeepSeek-R1-Distill-Llama-8B',
+]
+
+# Roles a cell needs before anything can draw it. `--all-cells` keeps cells with a degenerate
+# corner, which are missing a role row; they are real results but not projectable, so the
+# multi-model snapshot carries only the complete ones.
+DRAWABLE_ROLES = {'a1', 'a2', 'b1', 'b2', 'predicted'}
 
 # The quadruple `analogy_carbon_matched.py:306-311` marks DELIBERATE
 # NEGATIVE CONTROL: acid->ester and aldehyde->ketone are formally the same substitution but
@@ -277,6 +295,51 @@ def write_csv(path, rows, fieldnames):
     print(f"wrote {os.path.relpath(path, REPO)}  ({len(rows)} rows)")
 
 
+def project_model(args, model, all_cells):
+    """Every projected row for one checkpoint, plus the cells behind them.
+
+    Lifted out of `main` so `--all-models` can loop it. Returns `(rows, ordered, chosen,
+    disagreed)`; `main` still does all the writing and reporting.
+    """
+    npz = os.path.join(args.analogy_dir, model, args.entity_type, 'data',
+                       f'diff_vectors_layer_{args.layer}.npz')
+    if not os.path.exists(npz):
+        raise SystemExit(
+            f"missing {os.path.relpath(npz, REPO)} -- run "
+            "src/analogy_carbon_matched.py for this model first")
+    diffs = load_diff_vectors(npz)
+    molecules = read_molecules(args.dataset)
+    ordered = rank_cells(read_trials(
+        args.retrieval_dir, model, args.entity_type, args.layer, args.mode))
+
+    chosen = ordered if all_cells else [c for c in ordered if is_clean(c)]
+    if args.top_n:
+        chosen = chosen[:args.top_n]
+    if not chosen:
+        raise SystemExit(
+            f'no cell at layer {args.layer} is all-hit@1 with no degenerate corner -- '
+            'pass --all-cells to project the near misses anyway')
+
+    rows, disagreed = [], []
+    for i, cell in enumerate(chosen, start=1):
+        pool = (build_diff_by_group_at_carbon(diffs, cell['carbon'])
+                if cell['carbon'] is not None else lumped_pool(diffs))
+        made = project(pool, cell, molecules, model, args.layer, args.entity_type,
+                       args.mode, i)
+        rows.extend(made)
+        if made[0]['rank3d_excl'] != made[0]['rank_excl']:
+            disagreed.append((cell, made[0]['rank3d_excl']))
+    return rows, ordered, chosen, disagreed
+
+
+def drawable(rows):
+    """Drop cells missing a role -- see DRAWABLE_ROLES."""
+    by = {}
+    for r in rows:
+        by.setdefault((r['model'], r['cell_rank']), []).append(r)
+    return [r for v in by.values() if DRAWABLE_ROLES <= {x['role'] for x in v} for r in v]
+
+
 def main():
     p = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -293,40 +356,31 @@ def main():
     p.add_argument('--all-cells', action='store_true',
                    help='project every cell, failures included, so they can be read against '
                         'the successes')
+    p.add_argument('--all-models', action='store_true',
+                   help='project every drawable cell for all five checkpoints into '
+                        'analogy_quiver3d_all.csv, the snapshot figure S3 reads. Implies '
+                        '--all-cells; leaves analogy_quiver3d.csv, and the released figures '
+                        'that read it, untouched.')
     p.add_argument('--analogy-dir', default=DEFAULT_ANALOGY)
     p.add_argument('--retrieval-dir', default=DEFAULT_RETRIEVAL)
     p.add_argument('--dataset', default=DEFAULT_DATASET)
     p.add_argument('--out-dir', default=DEFAULT_OUT)
     args = p.parse_args()
 
-    npz = os.path.join(args.analogy_dir, args.model, args.entity_type, 'data',
-                       f'diff_vectors_layer_{args.layer}.npz')
-    if not os.path.exists(npz):
-        raise SystemExit(
-            f"missing {os.path.relpath(npz, REPO)} -- run "
-            "src/analogy_carbon_matched.py for this model first")
-    diffs = load_diff_vectors(npz)
-    molecules = read_molecules(args.dataset)
-    ordered = rank_cells(read_trials(
-        args.retrieval_dir, args.model, args.entity_type, args.layer, args.mode))
+    if args.all_models:
+        rows = []
+        for model in ALL_MODELS:
+            made, _, _, _ = project_model(args, model, all_cells=True)
+            rows.extend(drawable(made))
+        os.makedirs(args.out_dir, exist_ok=True)
+        write_csv(os.path.join(args.out_dir, 'analogy_quiver3d_all.csv'), rows,
+                  list(rows[0]))
+        cells = len({(r['model'], r['cell_rank']) for r in rows})
+        print(f'wrote analogy_quiver3d_all.csv: {len(rows)} rows, {cells} drawable cells '
+              f'across {len(ALL_MODELS)} models')
+        return
 
-    chosen = ordered if args.all_cells else [c for c in ordered if is_clean(c)]
-    if args.top_n:
-        chosen = chosen[:args.top_n]
-    if not chosen:
-        raise SystemExit(
-            f'no cell at layer {args.layer} is all-hit@1 with no degenerate corner -- '
-            'pass --all-cells to project the near misses anyway')
-
-    rows, disagreed = [], []
-    for i, cell in enumerate(chosen, start=1):
-        pool = (build_diff_by_group_at_carbon(diffs, cell['carbon'])
-                if cell['carbon'] is not None else lumped_pool(diffs))
-        made = project(pool, cell, molecules, args.model, args.layer, args.entity_type,
-                       args.mode, i)
-        rows.extend(made)
-        if made[0]['rank3d_excl'] != made[0]['rank_excl']:
-            disagreed.append((cell, made[0]['rank3d_excl']))
+    rows, ordered, chosen, disagreed = project_model(args, args.model, args.all_cells)
 
     os.makedirs(args.out_dir, exist_ok=True)
     write_csv(os.path.join(args.out_dir, 'analogy_quiver3d.csv'), rows, list(rows[0]))

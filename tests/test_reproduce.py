@@ -38,6 +38,10 @@ CASES = [
      ['geometry_by_layer.csv', 'retrieval_by_axis.csv', 'retrieval_rank_hist.csv']),
     ('analysis/snapshot_quiver3d.py', ['analogy', 'analogy_retrieval'], [],
      ['analogy_quiver3d.csv']),
+    # Same script, --all-models: every drawable cell for all five checkpoints. Figure S3 reads
+    # it; the released 3D figures keep reading the single-model snapshot above.
+    ('analysis/snapshot_quiver3d.py', ['analogy', 'analogy_retrieval'], ['--all-models'],
+     ['analogy_quiver3d_all.csv']),
     ('analysis/analyze_ambiguity.py', ['ambiguity_metric', 'analogy', 'probe'], [],
      ['ambiguity_family_probability.csv', 'ambiguity_two_readings.csv']),
 ]

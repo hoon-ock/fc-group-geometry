@@ -134,21 +134,28 @@ AZIMS = [a for a in range(-180, 180, 5) if min(abs(a - q) for q in (-180, -90, 0
          >= AZIM_GUARD]
 
 
-def read_cells(layer):
-    """One entry per drawn cell: coordinates by role, the pool, names, and scalar fields."""
-    rows = [r for r in load('analogy_quiver3d.csv')
+def read_cells(layer, source='analogy_quiver3d.csv'):
+    """One entry per drawn cell: coordinates by role, the pool, names, and scalar fields.
+
+    `source` exists so a composite can point this at a snapshot covering more than one
+    checkpoint. Cells are keyed by (model, cell_rank) rather than rank alone for the same
+    reason: rank restarts at 1 in every model, so on a multi-model file rank alone would fold
+    five checkpoints' cells into one. On the released single-model snapshot the two are the
+    same grouping, which is what keeps its six figures byte-identical.
+    """
+    rows = [r for r in load(source)
             if int(r['layer']) == layer]
     if not rows:
         raise SystemExit(
-            f'no rows at layer {layer} in data/analogy_quiver3d.csv -- re-run '
+            f'no rows at layer {layer} in data/{source} -- re-run '
             f'analysis/snapshot_quiver3d.py --layer {layer}')
 
     def vec(r):
         return np.array([num(r, 'svd1'), num(r, 'svd2'), num(r, 'svd3')])
 
     cells = []
-    for rank in sorted({int(r['cell_rank']) for r in rows}):
-        mine = [r for r in rows if int(r['cell_rank']) == rank]
+    for key in sorted({(r['model'], int(r['cell_rank'])) for r in rows}):
+        mine = [r for r in rows if (r['model'], int(r['cell_rank'])) == key]
         head = mine[0]
         by_role = {r['role']: r for r in mine if r['role'] != 'other'}
         cells.append({
