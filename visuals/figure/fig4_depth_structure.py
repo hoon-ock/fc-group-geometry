@@ -17,8 +17,9 @@ so a cell is the same group pair in both insets and in Figure 2. Ordering each l
 dendrogram would be wrong here rather than merely different: clustering always returns some
 order, so layer 8 would be drawn with blocks it does not have.
 
-The insets are deliberately unlabelled. At this size each of the 19 cells is about 3pt, so
-group names are not an option; the insets carry texture, and Figure 2 is the labelled reference.
+The insets carry no labels of any kind. Each of the 19 cells is about 3pt, so group names are
+not an option, and the depth each one is taken from is said by its leader landing on that layer
+rather than by a caption over the image. Figure 2 is the labelled reference.
 
 PDF, not PNG, like the other scripts here: the destination is a LaTeX manuscript whose figures
 are vector. It is not one of the 70 release figures and `run_local.sh` does not build it.
@@ -99,12 +100,17 @@ CUTS = (8, 24)
 # both sides -- which is where the leaders used to start, detached from the image by ~0.3in.
 # Deriving the width from the axes aspect makes the box match its content, so a corner of the
 # box IS a corner of the clustermap.
-INSET_H = 0.240
-INSET_Y = 0.078
-# Horizontal CENTRES, so the maps stay put when the derived width changes.
-# The right one sits a little right of its anchor so its leader leans away from the
-# 'Layer 24' title rather than running up the title's left edge.
-INSET_CX = (0.1225, 0.812)
+#
+# The band between the two reference rules is 0.056 (random guess) to 0.365 (n-gram baseline)
+# in axes fractions. With the 'Layer N' captions gone, the whole of it is available to the
+# images, which is where the extra size comes from: 0.240 -> 0.285 takes them 0.53in -> 0.63in.
+INSET_H = 0.285
+INSET_Y = 0.068
+# Horizontal CENTRES, so the maps stay put when the derived width changes. The right one sits
+# right of its anchor (layer 24 is at 0.749) only so its leader reads as a line rather than a
+# vertical tick; with the captions gone it no longer has a title to lean away from, and it is
+# pulled back far enough to keep clear of the colourbar at CB_X.
+INSET_CX = (0.1225, 0.805)
 
 # Vertical colourbar immediately right of the layer-24 inset. This is what sets that inset's
 # x position: the bar, its tick labels and its rotated label together need about 0.09 of the
@@ -117,7 +123,6 @@ LEADER = dict(arrowstyle='-', color='0.45', linewidth=0.8, shrinkA=1.5, shrinkB=
 # a single unlettered plot.
 PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
 
-INSETLAB_FS = 11.0
 CB_LABEL_FS = 9.5
 CB_TICK_FS = 9.0
 
@@ -171,7 +176,6 @@ def inset_block(ax, curves, z_by, order):
         im = f2.clustermap_panel(cell, z_by[(BASE, layer)], order)
         cell.set_xticks([])
         cell.set_yticks([])
-        cell.set_title(f'Layer {layer}', pad=2, fontsize=INSETLAB_FS)
 
         value = curves[BASE][layer]
         # Leader from the top CORNER nearest the anchor, not the top centre: the title sits at
