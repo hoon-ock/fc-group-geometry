@@ -121,7 +121,7 @@ LEADER = dict(arrowstyle='-', color='0.45', linewidth=0.8, shrinkA=1.5, shrinkB=
 
 # Back now that the figure has panels again; it was dropped when (b) and (c) collapsed into
 # a single unlettered plot.
-PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
+PANEL_LAB = dict(fontsize=14, fontweight='bold', va='top', ha='left')
 
 CB_LABEL_FS = 9.5
 CB_TICK_FS = 9.0
@@ -263,7 +263,7 @@ def main():
         t.set_fontsize(amb.MODEL_FS)
 
     lab = dict(PANEL_LAB, va='bottom')
-    fig.text(0.004, A_RECT[1] + A_RECT[3] + 0.052, '(a)', **lab)
+    fig.text(0.004, A_RECT[1] + A_RECT[3] + 0.052, '(a)', **lab) 
     fig.text(0.004, by + bh + 0.028, '(b)', **lab)
 
     os.makedirs(args.out_dir, exist_ok=True)
