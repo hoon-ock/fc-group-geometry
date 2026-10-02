@@ -114,6 +114,12 @@ def anisotropy(results_dir, model, entity_type):
             'raw_between_full': v['original']['full_between_mean'],
             'raw_null': v['original']['empirical_null_mean'],
             'raw_null_sd': v['original']['empirical_null_std'],
+            # Half-width of the 99.9%% interval for the cosine of two RANDOM vectors in
+            # R^hidden_dim. This is the only null here that is independent of the data:
+            # `raw_null`/`centered_null` resample the same cross-group pairs that
+            # `*_between` averages over, so those agree with it by construction and cannot
+            # test it. This one can.
+            'random_pair_null': v['original']['closed_form_ci'][1],
         }
     return out
 
@@ -260,7 +266,7 @@ def main():
               'diffvec_svd_top1', 'diffvec_svd_top5', 'raw_within', 'raw_between',
               'raw_gap', 'raw_between_max', 'centered_within', 'centered_between',
               'centered_null', 'centered_null_sd',
-              'raw_between_full', 'raw_null', 'raw_null_sd',
+              'raw_between_full', 'raw_null', 'raw_null_sd', 'random_pair_null',
               'hit1', 'hit1_ex_sulfoxide',
               'degenerate_rate', 'n_trials']
     rows = []
