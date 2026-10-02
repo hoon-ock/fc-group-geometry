@@ -65,17 +65,19 @@ COLS = [
 # "two left, two right" read as two groups rather than four columns.
 GUTTER = 0.5
 
-# Legend geometry, following grid_figure's own choices so the keys read the same as in the
-# released figures: 20 functional groups wrap at 7, 10 templates fit one row.
-FINE_NCOL, TEMPLATE_NCOL = 7, 10
+# Legend geometry. The released grid wraps the 20 functional groups at 7, but that key is the
+# widest artist on this page and 7 columns caps the whole figure's type: measured, it is 6.03in
+# at 8pt and 6.86in at 9pt against a 6.5in canvas. Six columns is 5.63in at 9pt, which is what
+# lets everything else come up too. The 10 templates still fit one row.
+FINE_NCOL, TEMPLATE_NCOL = 6, 10
 
 PANEL_LAB = dict(fontsize=10, fontweight='bold', va='top', ha='left')
 
-ROWLAB_FS = 7.0
-COLTITLE_FS = 7.5
-HEADER_FS = 8.5
-LEGEND_FS = 6.4
-LEGEND_TITLE_FS = 6.8
+ROWLAB_FS = 9.0
+COLTITLE_FS = 9.0
+HEADER_FS = 11.0
+LEGEND_FS = 9.0
+LEGEND_TITLE_FS = 9.5
 
 
 def retune():
@@ -86,14 +88,19 @@ def retune():
     """
     # (a) is drawn at roughly half the standalone's 5.0in width, so its marks come down with
     # it or they swamp 32 layers of line.
-    agr.AGR_MARK = 2.0
-    agr.AGR_LW = 1.0
-    agr.AGR_REF_FS = 5.4
+    agr.AGR_MARK = 2.6
+    agr.AGR_LW = 1.2
+    agr.AGR_REF_FS = 8.0
     # Each embedding is ~0.88in tall against the released grid's 1.28in cell.
     tsne.POINT_SIZE = 3.0
     tsne.POINT_ALPHA = 0.75
-    plt.rcParams.update({'axes.labelsize': 7.5, 'axes.titlesize': 8.0,
-                         'xtick.labelsize': 6.5, 'ytick.labelsize': 6.5})
+    # (a)'s y-label is ROTATED, so its LENGTH has to fit the panel's height, and raising the
+    # type shortens that panel: the bigger keys below need more bottom margin and the bigger
+    # headers a wider inter-panel band, both taken out of (a). 'kNN label agreement (k=10)'
+    # measures 1.45in at 9pt and 1.53in at 9.5, against a panel that ends up 1.50in -- so 9.5
+    # fitted exactly, with no margin, and 9 is the size that actually has room.
+    plt.rcParams.update({'axes.labelsize': 9.0, 'axes.titlesize': 10.0,
+                         'xtick.labelsize': 9.0, 'ytick.labelsize': 9.0})
 
 
 def agreement_block(fig, gs_cell, rows, models, layers):
@@ -172,9 +179,12 @@ def main():
     styles = {'functional_group': fine_styles, 'template_index': tmpl_styles}
 
     fig = plt.figure(figsize=(WIDTH, HEIGHT))
-    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 2.85],
-                          left=0.085, right=0.985, top=0.966, bottom=0.129,
-                          hspace=0.28)
+    # Solved from measured furniture, not guessed. Bottom holds the two keys, which at 9pt
+    # stack 1.52in; the inter-panel band holds (a)'s x label, the model legend, the two layer
+    # headers AND the scatter column titles, about 1.0in; what is left splits 1 : 2.63.
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 2.63],
+                          left=0.085, right=0.985, top=0.966, bottom=0.185,
+                          hspace=0.42)
     agr_axes = agreement_block(fig, gs[0, 0], rows, models, layers)
     sc = scatter_block(fig, gs[1, 0], coords, models, styles)
 
