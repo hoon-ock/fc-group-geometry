@@ -55,7 +55,9 @@ def import_results():
 
 
 def test_there_are_thirty_modules():
-    assert len(MODULES) == 37, MODULES
+    # 38 since figs4_ambiguity_mass.py joined visuals/figure/ -- the ambiguity mass panel,
+    # which was panel (b) of manuscript Figure 4 before it became Supplementary Figure S4.
+    assert len(MODULES) == 38, MODULES
 
 
 @pytest.mark.parametrize('rel', MODULES, ids=lambda r: r.replace('/', ':'))
