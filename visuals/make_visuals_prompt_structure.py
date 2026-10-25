@@ -16,7 +16,8 @@ around layer 19 -- measured against the family label, which is in the CSV but no
 and from there the checkpoints separate: every chemistry fine-tune ends BELOW base on template
 and ABOVE it on fine groups, while the reasoning distill tracks base.
 
-Companion to `visuals/probe/probe_depth.png`, and deliberately a different question: the probe asks whether a
+Companion to the probe-depth figure (`visuals/make_visuals_probe.py`), and deliberately a
+different question: the probe asks whether a
 linear reader CAN recover the class, this asks what the representation's own neighbourhood
 structure is organised by. They do not answer at the same depth, and the gap is the point --
 see `visuals/prompt_structure/README.md`.

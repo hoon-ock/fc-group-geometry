@@ -90,5 +90,5 @@ before quoting anything here; in particular, `reason`'s rank against base is not
 should not be stated as a result.
 
 Companion to `visuals/tsne/` (the same question at five layers, measured on 2-D coordinates)
-and to `visuals/probe/probe_depth.png` (whether a linear reader *can* recover the family, which happens
+and to `visuals/probe/` (whether a linear reader *can* recover the family, which happens
 several layers earlier than the neighbourhood structure reorganising).

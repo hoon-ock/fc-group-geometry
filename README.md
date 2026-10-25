@@ -326,7 +326,7 @@ unchanged and would emit more if more prompt types were extracted.
 
 ```bash
 pip install -r requirements-dev.txt
-pytest                    # 335 checks, ~5 s
+pytest                    # 338 checks, ~5 s
 pytest --runslow          # + the 25 skipped above: rebuild all 70 figures, reproduce the snapshots
 ```
 

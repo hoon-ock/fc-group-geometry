@@ -21,10 +21,31 @@ repository. That admits `analysis/data/x.csv` and rejects the model identifiers
 """
 import os
 import re
+import subprocess
 
 import pytest
 
 from conftest import REPO, tracked_text_files
+
+
+def _tracked():
+    """What a fresh clone holds: the `git ls-files` set, plus the directories it implies.
+
+    Git tracks files, not directories, so the parents are derived -- the topic READMEs cite
+    `visuals/tsne/` and `analysis/data/` legitimately and those must resolve.
+    """
+    out = subprocess.run(['git', 'ls-files'], cwd=REPO, capture_output=True, text=True)
+    files = set(out.stdout.split())
+    dirs = set()
+    for rel in files:
+        parent = os.path.dirname(rel)
+        while parent:
+            dirs.add(parent)
+            parent = os.path.dirname(parent)
+    return files, dirs
+
+
+TRACKED, TRACKED_DIRS = _tracked()
 
 # Real top-level entries. A backticked string starting with one of these is meant to be a
 # path; anything else is not assumed to be one. `Analysis/` is the SOURCE repository's
@@ -52,16 +73,29 @@ def _headings(path):
 
 
 def _resolves(candidate):
-    """Exists AND lies inside the repository.
+    """Is TRACKED, and lies inside the repository.
 
     The containment half is not pedantry. `../geometry/` in analysis/README.md resolved --
     to a directory of the same name in the PARENT project, which exists on the author's
     machine and in no clone -- so this test passed locally and failed on a fresh clone of the
     published repo, the very failure it was written to prevent. A reference that escapes the
     repository is broken for every reader regardless of what it finds here.
+
+    Tracked rather than `os.path.exists` for the second half of that same failure, which the
+    first fix missed: `visuals/probe/probe_depth.png` is a real file on any machine that has
+    run the generators, and is gitignored, so it exists for whoever just rendered it and for
+    nobody else. Citing it passed locally and failed in CI. `test_structure` was moved to
+    `git ls-files` for exactly this reason -- "so it sees what a reader gets rather than what
+    the working tree happens to hold" -- and this check was left behind on the filesystem.
+
+    The rule that falls out is worth stating plainly: **documentation may not cite a
+    generated artifact by path.** Cite the generator, or the topic README beside it.
     """
     full = os.path.normpath(candidate)
-    return os.path.exists(full) and (full == REPO or full.startswith(REPO + os.sep))
+    if full != REPO and not full.startswith(REPO + os.sep):
+        return False
+    rel = os.path.relpath(full, REPO)
+    return rel == '.' or rel in TRACKED or rel in TRACKED_DIRS
 
 
 def _anchored_paths(text):
@@ -77,13 +111,15 @@ def _anchored_paths(text):
 
 @pytest.mark.parametrize('rel,txt', MD, ids=MD_IDS)
 def test_every_markdown_link_resolves(rel, txt):
+    """Through `_resolves`, so a link and a backticked path agree on what existing means --
+    a link to a gitignored figure is as broken for a reader as a citation of one."""
     base = os.path.join(REPO, os.path.dirname(rel))
     broken = []
     for m in LINK.finditer(txt):
         target = m.group(1).split('#')[0]
         if not target or target.startswith(('http://', 'https://', 'mailto:')):
             continue
-        if not os.path.exists(os.path.normpath(os.path.join(base, target))):
+        if not _resolves(os.path.join(base, target)):
             broken.append(target)
     assert not broken, f'{rel} links to nothing: {broken}'
 
