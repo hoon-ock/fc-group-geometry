@@ -89,7 +89,8 @@ change silently.
 
 ## Layout
 
-**The figures under `visuals/` are the output.** Everything else exists to produce them.
+**The figures under `visuals/` are the output** — the 70 release PNGs and the 8 manuscript
+PDFs beside them. Everything else exists to produce them.
 
 | Path | Contents |
 |---|---|
@@ -98,7 +99,8 @@ change silently.
 | `data/` | the 92-molecule dataset |
 | `src/` | the pipeline: extraction, probe, analogy geometry, retrieval, anisotropy, generation eval |
 | `analysis/` | one script per analysis, flat, plus the 30 snapshot CSVs in `data/` and one README covering every topic |
-| `visuals/` | the 9 figure generators *and* their output — **70 PNGs**, gitignored, rebuilt from the snapshots. Read only `analysis/data/*.csv`, never `results/` |
+| `visuals/` | the 9 release figure generators *and* their output — **70 PNGs**, gitignored, rebuilt from the snapshots. Read only `analysis/data/*.csv`, never `results/` |
+| `visuals/figure/` | the 8 **manuscript** figure generators — 4 main, 4 supplementary — writing PDFs for the paper. Outside the 70-PNG set and not built by `run_local.sh`; same snapshots-only rule. See `visuals/figure/README.md` |
 | `scripts/` | `run_local.sh` (the whole CPU pipeline, no cluster) plus three SLURM jobs for the GPU stages |
 | `results/` | generated, gitignored. Raw per-model pipeline output |
 | `activations/` | the saved hidden states, one directory per checkpoint. Gitignored, ~1.2 GB |
@@ -113,6 +115,8 @@ Four stages. Only the first two need a GPU; the rest is one local command.
 [3] run_local.sh --stages compute   ->  results/  (7 trees, named below)
 [4] run_local.sh --stages analysis  ->  analysis/data/*.csv        30 snapshots, committed
     run_local.sh --stages figures   ->  visuals/            70 PNGs
+
+    visuals/figure/fig*.py          ->  visuals/figure/     8 PDFs   (not run_local.sh)
 ```
 
 ### [1] Activations
@@ -204,7 +208,7 @@ they take seconds.
 bash scripts/run_local.sh          # or --stages analysis / --stages figures
 ```
 
-**Analysis** turns `results/` into the 29 committed CSVs under `analysis/data/`. That is
+**Analysis** turns `results/` into the 30 committed CSVs under `analysis/data/`. That is
 the reproducibility boundary: past this point nothing reads `results/`. Two ordering
 constraints — `analyze_taxonomy` writes the matrix the clustermaps need, and
 `score_generations` must precede `analyze_generation`, which reads its adjudicated table:
@@ -219,6 +223,21 @@ score_generations -> analyze_generation
 activations directly, so **their 29 figures need stage [1] only** — not [2] or [3].
 
 **Figures** draw all 70 PNGs from those CSVs in about 15 seconds and need nothing else.
+
+#### Manuscript figures
+
+The paper's own figures — four main and four supplementary — are built by the eight scripts
+under `visuals/figure/`, as PDFs rather than PNGs because their destination is a LaTeX
+document. They read the same committed snapshots and need nothing else either, but they are
+**not** part of the 70 and `run_local.sh` does not build them:
+
+```bash
+for f in visuals/figure/fig*.py; do python "$f"; done   # 8 PDFs into visuals/figure/
+```
+
+Each one composes the release generators rather than reimplementing them, so a manuscript
+panel and the released PNG of the same measurement cannot disagree.
+`visuals/figure/README.md` has the figure-by-figure table and the conventions they share.
 
 ## Where to start
 
@@ -307,8 +326,8 @@ unchanged and would emit more if more prompt types were extracted.
 
 ```bash
 pip install -r requirements-dev.txt
-pytest                    # 315 checks, ~5 s
-pytest --runslow          # 334 -- + rebuild all 70 figures, + reproduce the snapshots
+pytest                    # 335 checks, ~5 s
+pytest --runslow          # + the 25 skipped above: rebuild all 70 figures, reproduce the snapshots
 ```
 
 **Nothing in the suite needs a GPU**, and `tests/test_no_gpu.py` pins that: it asserts by
@@ -317,8 +336,9 @@ that no test imports torch. The GPU stages' outputs are inputs to the tests, nev
 the tests produce.
 
 The fast tier covers structure, `paths.py` resolution (including cwd-independence and the
-`FCG_*` overrides), that all 30 modules import, that every producer is wired into
-`run_local.sh` and every `load()` name exists, the 29 snapshots' schema and record
+`FCG_*` overrides), that all 38 modules import — the eight under `visuals/figure/` included,
+which a non-recursive glob would have left untested — that every producer is wired into
+`run_local.sh` and every `load()` name exists, the 30 snapshots' schema and record
 terminators, shell syntax and the `--array`/`check_array_size` agreement, and that no
 renamed or dropped name survives in code.
 
@@ -336,7 +356,7 @@ name a workflow that exists, in *this* repository.
 
 | tier | needs | what it proves |
 |---|---|---|
-| figures | nothing but this repo | all 9 generators run and produce exactly 70 PNGs at the right per-topic counts |
+| figures | nothing but this repo | all 9 release generators run and produce exactly 70 PNGs at the right per-topic counts. The 8 manuscript scripts are checked for importability only, not rendered |
 | reproduce · activations | `activations/` | `compute_tsne_coords` and `analyze_prompt_structure` reproduce their 3 snapshots byte-for-byte |
 | reproduce · results | whichever `results/` trees exist | each analysis reproduces its own snapshots byte-for-byte |
 

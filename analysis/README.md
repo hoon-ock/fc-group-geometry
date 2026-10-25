@@ -675,7 +675,7 @@ One row per plotted point. Cell-level fields repeat on every row of that cell, a
 | `svd1..3` | the centered PCA coordinates, the only thing the figure positions anything by |
 | `explained_var` | variance the three components hold, over all 19 groups at that chain length |
 | `recon_frac` | how much of the constructed point those three dimensions hold — 0.42 to 0.64 across the six. Under half of some panels is on the page |
-| `rank_excl`, `cos_to_target` | **copied** from `retrieval_trials.csv` for the `b1 = b2 + (a1 − a2)` corner, never recomputed, so a panel cannot disagree with `f4_retrieval` about an outcome |
+| `rank_excl`, `cos_to_target` | **copied** from `retrieval_trials.csv` for the `b1 = b2 + (a1 − a2)` corner, never recomputed, so a panel cannot disagree with `f3_retrieval.pdf` about an outcome |
 | `rank3d_excl` | that rank recomputed from the three plotted coordinates, by Euclidean distance — what a reader's eye does with a scatter. When it disagrees with `rank_excl` the projection is misleading, and the script warns and the panel says so on its face |
 | `dist3d_true`, `dist3d_rival`, `rival_group` | the same comparison as a margin, so the figure can show that the answer *won* rather than only that the residual was short |
 | `n_corners`, `n_hit1`, `n_degenerate`, `mean_cos` | the selection criteria, carried so the ranking can be audited from the CSV |

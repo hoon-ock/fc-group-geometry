@@ -32,7 +32,7 @@ thiol and amine each carry an `n-`/`sec-` isomer pair in the dataset, so those t
 Two guards against the figure flattering itself:
 
   * `rank_excl` and `cos_to_target` are **copied** from `retrieval_trials.csv`, never
-    recomputed, so a panel cannot disagree with `f4_retrieval` about an outcome.
+    recomputed, so a panel cannot disagree with `f3_retrieval.pdf` about an outcome.
   * `rank3d_excl` recomputes that rank from the 3 plotted coordinates by Euclidean
     distance -- what a reader's eye actually does with a scatter. When it disagrees with
     `rank_excl` the projection is misleading and both the console and the figure have to

@@ -100,12 +100,14 @@ def recessive(ax):
 
 
 def read_curves():
-    """`model -> layer -> balanced_acc`, and the surface baseline the paper figure draws.
+    """`model -> layer -> balanced_acc`, and the surface baseline.
 
-    Both reads are `f1_probe_depth`'s verbatim. The baseline is averaged over every row of
-    `surface_baseline.csv` exactly as there: it is a character n-gram classifier that never
-    sees a model, and all five rows carry the same 0.475 over 19 folds, so the mean is a
-    single number rather than a blend of five different ones.
+    This is also what the paper figure reads: `visuals/figure/fig4_depth_structure.py` imports
+    this function rather than reimplementing it, so panel (a) and `probe_depth.png` cannot
+    disagree about a curve. The baseline is averaged over every row of
+    `surface_baseline.csv`: it is a character n-gram classifier that never sees a model, and
+    all five rows carry the same 0.475 over 19 folds, so the mean is a single number rather
+    than a blend of five different ones.
     """
     curves = defaultdict(dict)
     for r in load('layer_curves.csv'):

@@ -4,7 +4,8 @@
 python visuals/make_visuals_ambiguity.py [--layer 31]
 ```
 
-`f1_probe_depth.pdf`'s lower panel counts **argmax mistakes**. A model can be right on every
+`analysis/data/confusion_errors.csv`, the error table `visuals/probe/README.md` argues from,
+counts **argmax mistakes**. A model can be right on every
 prompt and still differ enormously in how it splits probability between two defensible
 answers, and a count cannot see that. These three figures draw the mass itself.
 

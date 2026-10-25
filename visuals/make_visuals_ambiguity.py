@@ -4,8 +4,9 @@
     python visuals/make_visuals_ambiguity.py [--layer 31] [--out-dir DIR]
     -> visuals/ambiguity/mass_split_L<layer>.png
 
-`f1_probe_depth.pdf`'s lower panel counts ARGMAX mistakes, so it cannot show how a model
-splits probability between two defensible answers. Four groups carry oxygen but are named for
+`analysis/data/confusion_errors.csv`, which `visuals/probe/README.md` argues from, counts
+ARGMAX mistakes, so it cannot show how a model splits probability between two defensible
+answers. Four groups carry oxygen but are named for
 another heteroatom -- `amide` and `nitro` are labelled nitrogen, `sulfone` and `sulfoxide`
 sulfur -- and under leave-one-group-out nothing in the chemistry picks the home family over
 oxygen. Only IUPAC does. This draws the mass itself, with the accuracy that disagrees with it.

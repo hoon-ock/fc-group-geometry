@@ -1,6 +1,6 @@
 # --- Generated artifacts -------------------------------------------------------
 # Everything here is rebuilt by the pipeline. The committed reproducibility layer is
-# analysis/data/*.csv -- the 29 snapshots every figure under visuals/ is built from.
+# analysis/data/*.csv -- the 30 snapshots every figure under visuals/ is built from.
 # If a figure generator ever needs results/, a snapshot step was missed upstream.
 results/
 activations/
